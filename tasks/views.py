@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm
 from tasks.helpers import login_prohibited
 
 
@@ -156,7 +156,7 @@ class CreateTaskView(LoginRequiredMixin, FormView):
     """Display the create task screen and handle creation of tasks."""
 
     template_name = "create_task.html"
-    form_class = CreateTaskForm
+    form_class = TaskForm
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user

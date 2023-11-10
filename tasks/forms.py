@@ -109,7 +109,7 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
         )
         return user
 
-class CreateTaskForm(forms.ModelForm):
+class TaskForm(forms.ModelForm):
     """Form enabling users to create a task."""
 
     class Meta:
@@ -117,6 +117,7 @@ class CreateTaskForm(forms.ModelForm):
 
         model = Task
         fields = ['title', 'description', 'due_date', 'created_by']
+        exclude = ['created_by']
         widgets = { 'description': forms.Textarea() }
     
     def save(self):

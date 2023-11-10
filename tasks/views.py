@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm
 from tasks.helpers import login_prohibited
 
 
@@ -155,16 +155,23 @@ class SignUpView(LoginProhibitedMixin, FormView):
 class CreateTaskView(LoginRequiredMixin, FormView):
     """Display the create task screen and handle creation of tasks."""
 
-    template_name = "create_task.html"
-    form_class = TaskForm
+    template_name = 'create_task.html'
+    form_class = CreateTaskForm
+
+    def get_form_kwargs(self, **kwargs):
+        """Pass the current user to the password change form."""
+        kwargs = super().get_form_kwargs(**kwargs)
+        kwargs.update({'user': self.request.user})
+        return kwargs
 
     def form_valid(self, form):
-        form.instance.created_by = self.request.user
-        form.save()
+        """Handle valid form by saving the new password."""
+        if form.is_valid():
+            form.save()
         return super().form_valid(form)
 
     def get_success_url(self):
-        """Redirect the user after successful creation of task."""
+        """Redirect the user after successful password change."""
 
-        messages.add_message(self.request, messages.SUCCESS, "Task created!")
+        messages.add_message(self.request, messages.SUCCESS, "Task created successfully!")
         return reverse('dashboard')

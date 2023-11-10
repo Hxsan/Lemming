@@ -46,5 +46,5 @@ class Task(models.Model):
 
     title = models.CharField(max_length=30, blank=False)
     description = models.CharField(max_length=300, blank=True)
-    due_date = models.DateTimeField(blank=False)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    due_date = models.DateField(blank=False)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True)

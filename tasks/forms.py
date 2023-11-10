@@ -109,25 +109,30 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
         )
         return user
 
-class TaskForm(forms.ModelForm):
+class CreateTaskForm(forms.ModelForm):
     """Form enabling users to create a task."""
 
     class Meta:
         """Form options."""
 
         model = Task
-        fields = ['title', 'description', 'due_date', 'created_by']
+        fields = ['title', 'description', 'due_date']
         exclude = ['created_by']
         widgets = { 'description': forms.Textarea() }
+
+    def __init__(self, user=None, **kwargs):
+        """Construct new form instance with a user instance."""
+        super().__init__(**kwargs)
+        self.user = user
     
     def save(self):
         """Create a new task."""
 
         created_task = super().save(commit=False)
 
-        if self.user is not None:
-            created_task.created_by = self.user
-            created_task.save()
+        created_task.created_by = self.user
+
+        created_task.save()
 
         return created_task
         

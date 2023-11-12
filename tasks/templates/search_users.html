@@ -1,3 +1,15 @@
 {% extends 'base_content.html' %}
 {% block content %}
+    {% if q %}
+
+        <h1>Users: {{q}}</h1>
+        <br/>
+            {% for user in users %}
+                {{ user }}<br/>
+            {% endfor %}
+    {% else %}
+
+        <h1>No search</h1>
+
+    {% endif %}
 {% endblock %}

@@ -10,13 +10,23 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
+from tasks.models import User
 
 
 @login_required
 def search_users(request):
     """Display a list of searched users."""
 
-    return render(request, "search_users.html")
+    if request.method == "POST":
+        q = request.POST["q"]
+        results = q.split()
+        if len(results) >= 2:
+            queried_users = User.objects.filter(first_name__contains=results[0]) | User.objects.filter(last_name__contains=results[1])
+        else:
+            queried_users = User.objects.filter(first_name__contains=q) | User.objects.filter(last_name__contains=q)
+        return render(request, "search_users.html",{"q":q, "users":queried_users})
+    else:
+        return render(request, "search_users.html")
 
 def dashboard(request):
     """Display the current user's dashboard."""

@@ -159,19 +159,19 @@ class CreateTaskView(LoginRequiredMixin, FormView):
     form_class = CreateTaskForm
 
     def get_form_kwargs(self, **kwargs):
-        """Pass the current user to the password change form."""
+        """Pass the current user to the create task form."""
         kwargs = super().get_form_kwargs(**kwargs)
         kwargs.update({'user': self.request.user})
         return kwargs
 
     def form_valid(self, form):
-        """Handle valid form by saving the new password."""
+        """Handle valid form by saving the created task."""
         if form.is_valid():
             form.save()
         return super().form_valid(form)
 
     def get_success_url(self):
-        """Redirect the user after successful password change."""
+        """Redirect the user after task creation."""
 
         messages.add_message(self.request, messages.SUCCESS, "Task created successfully!")
         return reverse('dashboard')

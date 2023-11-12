@@ -16,7 +16,6 @@ class CreateTaskFormTestCase(TestCase):
             'title' : 'Task 1',
             'description' : 'This is a task',
             'due_date' : '01/02/2024',
-            'created_by' : ''
         }
     
     def test_valid_task_form(self):
@@ -36,6 +35,12 @@ class CreateTaskFormTestCase(TestCase):
         form = CreateTaskForm(data=self.form_input)
         self.assertFalse(form.is_valid())
     
+    def test_description_can_be_blank(self):
+        self.client.login(username=self.user.username, password='Password123')
+        self.form_input['description'] = ''
+        form = CreateTaskForm(data=self.form_input)
+        self.assertTrue(form.is_valid())
+
     def test_due_date_must_be_in_correct_format(self):
         self.client.login(username=self.user.username, password='Password123')
         self.form_input['due_date'] = ''
@@ -47,7 +52,6 @@ class CreateTaskFormTestCase(TestCase):
     
     def test_task_must_save_correctly(self):
         self.client.login(username=self.user.username, password='Password123')
-        form = CreateTaskForm(data=self.form_input)
         before_count = Task.objects.count()
         self.client.post(self.url, self.form_input, follow=True)
         after_count = Task.objects.count()
@@ -57,5 +61,22 @@ class CreateTaskFormTestCase(TestCase):
         due_date_string = task.due_date.strftime('%m/%d/%Y')
         self.assertEqual(due_date_string, '01/02/2024')
         self.assertEqual(task.created_by, self.user)
+
+    def test_user_can_create_multiple_tasks(self):
+        self.client.login(username=self.user.username, password='Password123')
+        before_count = Task.objects.count()
+        self.client.post(self.url, self.form_input, follow=True)
+        self.form_input = {
+            'title' : 'Task 2',
+            'description' : 'This is a second task',
+            'due_date' : '03/04/2024',
+        }
+        self.client.post(self.url, self.form_input, follow=True)
+        after_count = Task.objects.count()
+        self.assertEqual(after_count, before_count+2)
+        task1 = Task.objects.get(title='Task 1')
+        task2 = Task.objects.get(title='Task 2')
+        self.assertEqual(task1.created_by, self.user)
+        self.assertEqual(task2.created_by, self.user)
 
 

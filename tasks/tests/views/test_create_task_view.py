@@ -17,7 +17,6 @@ class CreateTaskViewTestCase(TestCase):
             'title' : 'Task 1',
             'description' : 'This is a task',
             'due_date' : '01/02/2024',
-            'created_by' : '',
         }
 
     def test_create_task_url(self):

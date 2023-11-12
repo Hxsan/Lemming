@@ -4,12 +4,17 @@
 
         <h1>Users: {{q}}</h1>
         <br/>
+        <ul class="list-group">
+
             {% for user in users %}
-                {{ user }}<br/>
+
+            <li class="list-group-item">{{ user }}</li>
+            
             {% endfor %}
+        </ul>
     {% else %}
 
-        <h1>No search</h1>
+        <h1>No search results found</h1>
 
     {% endif %}
 {% endblock %}

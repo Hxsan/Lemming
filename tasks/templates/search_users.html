@@ -1,20 +1,29 @@
 {% extends 'base_content.html' %}
 {% block content %}
-    {% if q %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            {% if q %}
 
-        <h1>Users: {{q}}</h1>
-        <br/>
-        <ul class="list-group">
+            <h1>Users: {{q}}</h1>
+            <br/>
+            <div class="list-group">
+    
+                {% for user in users %}
+    
+                <li class="list-group-item">{{ user.first_name }} {{ user.last_name }}
+                    <button class="btn btn-outline-success" id = "addTeam_{{user}}"> Add to team </button> 
+                </li>
+                
+                {% endfor %}
+            </div>
+            {% else %}
 
-            {% for user in users %}
+                <h1>No search results found</h1>
 
-            <li class="list-group-item">{{ user }}</li>
-            
-            {% endfor %}
-        </ul>
-    {% else %}
-
-        <h1>No search results found</h1>
-
-    {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+        
 {% endblock %}

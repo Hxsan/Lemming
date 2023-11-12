@@ -13,6 +13,11 @@ from tasks.helpers import login_prohibited
 
 
 @login_required
+def search_users(request):
+    """Display a list of searched users."""
+
+    return render(request, "search_users.html")
+
 def dashboard(request):
     """Display the current user's dashboard."""
 

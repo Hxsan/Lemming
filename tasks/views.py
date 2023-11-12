@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, get_user
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTeamForm
 from tasks.helpers import login_prohibited
 
 
@@ -19,6 +19,31 @@ def dashboard(request):
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
 
+@login_required
+def create_team(request):
+    """Page for a user to view their team and create a new team."""
+    #current_user = request.user
+    if request.method =='POST':
+        form = CreateTeamForm(request.POST)
+        if form.is_valid():
+            user = get_user(request)
+            team = form.save()
+            #add current user to their own team
+            user.team = team 
+            user.is_admin = True #make them admin of this team
+            user.save()
+            return redirect('show_team')
+    else:
+        form = CreateTeamForm()
+    return render(request, 'create_team.html', {'form' : form})
+
+@login_required
+def show_team(request):
+    user = get_user(request)
+    #get a list of the users in the team, and pass it in
+    #also pass in the team itself to get the name
+    print(user.team.team_name)
+    return render(request, 'show_team.html', {'team' : user.team})
 
 @login_prohibited
 def home(request):

@@ -146,7 +146,7 @@ class UserModelTestCase(TestCase):
     def _gravatar_url(self, size):
         gravatar_url = f"{UserModelTestCase.GRAVATAR_URL}?size={size}&default=mp"
         return gravatar_url
-
+    
 
     def _assert_user_is_valid(self):
         try:

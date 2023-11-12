@@ -22,6 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/create_team', views.create_team, name = "create_team"),
+    path('dashboard/show_team', views.show_team, name = "show_team"),
     path('log_in/', views.LogInView.as_view(), name='log_in'),
     path('log_out/', views.log_out, name='log_out'),
     path('password/', views.PasswordView.as_view(), name='password'),

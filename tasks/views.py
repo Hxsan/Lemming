@@ -42,7 +42,6 @@ def show_team(request):
     user = get_user(request)
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name
-    print(user.team.team_name)
     return render(request, 'show_team.html', {'team' : user.team})
 
 @login_prohibited

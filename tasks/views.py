@@ -21,9 +21,9 @@ def search_users(request):
         q = request.POST["q"]
         results = q.split()
         if len(results) >= 2:
-            queried_users = User.objects.filter(first_name__contains=results[0]).filter(last_name__contains=results[1])
+            queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
         else:
-            queried_users = User.objects.filter(first_name__contains=q) | User.objects.filter(last_name__contains=q)
+            queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
         if(queried_users.count() == 0):
             return render(request, "search_users.html")
         

@@ -11,8 +11,8 @@
     
                 {% for user in users %}
     
-                <li class="list-group-item">{{ user.first_name }} {{ user.last_name }}
-                    <button class="btn btn-outline-success" id = "addTeam_{{user}}"> Add to team </button> 
+                <li class="list-group-item" style="display:flex; justify-content:space-between; align-items:center;">{{ user.first_name }} {{ user.last_name }}
+                    <button class="btn btn-outline-success" id = "addTeam_{{user}}">Add to team</button> 
                 </li>
                 
                 {% endfor %}

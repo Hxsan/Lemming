@@ -145,10 +145,11 @@ class CreateTeamForm(forms.ModelForm):
         model = Team
         fields = ['team_name']
 
-    def save(self):
+    def save(self, user):
         super().save(commit=False)
         team = Team.objects.create(
             team_name = self.cleaned_data.get('team_name'), 
+            admin_user = user,
         )
         return team
 

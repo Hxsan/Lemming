@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Team
+from .models import User, Task, Team
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -109,6 +109,35 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
         )
         return user
 
+
+class CreateTaskForm(forms.ModelForm):
+    """Form enabling users to create a task."""
+
+    class Meta:
+        """Form options."""
+
+        model = Task
+        fields = ['title', 'description', 'due_date']
+        exclude = ['created_by']
+        widgets = { 'description': forms.Textarea() }
+
+    def __init__(self, user=None, **kwargs):
+        """Construct new form instance with a user instance."""
+        super().__init__(**kwargs)
+        self.user = user
+    
+    def save(self):
+        """Create a new task."""
+
+        created_task = super().save(commit=False)
+
+        created_task.created_by = self.user
+
+        created_task.save()
+
+        return created_task
+        
+        
 class CreateTeamForm(forms.ModelForm):
     class Meta:
         """Form options."""
@@ -122,3 +151,4 @@ class CreateTeamForm(forms.ModelForm):
             team_name = self.cleaned_data.get('team_name'), 
         )
         return team
+

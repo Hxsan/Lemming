@@ -31,11 +31,13 @@ def search_users(request):
     else:
         return render(request, "search_users.html")
 
-@login_required
 def dashboard(request):
     """Display the current user's dashboard."""
-
     current_user = request.user
+    if not current_user.is_authenticated:
+
+        return render(request, 'home.html', {'user': current_user})
+    
     return render(request, 'dashboard.html', {'user': current_user})
 
 @login_required

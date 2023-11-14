@@ -31,6 +31,7 @@ def search_users(request):
     else:
         return render(request, "search_users.html")
 
+@login_required
 def dashboard(request):
     """Display the current user's dashboard."""
 

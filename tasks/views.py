@@ -40,6 +40,7 @@ def dashboard(request):
     
     return render(request, 'dashboard.html', {'user': current_user})
 
+
 @login_required
 def create_team(request):
     """Page for a user to view their team and create a new team."""
@@ -48,22 +49,24 @@ def create_team(request):
         form = CreateTeamForm(request.POST)
         if form.is_valid():
             user = get_user(request)
-            team = form.save()
+            team = form.save(user)
             #add current user to their own team
-            user.team = team 
-            user.is_admin = True #make them admin of this team
+            #user.team = team 
+            user.teams.add(team)
+            #user.is_admin = True #make them admin of this team
             user.save()
             return redirect('show_team')
     else:
         form = CreateTeamForm()
     return render(request, 'create_team.html', {'form' : form})
 
+#Change this view, this is just a prototype
 @login_required
 def show_team(request):
     user = get_user(request)
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name
-    return render(request, 'show_team.html', {'team' : user.team})
+    return render(request, 'show_team.html', {'team' : user.teams.all()[0]})
 
 @login_prohibited
 def home(request):

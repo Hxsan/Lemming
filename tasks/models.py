@@ -17,13 +17,18 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
-    team = models.ForeignKey(
+    teams = models.ManyToManyField(
+        "Team",
+    )
+
+    """ForeignKey(
         "Team",
         on_delete=models.CASCADE,
         blank= True,
         null=True,
     )
-    is_admin = models.BooleanField(default=False,blank=True)
+    """
+    #is_admin = models.BooleanField(default=False,blank=True)
 
     class Meta:
         """Model options."""
@@ -60,4 +65,6 @@ class Task(models.Model):
 class Team(models.Model):
     """Model used to represent a team"""
     team_name = models.CharField(max_length=50, blank=False)
+    admin_user = models.ForeignKey(User, on_delete = models.CASCADE, blank = False, null = True)
+
 

@@ -48,7 +48,7 @@ def dashboard(request):
         # If the user is associated with teams, use the ID of the first team
         team_id = teams[0].id
     else:
-        # If the user is not associated with any teams, set team_id to None or handle it accordingly
+        # If the user is not associated with any teams, set team id to 1
         team_id = 1
     
     return render(request, 'dashboard.html', {'user': current_user, 'team_id': team_id})

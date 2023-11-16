@@ -7,7 +7,7 @@
             </a>
         </div>
     </div>
-    <div class="minimize-row">
+    <div class="minimize-row overflow-auto" style="max-height: calc(100vh - 150px)">
     {% for team in teams %}
         <li class="nav-item">
             <div class="text-start border border-primary rounded">
@@ -17,7 +17,7 @@
             </div>
         </li>
         <li class="mt-1 mb-3">
-            <div class="d-flex justify-content-left">
+            <div class="d-flex justify-content-center">
                 <a href= "{% url 'show_team' %}" class="btn btn-outline-info" style="padding: 0.12rem 0.32rem; font-size: 0.55rem;">
                     Members
                 </a>
@@ -46,6 +46,7 @@
     $(document).ready(function() {
 
         // Activates content of nav-items on click
+
         $('.nav-item').on('click', function(e) {
             e.preventDefault();
 

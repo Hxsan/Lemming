@@ -1,0 +1,31 @@
+
+<nav>
+    <div class="nav nav-tabs flex-column col-lg-2 bg-light" id="nav-tab" role="tablist">
+        <div class="row">
+            <p class="mx-2"> <b>Teams:</b> </p>
+        </div>
+        {% for team in teams %}
+            <div class="row d-flex align-items-center">
+                <div class="col">
+                    <a href="#nav-{{ team.team_name }}" class="nav-item nav-link {% if forloop.first %} active {% endif %}" id="nav-{{ team.team_name }}-tab" data-toggle="tab" role="tab" aria-controls="nav-{{ team.team_name }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}"> 
+                        {{team.team_name}} 
+                    </a>
+                </div>
+                <div class="col-auto">
+                    <div class="mx-1">
+                        <a href= "{% url 'show_team' %}" class="btn btn-outline-info" style="padding: 0.15rem 0.35rem; font-size: 0.60rem;">
+                            Members
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    {% for team in teams %}
+    <div class="tab-pane fade {% if forloop.first %} show active {% endif %}" id="{{ team.team_name }}" role="tabpanel" aria-labelledby="{{ team.team_name }}-tab">
+        <p> {{ team.team_name }} </p>
+    </div>
+    {% endfor %}
+</div>

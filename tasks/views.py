@@ -37,8 +37,8 @@ def dashboard(request):
     if not current_user.is_authenticated:
 
         return render(request, 'home.html', {'user': current_user})
-    
-    return render(request, 'dashboard.html', {'user': current_user})
+    teams = current_user.teams.all()
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams})
 
 
 @login_required

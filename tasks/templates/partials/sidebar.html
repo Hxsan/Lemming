@@ -1,26 +1,32 @@
-<div id="sidebar">
-    <ul class="nav nav-pills flex-column col-auto bg-light" role="tablist" style="border-radius: 15px; overflow: hidden;">
-        <div class="row">
-            <p class="mx-2"> <b>Teams:</b> </p>
+<ul class="nav nav-pills flex-column col-auto bg-light" id="sidebar" role="tablist" style="border-radius: 10px; overflow: hidden;">
+    <div class="row">
+        <div class="col d-flex justify-content-between">
+            <p class="my-auto mx-1"> <b>Teams:</b> </p>
+            <a href="" class="mx-2" id="minimize">
+                <span class="bi-dash-circle"> </span>
+            </a>
         </div>
-        {% for team in teams %}
-            <li class="nav-item">
-                <div class="text-start border border-primary rounded">
-                    <a class="nav-link {% if forloop.first %} active {% endif %}" id="{{ team.team_name|slugify }}-tab" data-toggle="pill" href="#{{ team.team_name|slugify }}" role="tab" aria-controls="{{ team.team_name|slugify }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
-                        {{ team.team_name }}
-                    </a>
-                </div>
-            </li>
-            <li class="mb-2">
-                <div class="d-flex justify-content-center">
-                    <a href= "{% url 'show_team' %}" class="btn btn-outline-info" style="padding: 0.15rem 0.35rem; font-size: 0.60rem;">
-                        Members
-                    </a>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-</div>
+    </div>
+    <div class="minimize-row">
+    {% for team in teams %}
+        <li class="nav-item">
+            <div class="text-start border border-primary rounded">
+                <a class="nav-link {% if forloop.first %} active {% endif %}" id="{{ team.team_name|slugify }}-tab" data-toggle="pill" href="#{{ team.team_name|slugify }}" role="tab" aria-controls="{{ team.team_name|slugify }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
+                    {{ team.team_name }}
+                </a>
+            </div>
+        </li>
+        <li class="mt-1 mb-3">
+            <div class="d-flex justify-content-left">
+                <a href= "{% url 'show_team' %}" class="btn btn-outline-info" style="padding: 0.12rem 0.32rem; font-size: 0.55rem;">
+                    Members
+                </a>
+            </div>
+        </li>
+    {% endfor %}
+    </div>
+</ul>
+
 <div class="tab-content mx-2" id="sidebarContent">
     {% for team in teams %}
     <div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.team_name|slugify }}" role="tabpanel" aria-labelledby="{{ team.team_name|slugify }}-tab">
@@ -30,10 +36,16 @@
     {% endfor %}
 </div>
 
-<!-- JavaScript code for activating content of nav-items on click --> 
+
+
+
+
+<!-- Bootstrap apparently can do these automatically but it didn't work -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
     $(document).ready(function() {
+
+        // Activates content of nav-items on click
         $('.nav-item').on('click', function(e) {
             e.preventDefault();
 
@@ -42,11 +54,17 @@
 
             var tag = $(this).find('a');
             $(tag).addClass('active');
+            $(tag.attr('href')).addClass('active');
 
-            var tabId = $(this).find('a').attr('href');
-            $(tabId).addClass('active');
-
-            window.location.href = tabId;
+            window.location.href = tag.attr('href');
         });
+        
+        // Minimizes nav-items on click of "minimize" button
+        
+        $('#minimize').on('click', function(e) {
+            e.preventDefault();
+            $('.minimize-row').slideToggle();
+        });
+
     });
 </script>

@@ -10,24 +10,35 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm
 from tasks.helpers import login_prohibited
-from tasks.models import User
+from tasks.models import User, Team
 
+@login_required
+def addUserToTeam(request):
+    """Adds user to current team"""
+    currentUser = get_user(request)
+    teamToAdd = currentUser.teams.all()[0] #change to current_team variable
+    userToAddString = request.POST['userToAdd']
+    userToAdd = User.objects.get(username=userToAddString)
+    userToAdd.teams.add(teamToAdd)
 
 @login_required
 def search_users(request):
     """Display a list of searched users."""
-
     if request.method == "POST":
-        q = request.POST["q"]
-        results = q.split()
-        if len(results) >= 2:
-            queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
-        else:
-            queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
-        if(queried_users.count() == 0):
+        if request.POST.get("userToAdd"):
+            addUserToTeam(request)
             return render(request, "search_users.html")
+        else:
+            q = request.POST["q"]
+            results = q.split()
+            if len(results) >= 2:
+                queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
+            else:
+                queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
+            if(queried_users.count() == 0):
+                return render(request, "search_users.html")
         
-        return render(request, "search_users.html",{"q":q, "users":queried_users})
+            return render(request, "search_users.html",{"q":q, "users":queried_users})
     else:
         return render(request, "search_users.html")
 

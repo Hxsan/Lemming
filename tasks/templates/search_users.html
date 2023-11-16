@@ -10,9 +10,13 @@
             <div class="list-group">
     
                 {% for user in users %}
-    
+                <!-- Add if condition to skip users if they are already on the team-->
                 <li class="list-group-item" style="display:flex; justify-content:space-between; align-items:center;">{{ user.first_name }} {{ user.last_name }}
-                    <button class="btn btn-outline-success" id = "addTeam_{{user}}">Add to team</button> 
+                    <form method="POST" action="">
+                        {% csrf_token %}
+                        <input type = "hidden" name="userToAdd" value="{{user}}"/>
+                        <input type="submit" class="btn btn-outline-success" value="Add to Team"/>
+                    </form>
                 </li>
                 
                 {% endfor %}

@@ -1,10 +1,24 @@
 {% extends 'base_content.html' %}
 {% block content %}
+<style>
+  .view-team-button{
+    background-color: rgb(75, 74, 74);
+    border: 1px solid #121313;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 8px 16;
+    color: white;
+  }
+
+  .view-team-button:hover{
+    background-color: rgb(30, 29, 29);
+  }
+</style>
 <div class="container">
   <div class="row">
     <div class="col-12 d-flex justify-content-between">
       <h1>Welcome to your dashboard {{ user.username }}</h1>
-      <a href="{% url 'show_team' team_id=team_id %}" class="btn btn-md btn-secondary">
+      <a href="{% url 'show_team' team_id=team_id %}" class="btn btn-md btn-secondary view-team-button">
         View Team Members
       </a>
     </div>

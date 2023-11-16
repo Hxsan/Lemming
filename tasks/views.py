@@ -91,7 +91,21 @@ def show_team(request, team_id=1):
 
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name
-    return render(request, 'show_team.html', {'team' : team, 'team_name': team.team_name, 'team_members':team_members, 'is_admin': is_admin})
+    return render(request, 'show_team.html', {'team' : team, 'team_name': team.team_name, 'team_members':team_members, 'is_admin': is_admin, 'admin_user': team.admin_user})
+
+@login_required
+def remove_member(request, team_id, member_username):
+    user = get_user(request)
+    team = get_object_or_404(Team, pk=team_id)
+
+    # make sure that the user is an admin and the member exists in the team
+    if user == team.admin_user:
+        if member_username:
+            member_to_remove = get_object_or_404(User, username=member_username)
+            if team.members.filter(username=member_username).exists():
+                team.members.remove(member_to_remove)
+
+    return redirect('show_team', team_id=team_id)
 
 @login_prohibited
 def home(request):

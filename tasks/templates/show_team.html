@@ -13,7 +13,7 @@
     padding: 12px; 
     margin: 4px;
     text-align: center;
-    border: 1px solid rgb(214, 214, 214); 
+    border-bottom: 1px solid rgb(214, 214, 214); 
     }
     th {
         text-align: center;
@@ -59,18 +59,19 @@
                         {{ member.username }}</td>
                 {% endif %}
                 </td>
-                {% if is_admin %}
-                    <td>
-                        <form method="post" action="#">
-                        {% csrf_token %}
-                        <button class="remove-button" type="submit">Remove</button>
-                        </form>
-                    </td>
+                {% if is_admin%}
+                    {% if member != admin_user %}
+                        <td>
+                            <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
+                            {% csrf_token %}
+                            <button class="remove-button" type="submit">Remove</button>
+                            </form>
+                        </td>
+                        {% endif %}
                 {% endif %}
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<!--Use code from finding all the users, and filter and find only those who have the same team as the current user-->
 {% endblock %}

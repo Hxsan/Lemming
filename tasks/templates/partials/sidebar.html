@@ -18,10 +18,17 @@
         </div>
     </ul>
 </div>
-<div class="sidebar arrow">
+<div class="sidebar arrow-in">
     <div class="semi-circle bg-primary bg-opacity-10">
-        <a href="" class="arrow-content text-black" id="moveID">
+        <a href="" class="arrow-content text-black move">
             <span class="bi-caret-left-fill larger"></span>
+        </a>
+    </div>
+</div>
+<div class="arrow-out">
+    <div class="semi-circle bg-primary bg-opacity-10">
+        <a href="" class="arrow-content text-black move">
+            <span class="bi-caret-right-fill larger"></span>
         </a>
     </div>
 </div>
@@ -60,18 +67,25 @@
         
         // Moves nav-items offscreen / onscreen
         
-        $('#moveID').on('click', function(e) {
+        $('.move').on('click', function(e) {
             e.preventDefault();
             var sidebar = $('.sidebar');
+            var arrowOut = $('.arrow-out');
+
             if (sidebar.hasClass('slide-off')) {
+                arrowOut.animate({ left: '-=50px'}, 'fast')
+
                 sidebar.removeClass('slide-off');
                 sidebar.addClass('slide-on');
-                // Slide onscreen
+                // Slide arrow-out offscreen THEN menu onscreen
             } else {
                 sidebar.removeClass('slide-on');
                 sidebar.addClass('slide-off');
-                // Slide offscreen
+
+                arrowOut.animate({ left: '+=50px'}, 'slow')
+                // Slide menu offscreen THEN arrow-out onscreen
             }
+
         });
 
     });
@@ -83,9 +97,14 @@
 <!-- Specific CSS to this partial -->
 <style>
 /* CSS for positioning arrow */
-.arrow {
+.arrow-in {
     position: relative;
     overflow: hidden;
+}
+.arrow-out{
+    position: fixed;
+    left: -50px;
+
 }
 .semi-circle {
     width: 30px;
@@ -105,10 +124,10 @@
 
 
 .sidebar{
-    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.3, 1.4);
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.3, 1.2);
 }
 .slide-off{
-    transform: translateX(-250px);
+    transform: translateX(-330px);
 }
 .slide-on{
     transform: translateX(0);
@@ -117,7 +136,7 @@
 
 /* Menu and content for sidebar */
 #menu {
-    border-radius: 20px 0 0 20px;
+    border-radius: 20px 0 20px 20px;
     max-width: 165px;
 }
 #content{

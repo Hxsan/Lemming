@@ -38,7 +38,7 @@
     }
 
 </style>
-<h1>Team {{team_name}}</h1>
+<h1>Team {{team.team_name}}</h1>
 <!--Show the team members in the team as a list-->
 <table>
     <thead>
@@ -59,8 +59,8 @@
                         {{ member.username }}</td>
                 {% endif %}
                 </td>
-                {% if is_admin%}
-                    {% if member != admin_user %}
+                {% if is_admin %} 
+                    {% if member != team.admin_user %}
                         <td>
                             <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
                             {% csrf_token %}

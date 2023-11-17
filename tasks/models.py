@@ -28,7 +28,6 @@ class User(AbstractUser):
         null=True,
     )
     """
-    #is_admin = models.BooleanField(default=False,blank=True)
 
     class Meta:
         """Model options."""

@@ -34,11 +34,23 @@ def search_users(request):
 def dashboard(request):
     """Display the current user's dashboard."""
     current_user = request.user
+
+
     if not current_user.is_authenticated:
 
         return render(request, 'home.html', {'user': current_user})
+
     teams = current_user.teams.all()
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams})
+
+    # Check if the user is associated with any teams
+    if teams:
+        # If the user is associated with teams, use the ID of the first team
+        team_id = teams[0].id
+    else:
+        # If the user is not associated with any teams, set team id to 1
+        team_id = 1
+    
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id})
 
 
 @login_required

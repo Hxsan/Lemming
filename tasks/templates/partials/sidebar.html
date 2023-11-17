@@ -2,10 +2,10 @@
     <ul class="nav nav-pills flex-column bg-primary bg-opacity-10 p-2" id="menu" role="tablist">
         <div class="row">
             <div class="col">
-                <p class="my-auto mx-1 mb-3"> <b>Teams:</b> </p>
+                <p class="mx-1 mb-2" style="font-size:20px; padding-right: 77px"> <b>Teams:</b> </p>
             </div>
         </div>
-        <div class="overflow-auto" style="max-height: calc(100vh - 150px)">
+        <div class="move-row overflow-auto" style="max-height: calc(100vh - 250px)">
         {% for team in teams %}
             <li class="nav-object my-1">
                 <div class="text-start border border-primary rounded">
@@ -17,12 +17,12 @@
         {% endfor %}
         </div>
     </ul>
-    <div class="arrow">
-        <div class="semi-circle bg-primary bg-opacity-10">
-            <a href="" class="arrow-content text-black" id="offscreen">
-                <span class="bi-caret-left-fill larger"></span>
-            </a>
-        </div>
+</div>
+<div class="sidebar arrow">
+    <div class="semi-circle bg-primary bg-opacity-10">
+        <a href="" class="arrow-content text-black" id="moveID">
+            <span class="bi-caret-left-fill larger"></span>
+        </a>
     </div>
 </div>
 
@@ -60,16 +60,16 @@
         
         // Moves nav-items offscreen / onscreen
         
-        $('#offscreen').on('click', function(e) {
+        $('#moveID').on('click', function(e) {
             e.preventDefault();
             var sidebar = $('.sidebar');
             if (sidebar.hasClass('slide-off')) {
-                sidebar.removeClass('slide-off')
-
+                sidebar.removeClass('slide-off');
+                sidebar.addClass('slide-on');
                 // Slide onscreen
             } else {
-
-                sidebar.addClass('slide-off')
+                sidebar.removeClass('slide-on');
+                sidebar.addClass('slide-off');
                 // Slide offscreen
             }
         });
@@ -84,9 +84,8 @@
 <style>
 /* CSS for positioning arrow */
 .arrow {
-    position: fixed;
+    position: relative;
     overflow: hidden;
-    left: 155px;
 }
 .semi-circle {
     width: 30px;
@@ -96,8 +95,8 @@
 }
 .arrow-content{
     position: absolute;
-    top: 15%;
-    left: 15%;
+    top: 7px;
+    left: 2px;
     white-space: nowrap;
 }
 .larger{
@@ -105,22 +104,21 @@
 }
 
 
-/* Transition for sliding */
-.sidebar {
-    transition: transform 0.4s ease-in-out;
+.sidebar{
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.3, 1.4);
 }
-.slide-off {
-    transform: translateX(-200px);
+.slide-off{
+    transform: translateX(-250px);
+}
+.slide-on{
+    transform: translateX(0);
 }
 
 
 /* Menu and content for sidebar */
 #menu {
-    position: fixed;
-    overflow: hidden;
-    left:5px;
-    border-radius: 20px 0 20px 20px;
-    max-width: 150px;
+    border-radius: 20px 0 0 20px;
+    max-width: 165px;
 }
 #content{
     padding:20px;

@@ -1,4 +1,4 @@
-<ul class="nav nav-pills flex-column col-auto bg-light" id="sidebar" role="tablist" style="border-radius: 10px; overflow: hidden;">
+<ul class="nav nav-pills flex-column col-auto bg-light" id="sidebar" role="tablist" style="border-radius: 10px; overflow: hidden; max-width: 140px;">
     <div class="row">
         <div class="col d-flex justify-content-between">
             <p class="my-auto mx-1"> <b>Teams:</b> </p>
@@ -7,7 +7,7 @@
             </a>
         </div>
     </div>
-    <div class="minimize-row overflow-auto" style="max-height: calc(100vh - 150px)">
+    <div class="minimize-row overflow-auto" style="max-height: calc(100vh - 170px)">
     {% for team in teams %}
         <li class="nav-item">
             <div class="text-start border border-primary rounded">
@@ -18,7 +18,7 @@
         </li>
         <li class="mt-1 mb-3">
             <div class="d-flex justify-content-center">
-                <a href= "{% url 'show_team' %}" class="btn btn-outline-info" style="padding: 0.12rem 0.32rem; font-size: 0.55rem;">
+                <a href= "{% url 'show_team' %}?team_name={{ team.team_name }}" class="btn btn-outline-info" style="padding: 0.12rem 0.32rem; font-size: 0.55rem;">
                     Members
                 </a>
             </div>

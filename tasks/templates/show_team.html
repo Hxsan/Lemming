@@ -1,5 +1,32 @@
-<html>
-<h1>Team {{team.team_name}}</h1>
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+        <h1>Team {{team.team_name}}</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th> First name </th>
+                    <th> Last name </th>
+                    <th> Username </th>
+                    <th> Email </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td> <b> ADMIN: </b> </td>
+                    <td> {{team.admin_user.first_name}} </td>
+                    <td> {{team.admin_user.last_name}} </td>
+                    <td> {{team.admin_user.username}} </td>
+                    <td> {{team.admin_user.email}} </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+  </div>
+</div>
 <!--Show the team members in the team as a list-->
 <!--Use code from finding all the users, and filter and find only those who have the same team as the current user-->
-</html>
+{% endblock %}

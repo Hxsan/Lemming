@@ -64,9 +64,11 @@ def create_team(request):
 @login_required
 def show_team(request):
     user = get_user(request)
+    team_name = request.GET.get('team_name')
+    team = user.teams.get(team_name=team_name)
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name
-    return render(request, 'show_team.html', {'team' : user.teams.all()[0]})
+    return render(request, 'show_team.html', {'team' : team})
 
 @login_prohibited
 def home(request):

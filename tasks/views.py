@@ -54,6 +54,7 @@ def dashboard(request):
     return render(request, 'dashboard.html', {'user': current_user, 'team_id': team_id})
 
 
+
 @login_required
 def create_team(request):
     """Page for a user to view their team and create a new team."""

@@ -1,5 +1,77 @@
-<html>
-<h1>Team {{team.team_name}}</h1>
+{% extends 'base_content.html' %}
+{% block content %}
+
+<style>
+
+    table{
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    td {
+    padding: 12px; 
+    margin: 4px;
+    text-align: center;
+    border-bottom: 1px solid rgb(214, 214, 214); 
+    }
+    th {
+        text-align: center;
+        padding: 12px; 
+        margin: 4px;
+        color: white;
+        border-bottom: 2px solid rgb(209, 209, 209);
+        background-color: rgb(46, 46, 44);
+    }
+
+    .remove-button {
+        background-color: #cb0808; /* Red background color */
+        color: #fff; /* White text color */
+        border: none;
+        padding: 8px 12px; /* Adjust padding as needed */
+        cursor: pointer;
+        border-radius: 4px; /* Optional: Add rounded corners */
+    }
+
+    .remove-button:hover {
+        background-color: #880303; /* Darker red on hover */
+    }
+
+</style>
+<h1>Team {{team_name}}</h1>
 <!--Show the team members in the team as a list-->
-<!--Use code from finding all the users, and filter and find only those who have the same team as the current user-->
-</html>
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            {% if is_admin %}
+                <th>Action</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in team_members %}
+            <tr>
+                <td>
+                    {% if is_admin %}
+                        {{ member.username }} (Admin)</td>
+                    {% else %}
+                        {{ member.username }}</td>
+                {% endif %}
+                </td>
+                {% if is_admin%}
+                    {% if member != admin_user %}
+                        <td>
+                            <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
+                            {% csrf_token %}
+                            <button class="remove-button" type="submit">Remove</button>
+                            </form>
+                        </td>
+                        {% endif %}
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

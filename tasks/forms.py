@@ -151,4 +151,11 @@ class CreateTeamForm(forms.ModelForm):
             team_name = self.cleaned_data.get('team_name'), 
         )
         return team
+    
+class EditTaskForm(forms.Form):
+    due_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'data-selector', 'type':'date'}))
+    def save(self, task):
+        task.due_date = self.cleaned_data.get('due_date')
+        task.save()
+        return task
 

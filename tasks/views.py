@@ -8,9 +8,9 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm
 from tasks.helpers import login_prohibited
-from tasks.models import User
+from tasks.models import User, Task, Team
 
 
 @login_required
@@ -39,6 +39,21 @@ def dashboard(request):
         return render(request, 'home.html', {'user': current_user})
     
     return render(request, 'dashboard.html', {'user': current_user})
+
+@login_required
+#test view
+def task_date_selector(request):
+    #pass in first task randomly
+    task = Task.objects.get(created_by=request.user)
+    if request.method == "POST":
+        form = EditTaskForm(request.POST)
+        if form.is_valid():
+            form.save(task)
+            return redirect('show_task')
+    else:
+        form = EditTaskForm()
+    return render(request, 'test_show_task.html', {'form': form, 'due_date': task.due_date})
+
 
 @login_required
 def create_team(request):

@@ -40,6 +40,8 @@ def dashboard(request):
     
     return render(request, 'dashboard.html', {'user': current_user})
 
+"""A view that allows you to select a date for the task and have it be saved"""
+#this is not actually meant to be the real view
 @login_required
 #test view
 def task_date_selector(request):

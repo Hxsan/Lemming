@@ -12,25 +12,6 @@ from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTas
 from tasks.helpers import login_prohibited
 from tasks.models import User
 
-
-@login_required
-def search_users(request):
-    """Display a list of searched users."""
-
-    if request.method == "POST":
-        q = request.POST["q"]
-        results = q.split()
-        if len(results) >= 2:
-            queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
-        else:
-            queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
-        if(queried_users.count() == 0):
-            return render(request, "search_users.html")
-        
-        return render(request, "search_users.html",{"q":q, "users":queried_users})
-    else:
-        return render(request, "search_users.html")
-
 def dashboard(request):
     """Display the current user's dashboard."""
     current_user = request.user

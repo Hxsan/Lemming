@@ -31,5 +31,6 @@ urlpatterns = [
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_task/', views.CreateTaskView.as_view(), name='create_task'),
     path('search_users/', views.search_users, name='search_users'),
+    path('assign_task/', views.assign_task, name='assign_task'),
 ]
 

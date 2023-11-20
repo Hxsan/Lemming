@@ -42,9 +42,28 @@ def create_team(request):
 @login_required
 def show_team(request):
     user = get_user(request)
-    #get a list of the users in the team, and pass it in
-    #also pass in the team itself to get the name
-    return render(request, 'show_team.html', {'team' : user.team})
+    if request.method == "POST":
+        if request.POST.get("userToAdd"):
+            userToAddString = request.POST['userToAdd']
+            print(userToAddString)
+            userToAdd = User.objects.get(username = userToAddString)
+            userToAdd.team = user.team
+            userToAdd.save()
+            return render(request, "show_team.html",{"team": user.team})
+        else:
+            q = request.POST["q"]
+            results = q.split()
+            if len(results) >= 2:
+                queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
+            else:
+                queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
+            if(queried_users.count() == 0):
+                return render(request, 'show_team.html', {'team' : user.team})
+            
+            #team = request.session.get("team")
+            return render(request, "show_team.html",{"q":q, "users":queried_users, "team": user.team})
+    else:
+        return render(request, 'show_team.html', {'team' : user.team})
 
 @login_prohibited
 def home(request):

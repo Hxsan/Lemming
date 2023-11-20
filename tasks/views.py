@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, AssignTaskForm
 from tasks.helpers import login_prohibited
 from tasks.models import User
 
@@ -226,12 +226,11 @@ def assign_task(request):
     if request.method =='POST':
         """Handle assignment of tasks"""
         form = AssignTaskForm(request.POST)
-        task = request.POST.get('task_id') # Tasks may need an ID as a primary key
-
+        # request.POST.get() needs to be used to retrieve the selected task
         if form.is_valid():
-            form.assign_task(task)
-            messages.add_message(self.request, messages.SUCCESS, "Tasks assigned!")
-            return reverse('dashboard')
+            form.assign_task() # Selected task needs to be passed in this parameter
+            messages.add_message(request, messages.SUCCESS, "Tasks assigned!")
+            return redirect('dashboard')
     else:
         form = AssignTaskForm()
 

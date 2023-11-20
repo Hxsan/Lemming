@@ -129,15 +129,11 @@ class CreateTaskForm(forms.ModelForm):
     def save(self):
         """Create a new task."""
 
-        super().save(commit=False)
-
-        created_task = Task.objects.create(
-            title = self.cleaned_data.get('title'),
-            description = self.cleaned_data.get('description'),
-            due_date = self.cleaned_data.get('due_date'),
-        )
+        created_task = super().save(commit=False)
 
         created_task.created_by = self.user
+
+        created_task.save()
 
         return created_task
         
@@ -165,20 +161,25 @@ class AssignTaskForm(forms.ModelForm):
     
     """Custom form displaying users in a list that can be checkboxed"""
     # User.objects.all() needs to be changed to User.objects.filter()
-    # The filter being ONLY the selected team's users not all users
+    # The filter being only the selected team's users
+    # Displaying all users is used now because the template isnt made yet.
+
     usernames = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         to_field_name='username',
         widget=forms.CheckboxSelectMultiple,
     )
 
-    def assign_task(self, selected_task):
+    def assign_task(self):
         """Assign task to users selected"""
-
         selected_usernames = self.cleaned_data.get('usernames')
-        selected_users = User.objects.filter(username__in=selected_usernames)
+        list_of_usernames = list(selected_usernames.values_list('username', flat=True))
+        selected_users = User.objects.filter(username__in=list_of_usernames)
 
+        # This can only be done when the task is passed from views
+        """ 
         for user in selected_users:
             selected_task.assigned_to.add(user)
-        
-        return selected_task
+        """
+
+        return selected_users

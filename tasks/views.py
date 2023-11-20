@@ -220,3 +220,22 @@ class CreateTaskView(LoginRequiredMixin, FormView):
 
         messages.add_message(self.request, messages.SUCCESS, "Task created successfully!")
         return reverse('dashboard')
+
+@login_required
+def assign_task(request):
+    if request.method =='POST':
+        """Handle data passed in request."""
+        selected_usernames = request.POST.getlist('usernames')
+        selected_users = User.objects.filter(username=selected_usernames)
+
+        task_title = request.POST.get('task')
+        task = Task.objects.get('title') # Change this to an ID if necessary
+
+        """Assign tasks to users selected."""
+        for user in selected_users:
+            selected_task.assigned_to.add(user)
+
+        messages.add_message(self.request, messages.SUCCESS, "Tasks assigned!")
+        return reverse('dashboard')
+    else:
+        return HttpResponse("This view only handles POST")

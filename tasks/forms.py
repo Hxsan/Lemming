@@ -129,11 +129,15 @@ class CreateTaskForm(forms.ModelForm):
     def save(self):
         """Create a new task."""
 
-        created_task = super().save(commit=False)
+        super().save(commit=False)
+
+        created_task = Task.objects.create(
+            title = self.cleaned_data.get('title'),
+            description = self.cleaned_data.get('description'),
+            due_date = self.cleaned_data.get('due_date'),
+        )
 
         created_task.created_by = self.user
-
-        created_task.save()
 
         return created_task
         

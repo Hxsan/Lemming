@@ -40,7 +40,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" id="show-team-table">
+        <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12" id="show-team-table">
             <h1>Team {{team.team_name}}</h1>
             <!--Show the team members in the team as a list-->
             <table>
@@ -56,13 +56,13 @@
                     {% for member in team_members %}
                         <tr>
                             <td>
-                                {% if is_admin %}
+                                {% if member == team.admin_user %}
                                     {{ member.username }} (Admin)</td>
                                 {% else %}
                                     {{ member.username }}</td>
                             {% endif %}
                             </td>
-                            {% if is_admin %} 
+                            {% if is_admin %}
                                 {% if member != team.admin_user %}
                                     <td>
                                         <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
@@ -77,9 +77,9 @@
                 </tbody>
             </table>
             
-    <!--Use code from finding all the users, and filter and find only those who have the same team as the current user-->
+    <!--Use code from finding all the users, and filter and find only those who are not in the same team as the current user-->
         </div>
-        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
             <form class="d-flex" method="POST" action="{% url 'show_team' team_id=team.id  %}">
                 {% csrf_token %}
                 <input class="form-control me-2" type="search" id="query" name="q" placeholder="Search...">
@@ -91,17 +91,18 @@
                 <h1>Users: {{q}}</h1>
                 <br/>
                 <div class="list-group">
-        
                     {% for user in users %}
-                    {{ user.username }}
-                    <li class="list-group-item">{{ user.first_name }} {{ user.last_name }}
-                        <form method="POST" action="">
-                            {% csrf_token %}
-                            <!-- ADD ADMIN CHECK FOR ADD TO TEAM BUTTON -->
-                            <input type = "hidden" name="userToAdd" value="{{user}}"/>
-                            <input type="submit" class="btn btn-outline-success" value="Add to Team"/>
-                        </form>
-                    </li>
+                        {% if not user in team_members %}
+                            <li class="list-group-item">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
+                                <form method="POST" action="">
+                                    {% csrf_token %}
+                                    {% if is_admin %}
+                                        <input type = "hidden" name="userToAdd" value="{{user}}"/>
+                                        <input type="submit" class="btn btn-outline-success" value="Add to Team"/>
+                                    {% endif %}
+                                </form>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                 </div>
             {% endif%}

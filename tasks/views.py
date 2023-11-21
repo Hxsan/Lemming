@@ -45,11 +45,12 @@ def create_team(request):
             user = get_user(request)
             team = form.save(user)
             #add current user to their own team
-            #user.teams.all()[0] = team 
             team_id=team.id
             user.teams.add(team)
             #user.is_admin = True #make them admin of this team
             user.save()
+            team.save()
+            team.members.add(user)
             return redirect('show_team', team_id=team.id)
     else:
         form = CreateTeamForm()
@@ -59,15 +60,21 @@ def create_team(request):
 @login_required
 def show_team(request, team_id):
     user = get_user(request)
-    team_id = user.teams.all()[0].id
+    try:
+         team = Team.objects.get(pk=team_id)
+    except Team.DoesNotExist:
+         admin_user = request.user
+         team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
+         team.members.add(admin_user)
+    is_admin = user == team.admin_user
+    team_members = team.members.all()
+
     if request.method == "POST":
         if request.POST.get("userToAdd"):
             userToAddString = request.POST['userToAdd']
-            print(userToAddString)
             userToAdd = User.objects.get(username = userToAddString)
-            userToAdd.team = user.teams.all()[0]
-            userToAdd.save()
-            return render(request, "show_team.html",{"team": user.teams.all()[0] , "team_id" : team_id})
+            team.members.add(userToAdd)
+            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
         else:
             q = request.POST["q"]
             results = q.split()
@@ -75,28 +82,12 @@ def show_team(request, team_id):
                 queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
             else:
                 queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
-            if(queried_users.count() == 0):
-                return render(request, 'show_team.html', {'team' : user.teams.all()[0],"team_id" : team_id})
-            
-            #team = request.session.get("team")
-            return render(request, "show_team.html",{"q":q, "users":queried_users, "team": user.teams.all()[0], "team_id" : team_id})
-    else:
-        return render(request, 'show_team.html', {'team' : user.teams.all()[0], "team_id" : team_id})
-    
-    # try:
-    #     team = Team.objects.get(pk=team_id)
-    # except Team.DoesNotExist:
-    #     admin_user = request.user
-    #     team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
-    #     team.members.add(admin_user)
-    
-    # is_admin = user == team.admin_user
+            if(queried_users.count() > 0):
+                return render(request, "show_team.html",{"q":q, "users":queried_users, "team": team, "team_id" : team_id, 'team_members':team_members, 'is_admin':is_admin})
 
-    # team_members = team.members.all()
-
-    # #get a list of the users in the team, and pass it in
-    # #also pass in the team itself to get the name
-    # return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
+    #get a list of the users in the team, and pass it in
+    #also pass in the team itself to get the name
+    return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
 
 @login_required
 def remove_member(request, team_id, member_username):

@@ -17,13 +17,17 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
-    team = models.ForeignKey(
+    teams = models.ManyToManyField(
+        "Team"
+    )
+
+    """ForeignKey(
         "Team",
         on_delete=models.CASCADE,
         blank= True,
         null=True,
     )
-    is_admin = models.BooleanField(default=False,blank=True)
+    """
 
     class Meta:
         """Model options."""
@@ -47,7 +51,7 @@ class User(AbstractUser):
         
         return self.gravatar(size=60)
 
-      
+
 class Task(models.Model):
     """Model used for task creation, and assignment on team members"""
 
@@ -60,4 +64,9 @@ class Task(models.Model):
 class Team(models.Model):
     """Model used to represent a team"""
     team_name = models.CharField(max_length=50, blank=False)
+    admin_user = models.ForeignKey(User, on_delete = models.CASCADE, blank = False, null = True)
+    members = models.ManyToManyField(User, related_name ='membership', blank=True)
+
+    def __str__(self):
+        return self.team_name
 

@@ -1,13 +1,45 @@
 {% extends 'base_content.html' %}
 {% block content %}
+<style>
+  .view-team-button{
+    background-color: rgb(75, 74, 74);
+    border: 1px solid #121313;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 8px 16;
+    color: white;
+  }
+
+  .view-team-button:hover{
+    background-color: rgb(30, 29, 29);
+  }
+</style>
 <div class="container">
   <div class="row">
-    <div class="col-12 d-flex justify-content-between">
+    <div class="col-12 d-flex justify-content-center">
       <h1>Welcome to your dashboard {{ user.username }}</h1>
-      <a href="{% url 'create_task' %}" class="btn btn-md btn-secondary">
-        Create Task
+    </div>
+    
+    <div class="col-6 mb-3">
+      <a href="{% url 'create_team' %}" class="btn btn-sm btn-secondary">
+        Create Team
       </a>
     </div>
+    <div class="col-6">
+      <div class="d-flex justify-content-end">
+        <a href="{% url 'show_team' team_id=team_id %}" class="btn btn-md btn-secondary view-team-button">
+          View Team Members
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 mt-4"">
+    {% for task in tasks %}
+      <div class="mx-auto text-center">
+        {% include 'partials/task_info_btn.html' with task_id=task.id %}
+      </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

@@ -30,7 +30,6 @@ urlpatterns = [
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_task/', views.CreateTaskView.as_view(), name='create_task'),
-    path('search_users/', views.search_users, name='search_users'),
     path('dashboard/show_team/<int:team_id>/remove_member/<str:member_username>/', views.remove_member, name='remove_member')
 ]
 

@@ -1,6 +1,5 @@
 {% extends 'base_content.html' %}
 {% block content %}
-
 <style>
 
     table{
@@ -38,40 +37,79 @@
     }
 
 </style>
-<h1>Team {{team.team_name}}</h1>
-<!--Show the team members in the team as a list-->
-<table>
-    <thead>
-        <tr>
-            <th>Username</th>
-            {% if is_admin %}
-                <th>Action</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for member in team_members %}
-            <tr>
-                <td>
-                    {% if is_admin %}
-                        {{ member.username }} (Admin)</td>
-                    {% else %}
-                        {{ member.username }}</td>
-                {% endif %}
-                </td>
-                {% if is_admin %} 
-                    {% if member != team.admin_user %}
-                        <td>
-                            <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
-                            {% csrf_token %}
-                            <button class="remove-button" type="submit">Remove</button>
-                            </form>
-                        </td>
-                        {% endif %}
-                {% endif %}
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
 
-{% endblock %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12" id="show-team-table">
+            <h1>Team {{team.team_name}}</h1>
+            <!--Show the team members in the team as a list-->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        {% if is_admin %}
+                            <th>Action</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in team_members %}
+                        <tr>
+                            <td>
+                                {% if member == team.admin_user %}
+                                    {{ member.username }} (Admin)</td>
+                                {% else %}
+                                    {{ member.username }}</td>
+                            {% endif %}
+                            </td>
+                            {% if is_admin %}
+                                {% if member != team.admin_user %}
+                                    <td>
+                                        <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
+                                        {% csrf_token %}
+                                        <button class="remove-button" type="submit">Remove</button>
+                                        </form>
+                                    </td>
+                                    {% endif %}
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+    <!--Use code from finding all the users, and filter and find only those who are not in the same team as the current user-->
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+            <form class="d-flex" method="POST" action="{% url 'show_team' team_id=team.id  %}">
+                {% csrf_token %}
+                <input class="form-control me-2" type="search" id="query" name="q" placeholder="Search...">
+                <button class="btn btn-outline-secondary">Search</button>
+            </form>
+
+            {% if q %}
+
+                <h2>Users: {{q}}</h2>
+                <br/>
+                <div class="list-group">
+                    {% for user in users %}
+                        {% if not user in team_members %}
+                            <li class="list-group-item">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
+                                <form method="POST" action="">
+                                    {% csrf_token %}
+                                    {% if is_admin %}
+                                        <input type = "hidden" name="userToAdd" value="{{user}}"/>
+                                        <input type="submit" class="btn btn-outline-success" value="Add to Team"/>
+                                    {% endif %}
+                                </form>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif%}
+        </div>
+        
+        </div>
+    </div>
+</div>
+    
+{% endblock %}  

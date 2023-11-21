@@ -13,25 +13,6 @@ from tasks.helpers import login_prohibited
 from tasks.models import User
 from tasks.models import Team
 
-
-@login_required
-def search_users(request):
-    """Display a list of searched users."""
-
-    if request.method == "POST":
-        q = request.POST["q"]
-        results = q.split()
-        if len(results) >= 2:
-            queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
-        else:
-            queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
-        if(queried_users.count() == 0):
-            return render(request, "search_users.html")
-        
-        return render(request, "search_users.html",{"q":q, "users":queried_users})
-    else:
-        return render(request, "search_users.html")
-
 def dashboard(request):
     """Display the current user's dashboard."""
     current_user = request.user
@@ -64,11 +45,12 @@ def create_team(request):
             user = get_user(request)
             team = form.save(user)
             #add current user to their own team
-            #user.team = team 
             team_id=team.id
             user.teams.add(team)
             #user.is_admin = True #make them admin of this team
             user.save()
+            team.save()
+            team.members.add(user)
             return redirect('show_team', team_id=team.id)
     else:
         form = CreateTeamForm()
@@ -76,18 +58,32 @@ def create_team(request):
 
 #Change this view, this is just a prototype
 @login_required
-def show_team(request, team_id=1):
+def show_team(request, team_id):
     user = get_user(request)
     try:
-        team = Team.objects.get(pk=team_id)
+         team = Team.objects.get(pk=team_id)
     except Team.DoesNotExist:
-        admin_user = request.user
-        team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
-        team.members.add(admin_user)
-    
+         admin_user = request.user
+         team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
+         team.members.add(admin_user)
     is_admin = user == team.admin_user
-
     team_members = team.members.all()
+
+    if request.method == "POST":
+        if request.POST.get("userToAdd"):
+            userToAddString = request.POST['userToAdd']
+            userToAdd = User.objects.get(username = userToAddString)
+            team.members.add(userToAdd)
+            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
+        else:
+            q = request.POST["q"]
+            results = q.split()
+            if len(results) >= 2:
+                queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
+            else:
+                queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
+            if(queried_users.count() > 0):
+                return render(request, "show_team.html",{"q":q, "users":queried_users, "team": team, "team_id" : team_id, 'team_members':team_members, 'is_admin':is_admin})
 
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name

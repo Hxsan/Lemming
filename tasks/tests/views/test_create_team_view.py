@@ -43,7 +43,7 @@ class CreateTeamViewTestCase(TestCase):
         user = User.objects.get(username= "@johndoe")
         before_count = Team.objects.count()
         #check he has no team
-        self.assertEqual(user.team, None)
+        self.assertEqual(user.teams.count(), 0)
         #create a team for this guy
         response = self.client.post(self.url , self.form_input, follow = True)
         after_count = Team.objects.count()
@@ -54,7 +54,8 @@ class CreateTeamViewTestCase(TestCase):
         team = Team.objects.get(team_name = "NewTeam")
         #check user team is set
         user.refresh_from_db() #refresh to check changes
-        self.assertNotEqual(user.team, None)
-        self.assertTrue(user.is_admin) #check they have become the admin
-        self.assertEqual(user.team.team_name, 'NewTeam')
+        self.assertEqual(user.teams.count(), 1)
+        #self.assertTrue(user.is_admin) #check they have become the admin
+        self.assertEqual(user.teams.all()[0].team_name, 'NewTeam')
+        self.assertEqual(team.admin_user, user)
         self.assertEqual(team.team_name, 'NewTeam')

@@ -1,7 +1,23 @@
 
+<style>
+.taskbtn {
+    font-size: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+    background: rgb(2, 124, 205);
+    border: 1px solid #efeded;
+    outline: none;
+    transition: 1s ease-in-out;
+}
+taskbtn:hover {
+    transition: 1s ease-in-out;
+    background: #0e77e1;
+}
+
+</style>
 
 <div class="task-button-container">
-    <a href="{% url 'view_task' task_id=task_id %}" class="btn btn-md btn-primary">
+    <a href="{% url 'view_task' task_id=task_id %}" class="btn btn-md btn-primary taskbtn">
         View Task Information
     </a>
 </div>

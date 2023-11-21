@@ -1,12 +1,71 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-12 d-flex justify-content-between">
-      <h1>Welcome to your dashboard {{ user.username }}</h1>
-      <a href="{% url 'create_task' %}" class="btn btn-md btn-secondary">
-        Create Task
-      </a>
+<div class="container-fluid">
+  <div class="row row-cols-3 bg-gradient">
+    <div class="col-md-auto bg-dark">
+      {% include 'partials/sidebar.html' %}
+    </div>
+    <div class="col-md-auto bg-secondary align-items-center">
+      <div class="container-fluid">
+        <div class="row m-2 bg-success bg-gradient">
+          <h1>Welcome to your dashboard {{ user.username }}</h1>
+        </div>
+        <div class="row">
+          <div class="card text-white bg-primary m-1" style="max-width: 18rem;">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+              <h5 class="card-title">Primary card title</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+          </div>
+          <div class="card text-white bg-primary m-1" style="max-width: 18rem;">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+              <h5 class="card-title">Primary card title</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+          </div>
+          <div class="card text-white bg-primary m-1" style="max-width: 18rem;">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+              <h5 class="card-title">Primary card title</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="card text-white bg-primary m-1" style="max-width: 18rem;">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+              <h5 class="card-title">Primary card title</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+          </div>
+          <div class="card text-white bg-primary m-1" style="max-width: 18rem;">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+              <h5 class="card-title">Primary card title</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+          </div>
+          <div class="card text-white bg-primary m-1" style="max-width: 18rem;">
+            <div class="card-header">Header</div>
+            <div class="card-body">
+              <h5 class="card-title">Primary card title</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="col bg-gradient bg-success">
+      <div class="row-cols-1">
+        <div class="col-mb-2">
+          Current team chills here
+        </div>
+        <div class="col-mt-2">
+          Due dates hangs here
+        </div>
+      </div>
     </div>
   </div>
 </div>

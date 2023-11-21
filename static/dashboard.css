@@ -1,0 +1,12 @@
+/*
+ * Dashboard
+ */
+
+.container {
+    display: flex;
+  }
+  
+.row {
+    background-image:  var(--bs-gradient);
+  }
+  

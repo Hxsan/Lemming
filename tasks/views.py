@@ -51,8 +51,7 @@ def dashboard(request):
         # If the user is not associated with any teams, set team id to 1
         team_id = 1
     
-    return render(request, 'dashboard.html', {'user': current_user, 'team_id': team_id})
-
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id})
 
 
 @login_required

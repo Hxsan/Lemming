@@ -4,13 +4,14 @@ from django.contrib.auth import login, logout, get_user
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm
 from tasks.helpers import login_prohibited
 from tasks.models import User
+from tasks.models import Team
 
 
 @login_required
@@ -34,11 +35,25 @@ def search_users(request):
 def dashboard(request):
     """Display the current user's dashboard."""
     current_user = request.user
+
+
     if not current_user.is_authenticated:
 
         return render(request, 'home.html', {'user': current_user})
+
+    teams = current_user.teams.all()
+
+    # Check if the user is associated with any teams
+    if teams:
+        # If the user is associated with teams, use the ID of the first team
+        team_id = teams[0].id
+    else:
+        # If the user is not associated with any teams, set team id to 1
+        team_id = 1
     
-    return render(request, 'dashboard.html', {'user': current_user})
+    return render(request, 'dashboard.html', {'user': current_user, 'team_id': team_id})
+
+
 
 @login_required
 def create_team(request):
@@ -48,22 +63,50 @@ def create_team(request):
         form = CreateTeamForm(request.POST)
         if form.is_valid():
             user = get_user(request)
-            team = form.save()
+            team = form.save(user)
             #add current user to their own team
-            user.team = team 
-            user.is_admin = True #make them admin of this team
+            #user.team = team 
+            team_id=team.id
+            user.teams.add(team)
+            #user.is_admin = True #make them admin of this team
             user.save()
-            return redirect('show_team')
+            return redirect('show_team', team_id=team.id)
     else:
         form = CreateTeamForm()
     return render(request, 'create_team.html', {'form' : form})
 
+#Change this view, this is just a prototype
 @login_required
-def show_team(request):
+def show_team(request, team_id=1):
     user = get_user(request)
+    try:
+        team = Team.objects.get(pk=team_id)
+    except Team.DoesNotExist:
+        admin_user = request.user
+        team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
+        team.members.add(admin_user)
+    
+    is_admin = user == team.admin_user
+
+    team_members = team.members.all()
+
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name
-    return render(request, 'show_team.html', {'team' : user.team})
+    return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
+
+@login_required
+def remove_member(request, team_id, member_username):
+    user = get_user(request)
+    team = get_object_or_404(Team, pk=team_id)
+
+    # make sure that the user is an admin and the member exists in the team
+    if user == team.admin_user:
+        if member_username:
+            member_to_remove = get_object_or_404(User, username=member_username)
+            if team.members.filter(username=member_username).exists():
+                team.members.remove(member_to_remove)
+
+    return redirect('show_team', team_id=team_id)
 
 @login_prohibited
 def home(request):

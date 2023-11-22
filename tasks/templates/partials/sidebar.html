@@ -9,7 +9,7 @@
         {% for team in teams %}
             <li class="nav-object my-1">
                 <div class="text-start border border-primary rounded">
-                    <a class="nav-link {% if forloop.first %} active {% endif %}" id="{{ team.team_name|slugify }}-tab" data-toggle="pill" href="#{{ team.team_name|slugify }}" role="tab" aria-controls="{{ team.team_name|slugify }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
+                    <a class="nav-link {% if forloop.first %} active {% endif %}" id="{{ team.id }}-tab" data-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
                         {{ team.team_name }}
                     </a>
                 </div>
@@ -35,7 +35,7 @@
 
 <div class="tab-content" id="content">
     {% for team in teams %}
-    <div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.team_name|slugify }}" role="tabpanel" aria-labelledby="{{ team.team_name|slugify }}-tab">
+    <div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
         <!-- displaying dashboard with tasks could go here -->
         {{ team.team_name }}
     </div>
@@ -84,6 +84,21 @@
 
                 arrowOut.animate({ left: '+=50px'}, 'slow')
                 // Slide menu offscreen THEN arrow-out onscreen
+            }
+
+        });
+
+        // Redirects to correct team page based on which team was clicked
+
+        $('.view-team-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            console.log(teamId);
+            if (teamId) {
+                var url = '/dashboard/show_team/' + teamId + '/';
+                console.log(url);
+                window.location.href = url;
             }
 
         });

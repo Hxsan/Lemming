@@ -153,3 +153,35 @@ class CreateTeamForm(forms.ModelForm):
             admin_user=user,
         )
         return team
+
+class AssignTaskForm(forms.ModelForm):
+    class Meta:
+        """Form options."""
+
+        model = User
+        fields = []
+    
+    """Custom form displaying users in a list that can be checkboxed"""
+    # User.objects.all() needs to be changed to User.objects.filter()
+    # The filter being only the selected team's users
+    # Displaying all users is used now because the template isnt made yet.
+
+    usernames = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        to_field_name='username',
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    def assign_task(self):
+        """Assign task to users selected"""
+        selected_usernames = self.cleaned_data.get('usernames')
+        list_of_usernames = list(selected_usernames.values_list('username', flat=True))
+        selected_users = User.objects.filter(username__in=list_of_usernames)
+
+        # This can only be done when the task is passed from views
+        """ 
+        for user in selected_users:
+            selected_task.assigned_to.add(user)
+        """
+
+        return selected_users

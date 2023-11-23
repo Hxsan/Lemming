@@ -40,6 +40,16 @@
         {% include 'partials/task_info_btn.html' with task_id=task.id %}
       </div>
     {% endfor %}
+      <a href="{% url 'create_team' %}" class="btn btn-sm btn-secondary">
+          Create Team
+      <a href="#" class="btn btn-md btn-secondary view-team-button">
+        View Team Members
+
+      </a>
+    </div>
+    <div class="col-auto d-flex mt-2">
+      {% include 'partials/sidebar.html' %}
+    </div>
   </div>
 </div>
 {% endblock %}

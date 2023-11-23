@@ -4,15 +4,13 @@ from django.contrib.auth import login, logout, get_user
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
-from django.shortcuts import redirect, render,  get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm
 from tasks.helpers import login_prohibited
-from tasks.models import User
-from tasks.models import Team
-from tasks.models import Task
+from tasks.models import User, Task, Team
 
 @login_required
 def search_users(request):
@@ -35,10 +33,11 @@ def search_users(request):
 def dashboard(request):
     """Display the current user's dashboard."""
     current_user = request.user
+
+
     if not current_user.is_authenticated:
 
         return render(request, 'home.html', {'user': current_user})
-
 
     teams = current_user.teams.all()
 
@@ -57,7 +56,24 @@ def dashboard(request):
 
     tasks = Task.objects.all()
 
-    return render(request, 'dashboard.html', {'user': current_user, 'team_id': team_id, 'tasks' : tasks})
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'tasks' : tasks})
+
+
+"""A view that allows you to select a date for the task and have it be saved"""
+#this is not actually meant to be the real view
+@login_required
+#test view
+def task_date_selector(request):
+    #pass in first task randomly
+    task = Task.objects.get(created_by=request.user)
+    if request.method == "POST":
+        form = EditTaskForm(request.POST)
+        if form.is_valid():
+            form.save(task)
+            return redirect('show_task')
+    else:
+        form = EditTaskForm()
+    return render(request, 'test_show_task.html', {'form': form, 'due_date': task.due_date})
 
 @login_required
 def create_team(request):
@@ -69,29 +85,50 @@ def create_team(request):
             user = get_user(request)
             team = form.save(user)
             #add current user to their own team
+
             #user.team = team 
+
             team_id=team.id
             user.teams.add(team)
             #user.is_admin = True #make them admin of this team
             user.save()
+
+            team.save()
+            team.members.add(user)
+
             return redirect('show_team', team_id=team.id)
     else:
         form = CreateTeamForm()
     return render(request, 'create_team.html', {'form' : form})
 
+#Change this view, this is just a prototype
 @login_required
-def show_team(request, team_id=1):
+def show_team(request, team_id):
     user = get_user(request)
     try:
-        team = Team.objects.get(pk=team_id)
+         team = Team.objects.get(pk=team_id)
     except Team.DoesNotExist:
-        admin_user = request.user
-        team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
-        team.members.add(admin_user)
-    
+         admin_user = request.user
+         team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
+         team.members.add(admin_user)
     is_admin = user == team.admin_user
-
     team_members = team.members.all()
+
+    if request.method == "POST":
+        if request.POST.get("userToAdd"):
+            userToAddString = request.POST['userToAdd']
+            userToAdd = User.objects.get(username = userToAddString)
+            team.members.add(userToAdd)
+            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
+        else:
+            q = request.POST["q"]
+            results = q.split()
+            if len(results) >= 2:
+                queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
+            else:
+                queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
+            if(queried_users.count() > 0):
+                return render(request, "show_team.html",{"q":q, "users":queried_users, "team": team, "team_id" : team_id, 'team_members':team_members, 'is_admin':is_admin})
 
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name
@@ -120,7 +157,6 @@ def view_task(request, task_id=1):
         task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = user)
 
     return render(request, 'task_information.html', {'task': task})
-
 
 @login_prohibited
 def home(request):

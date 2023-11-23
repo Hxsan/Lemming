@@ -1,4 +1,4 @@
-"""Tests of the show team view."""
+"Tests of the show team view."""
 
 # from django.test import TestCase
 # from django.urls import reverse
@@ -34,5 +34,5 @@
 #         self.assertNotEqual(team, None)
 #         self.assertEqual(team.team_name, 'NewTeam')
 #         #self.assertEqual(user_list.count(), 1)
-#         #can't do this test yet
 
+#         #can't do this test yet

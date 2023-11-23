@@ -16,8 +16,30 @@
 </style>
 <div class="container">
   <div class="row">
-    <div class="col-12 d-flex justify-content-between">
+    <div class="col-12 d-flex justify-content-center">
       <h1>Welcome to your dashboard {{ user.username }}</h1>
+    </div>
+    
+    <div class="col-6 mb-3">
+      <a href="{% url 'create_team' %}" class="btn btn-sm btn-secondary">
+        Create Team
+      </a>
+    </div>
+    <div class="col-6">
+      <div class="d-flex justify-content-end">
+        <a href="{% url 'show_team' team_id=team_id %}" class="btn btn-md btn-secondary view-team-button">
+          View Team Members
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 mt-4"">
+    {% for task in tasks %}
+      <div class="mx-auto text-center">
+        {% include 'partials/task_info_btn.html' with task_id=task.id %}
+      </div>
+    {% endfor %}
       <a href="{% url 'create_team' %}" class="btn btn-sm btn-secondary">
           Create Team
       <a href="#" class="btn btn-md btn-secondary view-team-button">

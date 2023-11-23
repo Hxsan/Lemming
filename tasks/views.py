@@ -12,7 +12,6 @@ from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTas
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team
 
-
 @login_required
 def search_users(request):
     """Display a list of searched users."""
@@ -49,8 +48,15 @@ def dashboard(request):
     else:
         # If the user is not associated with any teams, set team id to 1
         team_id = 1
-    
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id})
+
+    tasks = Task.objects.all()
+
+    if not tasks:
+        task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = current_user)
+
+    tasks = Task.objects.all()
+
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'tasks' : tasks})
 
 
 """A view that allows you to select a date for the task and have it be saved"""
@@ -69,7 +75,6 @@ def task_date_selector(request):
         form = EditTaskForm()
     return render(request, 'test_show_task.html', {'form': form, 'due_date': task.due_date})
 
-
 @login_required
 def create_team(request):
     """Page for a user to view their team and create a new team."""
@@ -80,12 +85,17 @@ def create_team(request):
             user = get_user(request)
             team = form.save(user)
             #add current user to their own team
+
+            #user.team = team 
+
             team_id=team.id
             user.teams.add(team)
             #user.is_admin = True #make them admin of this team
             user.save()
+
             team.save()
             team.members.add(user)
+
             return redirect('show_team', team_id=team.id)
     else:
         form = CreateTeamForm()
@@ -137,6 +147,16 @@ def remove_member(request, team_id, member_username):
                 team.members.remove(member_to_remove)
 
     return redirect('show_team', team_id=team_id)
+
+@login_required
+def view_task(request, task_id=1):
+    user = get_user(request)
+    try:
+        task = Task.objects.get(pk=task_id)
+    except Task.DoesNotExist:
+        task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = user)
+
+    return render(request, 'task_information.html', {'task': task})
 
 @login_prohibited
 def home(request):
@@ -285,7 +305,8 @@ class CreateTaskView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         """Handle valid form by saving the created task."""
         if form.is_valid():
-            form.save()
+            task = form.save()
+            task_id = task.id
         return super().form_valid(form)
 
     def get_success_url(self):

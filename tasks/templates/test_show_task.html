@@ -1,0 +1,21 @@
+<!--This is a test view, no need to test its functionality-->
+{% extends 'base_content.html' %}
+{% block content %}
+{{due_date|json_script:"due_date"}}
+<div class="container">
+    <form action = "{% url 'show_task'%}" method = "post">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="Submit" value = "Save">
+    </form>
+</div>
+
+<script type="text/javascript">
+    const dateControl = document.querySelector('input[type="date"]');
+    var currentDate = new Date();
+    var currentDateString = currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate()
+    dateControl.min = currentDateString;
+    dateControl.value = JSON.parse(document.getElementById('due_date').textContent);
+    console.log(JSON.parse(document.getElementById('due_date').textContent));
+</script>
+{% endblock %}

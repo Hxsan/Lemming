@@ -153,3 +153,12 @@ class CreateTeamForm(forms.ModelForm):
             admin_user=user,
         )
         return team
+
+"""Maybe need a form of this type eventually"""    
+#But this form isn't the actual form we will use
+class EditTaskForm(forms.Form):
+    due_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'data-selector', 'type':'date'}))
+    def save(self, task):
+        task.due_date = self.cleaned_data.get('due_date')
+        task.save()
+        return task

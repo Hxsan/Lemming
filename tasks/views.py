@@ -8,10 +8,28 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm
 from tasks.helpers import login_prohibited
-from tasks.models import User
-from tasks.models import Team
+from tasks.models import User, Task, Team
+
+
+@login_required
+def search_users(request):
+    """Display a list of searched users."""
+
+    if request.method == "POST":
+        q = request.POST["q"]
+        results = q.split()
+        if len(results) >= 2:
+            queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
+        else:
+            queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
+        if(queried_users.count() == 0):
+            return render(request, "search_users.html")
+        
+        return render(request, "search_users.html",{"q":q, "users":queried_users})
+    else:
+        return render(request, "search_users.html")
 
 def dashboard(request):
     """Display the current user's dashboard."""
@@ -33,6 +51,23 @@ def dashboard(request):
         team_id = 1
     
     return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id})
+
+
+"""A view that allows you to select a date for the task and have it be saved"""
+#this is not actually meant to be the real view
+@login_required
+#test view
+def task_date_selector(request):
+    #pass in first task randomly
+    task = Task.objects.get(created_by=request.user)
+    if request.method == "POST":
+        form = EditTaskForm(request.POST)
+        if form.is_valid():
+            form.save(task)
+            return redirect('show_task')
+    else:
+        form = EditTaskForm()
+    return render(request, 'test_show_task.html', {'form': form, 'due_date': task.due_date})
 
 
 @login_required

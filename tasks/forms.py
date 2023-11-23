@@ -144,11 +144,13 @@ class CreateTeamForm(forms.ModelForm):
 
         model = Team
         fields = ['team_name']
+        exclude = ['team_id']
 
-    def save(self):
+    def save(self, user):
         super().save(commit=False)
         team = Team.objects.create(
-            team_name = self.cleaned_data.get('team_name'), 
+            team_name=self.cleaned_data.get('team_name'), 
+            admin_user=user,
         )
         return team
 
@@ -160,4 +162,3 @@ class EditTaskForm(forms.Form):
         task.due_date = self.cleaned_data.get('due_date')
         task.save()
         return task
-

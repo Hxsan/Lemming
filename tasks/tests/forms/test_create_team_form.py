@@ -16,6 +16,9 @@ class CreateTeamFormTestCase(TestCase):
         self.form_input = {
             'team_name': 'NewTeam'
         }
+        self.user = User.objects.get(username='@johndoe')
+
+
     def test_valid_create_team_form(self):
         form = CreateTeamForm({'team_name':'NewTeam'})
         self.assertTrue(form.is_valid())
@@ -32,7 +35,7 @@ class CreateTeamFormTestCase(TestCase):
     def test_form_saves_correctly(self):
         form = CreateTeamForm(self.form_input)
         before_count = Team.objects.count()
-        form.save()
+        form.save(self.user)
         after_count = Team.objects.count()
         self.assertEqual(after_count, before_count + 1)
         team = Team.objects.get(team_name = 'NewTeam')

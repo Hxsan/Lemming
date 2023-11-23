@@ -119,6 +119,7 @@ def show_team(request, team_id):
             userToAddString = request.POST['userToAdd']
             userToAdd = User.objects.get(username = userToAddString)
             team.members.add(userToAdd)
+            userToAdd.teams.add(team)
             return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
         else:
             q = request.POST["q"]
@@ -145,6 +146,7 @@ def remove_member(request, team_id, member_username):
             member_to_remove = get_object_or_404(User, username=member_username)
             if team.members.filter(username=member_username).exists():
                 team.members.remove(member_to_remove)
+                member_to_remove.teams.remove(team)
 
     return redirect('show_team', team_id=team_id)
 

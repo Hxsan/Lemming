@@ -51,8 +51,11 @@ def dashboard(request):
 
     tasks = Task.objects.all()
 
+    """
     if not tasks:
-        task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = current_user)
+        this is #task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = current_user)
+    """
+
 
     # List of pairs matching each team with their created tasks
     team_tasks = []

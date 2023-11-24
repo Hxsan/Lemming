@@ -34,10 +34,15 @@
 </div>
 
 <div class="tab-content" id="content">
-    {% for team in teams %}
+    {% for team, tasks in team_tasks %}
     <div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
         <!-- displaying dashboard with tasks could go here -->
         {{ team.team_name }}
+        {% for task in tasks %}
+            <div class="mx-auto text-center">
+                {% include 'partials/task_info_btn.html' with task_id=task.id %}
+            </div>
+        {% endfor %}
     </div>
     {% endfor %}
 </div>
@@ -94,10 +99,19 @@
             e.preventDefault();
 
             var teamId = $('.nav-link.active').attr('href').replace('#','');
-            console.log(teamId);
             if (teamId) {
                 var url = '/dashboard/show_team/' + teamId + '/';
-                console.log(url);
+                window.location.href = url;
+            }
+
+        });
+
+        $('.create-task-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/create_task/' + teamId + '/';
                 window.location.href = url;
             }
 

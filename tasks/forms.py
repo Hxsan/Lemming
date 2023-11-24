@@ -126,12 +126,13 @@ class CreateTaskForm(forms.ModelForm):
         super().__init__(**kwargs)
         self.user = user
     
-    def save(self):
+    def save(self, team_id=None):
         """Create a new task."""
 
         created_task = super().save(commit=False)
-
-        created_task.created_by = self.user
+        
+        if team_id is not None:
+            created_task.created_by = self.user.teams.get(pk=team_id)
 
         created_task.save()
 

@@ -54,9 +54,14 @@ def dashboard(request):
     if not tasks:
         task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = current_user)
 
-    tasks = Task.objects.all()
+    # List of pairs matching each team with their created tasks
+    team_tasks = []
+    for team in teams:
+        tasks_for_each_team = Task.objects.filter(created_by=team)
+        team_tasks.append((team, tasks_for_each_team))
 
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'tasks' : tasks})
+
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks})
 
 
 """A view that allows you to select a date for the task and have it be saved"""
@@ -298,6 +303,12 @@ class CreateTaskView(LoginRequiredMixin, FormView):
     template_name = 'create_task.html'
     form_class = CreateTaskForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        team_id = self.kwargs.get('pk')
+        context['team_id'] = team_id
+        return context
+
     def get_form_kwargs(self, **kwargs):
         """Pass the current user to the create task form."""
         kwargs = super().get_form_kwargs(**kwargs)
@@ -307,7 +318,8 @@ class CreateTaskView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         """Handle valid form by saving the created task."""
         if form.is_valid():
-            task = form.save()
+            team_id = self.kwargs.get('pk')
+            task = form.save(team_id=team_id)
             task_id = task.id
         return super().form_valid(form)
 

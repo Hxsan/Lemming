@@ -59,6 +59,7 @@ class Task(models.Model):
     description = models.CharField(max_length=300, blank=True)
     due_date = models.DateField(blank=False)
     created_by = models.ForeignKey('Team', on_delete=models.CASCADE, null=True)
+    assigned_to = models.ManyToManyField(User)
     
 
 class Team(models.Model):

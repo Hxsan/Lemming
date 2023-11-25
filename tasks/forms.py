@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User, Task, Team
+from datetime import date
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -118,8 +119,9 @@ class CreateTaskForm(forms.ModelForm):
 
         model = Task
         fields = ['title', 'description', 'due_date']
-        exclude = ['created_by']
-        widgets = { 'description': forms.Textarea() }
+        exclude = ['created_by', 'task_completed']
+        widgets = { 'description': forms.Textarea(),
+                    'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today})}
 
     def __init__(self, user=None, **kwargs):
         """Construct new form instance with a user instance."""
@@ -130,7 +132,7 @@ class CreateTaskForm(forms.ModelForm):
         """Create a new task."""
 
         created_task = super().save(commit=False)
-        
+        created_task.due_date = self.cleaned_data.get('due_date')
         if team_id is not None:
             created_task.created_by = self.user.teams.get(pk=team_id)
 
@@ -157,9 +159,21 @@ class CreateTeamForm(forms.ModelForm):
 
 """Maybe need a form of this type eventually"""    
 #But this form isn't the actual form we will use
-class EditTaskForm(forms.Form):
-    due_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'data-selector', 'type':'date'}))
-    def save(self, task):
-        task.due_date = self.cleaned_data.get('due_date')
+class EditTaskForm(forms.ModelForm):
+    class Meta:
+        """Form options."""
+
+        model = Task
+        fields = ['title', 'description', 'due_date']
+        exclude = ['created_by', 'task_completed']
+        widgets = {'title': forms.TextInput(attrs={'class': 'form-control','id':'task_title'}),
+                   'description': forms.Textarea(attrs={'class': 'form-control','id':'task_description'}),
+                   'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today})}
+
+    def save(self, old_task):
+        task = super().save(commit=False)
+        task.id = old_task.id
+        task.created_by = old_task.created_by
+        task.task_completed = old_task.task_completed
         task.save()
         return task

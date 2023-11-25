@@ -51,11 +51,6 @@ def dashboard(request):
 
     tasks = Task.objects.all()
 
-    """
-    if not tasks:
-        this is #task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = current_user)
-    """
-
 
     # List of pairs matching each team with their created tasks
     team_tasks = []
@@ -66,22 +61,6 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks})
 
-
-"""A view that allows you to select a date for the task and have it be saved"""
-#this is not actually meant to be the real view
-@login_required
-#test view
-def task_date_selector(request):
-    #pass in first task randomly
-    task = Task.objects.get(created_by=request.user)
-    if request.method == "POST":
-        form = EditTaskForm(request.POST)
-        if form.is_valid():
-            form.save(task)
-            return redirect('show_task')
-    else:
-        form = EditTaskForm()
-    return render(request, 'test_show_task.html', {'form': form, 'due_date': task.due_date})
 
 @login_required
 def create_team(request):
@@ -160,13 +139,27 @@ def remove_member(request, team_id, member_username):
 
 @login_required
 def view_task(request, task_id=1):
-    user = get_user(request)
-    try:
-        task = Task.objects.get(pk=task_id)
-    except Task.DoesNotExist:
-        task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = user)
+    task = Task.objects.get(pk=task_id)
+    if request.method == "POST":
+        form = EditTaskForm(request.POST)
+        #If we clicked the complete button 
+        if "task_completion_value" in request.POST: #so this is for submitting the actual form itself
+            if request.POST['task_completion_value'] == "Completed":
+                task.task_completed = False #we clicked on Completed, so it must now be incomplete
+            else:
+                task.task_completed = True #we clicked on mark as done, so it is now done
+        else:
+            #otherwise, we have submitted the whole form, so save it
+            #get the value of the complete button 
+            if form.is_valid():
+                task.task_completed = request.POST['task_completed']
+                form.save(task)
+                return redirect('dashboard')
+    else:
+        #fill the form with the values from the task itself to begin with
+        form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date})
 
-    return render(request, 'task_information.html', {'task': task})
+    return render(request, 'task_information.html', {'task': task, 'form' : form})
 
 @login_prohibited
 def home(request):

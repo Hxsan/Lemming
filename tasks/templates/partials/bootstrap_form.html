@@ -2,7 +2,7 @@
 {% for field in form %}
   <div class="mb-3">
     {{ field.label_tag }}
-    {% if form.is_bound %}
+    {% if form.is_bound and not dont_show_feedback%}
       {% if field.errors %}
         {% render_field field class="form-control is-invalid" %}
       {% else %}
@@ -11,11 +11,13 @@
     {% else %}
       {% render_field field class="form-control" %}
     {% endif %}
-    <div class="valid-feedback">
-      Looks good!
-    </div>
-    <div class="invalid-feedback">
-      {{ field.errors }}
-    </div>
+    {% if not dont_show_feedback %}
+      <div class="valid-feedback">
+        Looks good!
+      </div>
+      <div class="invalid-feedback">
+        {{ field.errors }}
+      </div>
+    {%endif%}
   </div>
 {% endfor %}

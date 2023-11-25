@@ -1,0 +1,9 @@
+
+<div class="card text-white bg-primary m-1" style="max-width: 18rem;">
+    <div class="card-header">{{task.title}}</div>
+    <div class="card-body">
+      <h5 class="card-title">{{ task.due_date }}</h5>
+      <p class="card-text">{{ task.description }}</p>
+    </div>
+    <a href="{% url 'view_task' task.id %}" class="stretched-link"></a>
+</div>

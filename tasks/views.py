@@ -324,3 +324,19 @@ class CreateTaskView(LoginRequiredMixin, FormView):
 
         messages.add_message(self.request, messages.SUCCESS, "Task created successfully!")
         return reverse('dashboard')
+
+@login_required
+def assign_task(request):
+    if request.method =='POST':
+        """Handle assignment of tasks"""
+        form = AssignTaskForm(request.POST)
+        # request.POST.get() needs to be used to retrieve the selected task
+        if form.is_valid():
+            form.assign_task() # Selected task needs to be passed in this parameter
+            messages.add_message(request, messages.SUCCESS, "Tasks assigned!")
+            return redirect('dashboard')
+    else:
+        form = AssignTaskForm()
+
+    """GET request = no change, JavaScript should handle this"""
+    return HttpResponse("") 

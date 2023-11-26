@@ -1,21 +1,39 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class="container">
-    <h1>Task Details</h1>
-    
-    <form action="{% url 'view_task' task_id=task.id %}"method = "post">
-        {% csrf_token %}
-        <!--The below part with dont show feedback is is so that we don't show the validation mesages when the form is opened with the values-->
-        {% include 'partials/bootstrap_form.html' with form=form dont_show_feedback=True%} 
-        {%if task.task_completed %}
-            <input type="Submit" class="btn btn-success" name="task_completion_value" value="Completed"><!--</a>-->
-        {%else%}
-            <input type="Submit" class="btn btn-outline-success" name="task_completion_value" value="Mark Task As Complete"><!--</a>-->
-        {%endif%}
-        <!--This below hidden input is to store the value of task_completed as it changes-->
-        <input type="text" hidden="True" name="task_completed" value={{task.task_completed}}>
-        <input type="Submit" value = "Save" class="btn btn-primary">
-    </form>
+    <div class="row">
+        <div class="col-7">
+            <h2>Task Details</h2>
+            <form action="{% url 'view_task' team_id=team.id task_id=task.id %}"method = "post">
+                {% csrf_token %}
+                <!--The below part with dont show feedback is is so that we don't show the validation mesages when the form is opened with the values-->
+                {% include 'partials/bootstrap_form.html' with form=form dont_show_feedback=True%} 
+                {%if task.task_completed %}
+                    <input type="Submit" class="btn btn-success" name="task_completion_value" value="Completed"><!--</a>-->
+                {%else%}
+                    <input type="Submit" class="btn btn-outline-success" name="task_completion_value" value="Mark Task As Complete"><!--</a>-->
+                {%endif%}
+                <!--This below hidden input is to store the value of task_completed as it changes-->
+                <input type="text" hidden="True" name="task_completed" value={{task.task_completed}}>
+                <input type="Submit" name="edit_submit" value = "Save" class="btn btn-primary">
+            </form>
+        </div>
+        <div class="col-auto">
+            <div class="mt-5" style="border-left: 2px solid black; height: 81%"></div>
+        </div>
+        <div class="col-4">
+            <h2>Assign Task</h2>
+            <form action="{% url 'view_task' team_id=team.id task_id=task.id %}" method="post">
+                {% csrf_token %}
+                {{ form2.usernames }}
+                <input type="Submit" name="assign_submit" value = "Assign" class="btn btn-primary my-2">
+            </form>
+            {% if alert_message %}
+                <div class="alert {% if selected_users %}alert-success{% else %}alert-warning{% endif %} rounded">
+                    {{ alert_message|safe }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
-
 {% endblock %}

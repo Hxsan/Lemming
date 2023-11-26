@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team
 
@@ -138,28 +138,53 @@ def remove_member(request, team_id, member_username):
     return redirect('show_team', team_id=team_id)
 
 @login_required
-def view_task(request, task_id=1):
+def view_task(request, team_id=1, task_id=1):
+    team = Team.objects.get(pk=team_id)
     task = Task.objects.get(pk=task_id)
+    alert_message = selected_users = None
     if request.method == "POST":
-        form = EditTaskForm(request.POST)
         #If we clicked the complete button 
         if "task_completion_value" in request.POST: #so this is for submitting the actual form itself
             if request.POST['task_completion_value'] == "Completed":
                 task.task_completed = False #we clicked on Completed, so it must now be incomplete
             else:
                 task.task_completed = True #we clicked on mark as done, so it is now done
-        else:
+        elif 'edit_submit' in request.POST:
+            form = EditTaskForm(request.POST)
             #otherwise, we have submitted the whole form, so save it
             #get the value of the complete button 
             if form.is_valid():
                 task.task_completed = request.POST['task_completed']
                 form.save(task)
                 return redirect('dashboard')
-    else:
-        #fill the form with the values from the task itself to begin with
-        form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date})
+        elif 'assign_submit' in request.POST:
+            form2 = AssignTaskForm(specific_team=team, specific_task=task, data=request.POST)
+            if form2.is_valid():
+                selected_users = form2.save(task)
+                if selected_users:
+                    users_list = "<br>".join(f"- {user.username}" for user in selected_users)
+                    alert_message = f"Successfully assigned:<br>{users_list}<br>to this task."
 
-    return render(request, 'task_information.html', {'task': task, 'form' : form})
+    #fill the form with the values from the task itself to begin with
+    form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date})
+    form2 = AssignTaskForm(specific_team=team, specific_task=task)
+
+    # Check if users have already been assigned prior
+    if form2.get_assigned_users(task):
+        alert_message = alert_message
+    else:  
+        alert_message = "This task has no assigned users." 
+
+    context = {
+        'team': team,
+        'task': task,
+        'form': form,
+        'form2': form2,
+        'alert_message': alert_message,
+        'selected_users': selected_users,
+    }
+
+    return render(request, 'task_information.html', context)
 
 @login_prohibited
 def home(request):

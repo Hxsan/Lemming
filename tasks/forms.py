@@ -178,6 +178,35 @@ class EditTaskForm(forms.ModelForm):
         task.save()
         return task
 
+class AssignTaskForm(forms.Form):
+    usernames = forms.ModelMultipleChoiceField(
+        queryset=None,
+        to_field_name='username',
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
+
+    def __init__(self, specific_team, specific_task, *args, **kwargs):
+        super(AssignTaskForm, self).__init__(*args, **kwargs)
+        self.fields['usernames'].queryset = specific_team.members.all()
+
+        assigned_users = specific_task.assigned_to.all()
+        self.initial['usernames'] = [user.username for user in assigned_users]
+
+    def get_assigned_users(self, specific_task):
+        return specific_task.assigned_to.all()
+
+    def save(self, task):
+        original_users = set(task.assigned_to.all())
+
+        task.assigned_to.clear()
+        selected_users = self.cleaned_data['usernames']
+        task.assigned_to.add(*selected_users)
+
+        new_users = set(selected_users) - original_users
+        removed_users = original_users - set(selected_users)
+
+        return list(new_users)
  
 # class AssignTaskForm(forms.ModelForm):
 #     class Meta:

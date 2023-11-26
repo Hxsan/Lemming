@@ -134,6 +134,11 @@ def remove_member(request, team_id, member_username):
             if team.members.filter(username=member_username).exists():
                 team.members.remove(member_to_remove)
                 member_to_remove.teams.remove(team)
+            # remove user from assignment if assigned to any tasks
+            updated_tasks = Task.objects.filter(assigned_to=member_to_remove)
+            if updated_tasks:
+                for task in updated_tasks:
+                    task.assigned_to.remove(member_to_remove)
 
     return redirect('show_team', team_id=team_id)
 
@@ -141,7 +146,10 @@ def remove_member(request, team_id, member_username):
 def view_task(request, team_id=1, task_id=1):
     team = Team.objects.get(pk=team_id)
     task = Task.objects.get(pk=task_id)
-    alert_message = selected_users = None
+
+    alert_message = remove_message = None
+    selected_users = (None, None)
+
     if request.method == "POST":
         #If we clicked the complete button 
         if "task_completion_value" in request.POST: #so this is for submitting the actual form itself
@@ -160,20 +168,30 @@ def view_task(request, team_id=1, task_id=1):
         elif 'assign_submit' in request.POST:
             form2 = AssignTaskForm(specific_team=team, specific_task=task, data=request.POST)
             if form2.is_valid():
+                # This is all code to do with generating messages to be displayed
                 selected_users = form2.save(task)
                 if selected_users:
-                    users_list = "<br>".join(f"- {user.username}" for user in selected_users)
-                    alert_message = f"Successfully assigned:<br>{users_list}<br>to this task."
+                    new_users_list = "<br>".join(f"- {user.username}" for user in selected_users[0])
+                    alert_message = f"Successfully assigned:<br>{new_users_list}<br>to this task."
+                    removed_users_list = "<br>".join(f"- {user.username}" for user in selected_users[1])
+                    remove_message = f"Successfully removed:<br>{removed_users_list}<br>from this task."
 
     #fill the form with the values from the task itself to begin with
     form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date})
     form2 = AssignTaskForm(specific_team=team, specific_task=task)
 
-    # Check if users have already been assigned prior
-    if form2.get_assigned_users(task):
-        alert_message = alert_message
-    else:  
+
+    # Checking if a user has been added / removed to a task
+    if not selected_users[0]:
+        alert_message = None
+    if not selected_users[1]:
+        remove_message = None
+
+    # Checking if no users have been assigned to a task
+    if not form2.get_assigned_users(task):
         alert_message = "This task has no assigned users." 
+
+    
 
     context = {
         'team': team,
@@ -181,7 +199,9 @@ def view_task(request, team_id=1, task_id=1):
         'form': form,
         'form2': form2,
         'alert_message': alert_message,
-        'selected_users': selected_users,
+        'remove_message': remove_message,
+        'new_users': selected_users[0],
+        'removed_users': selected_users[1],
     }
 
     return render(request, 'task_information.html', context)

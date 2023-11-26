@@ -206,7 +206,7 @@ class AssignTaskForm(forms.Form):
         new_users = set(selected_users) - original_users
         removed_users = original_users - set(selected_users)
 
-        return list(new_users)
+        return (list(new_users), list(removed_users))
  
 # class AssignTaskForm(forms.ModelForm):
 #     class Meta:

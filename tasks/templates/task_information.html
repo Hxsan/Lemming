@@ -19,18 +19,23 @@
             </form>
         </div>
         <div class="col-auto">
-            <div class="mt-5" style="border-left: 2px solid black; height: 81%"></div>
+            <div class="mt-5" style="border-left: 2px dashed black; height: 81%"></div>
         </div>
         <div class="col-4">
-            <h2>Assign Task</h2>
+            <h2>Assigned To</h2>
             <form action="{% url 'view_task' team_id=team.id task_id=task.id %}" method="post">
                 {% csrf_token %}
                 {{ form2.usernames }}
                 <input type="Submit" name="assign_submit" value = "Assign" class="btn btn-primary my-2">
             </form>
             {% if alert_message %}
-                <div class="alert {% if selected_users %}alert-success{% else %}alert-warning{% endif %} rounded">
+                <div class="alert {% if new_users %}alert-success{% else %}alert-warning{% endif %} rounded">
                     {{ alert_message|safe }}
+                </div>
+            {% endif %}
+            {% if remove_message %}
+                <div class="alert alert-danger rounded">
+                    {{ remove_message|safe }}
                 </div>
             {% endif %}
         </div>

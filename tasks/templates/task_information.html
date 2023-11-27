@@ -1,5 +1,23 @@
 {% extends 'base_content.html' %}
 {% block content %}
+
+<style>
+    .highlight {
+        padding: 5px 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        background-color: #f5f5f5;
+        transition: background-color 0.3s ease;
+    }
+
+    .highlight.active {
+        background-color: #007bff;
+        color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+</style>
+
+
 <div class="container">
     <div class="row">
         <div class="col-7">
@@ -25,8 +43,13 @@
             <h2>Assigned To</h2>
             <form action="{% url 'view_task' team_id=team.id task_id=task.id %}" method="post">
                 {% csrf_token %}
-                {{ form2.usernames }}
-                <input type="Submit" name="assign_submit" value = "Assign" class="btn btn-primary my-2">
+                {% for checkbox_id, checkbox in form2.usernames.field.choices %}
+                    <label class="highlight mb-1 {% if checkbox_id in form2.usernames.value %}active{% endif %}">
+                        <input class="d-none" type="checkbox" name="usernames" value="{{ checkbox_id }}" {% if checkbox_id in form2.usernames.value %} checked {% endif %}>
+                        {{ checkbox }}
+                    </label><br>
+                {% endfor %}
+                <input type="Submit" name="assign_submit" value = "Assign" class="btn btn-outline-primary my-2">
             </form>
             {% if alert_message %}
                 <div class="alert {% if new_users %}alert-success{% else %}alert-warning{% endif %} rounded">
@@ -41,4 +64,24 @@
         </div>
     </div>
 </div>
+
+<!-- JQuery for highlighting a username -->
+<script>
+    $(document).ready(function() {
+
+        $('.highlight').each(function() {
+
+            var checkbox = $(this).find('input[type="checkbox"]');
+
+            $(this).on('click', function() {
+                // Checks the checkbox if unchecked
+                checkbox.prop('checked', !checkbox.prop('checked')) 
+                // Toggles 'active' based on if the checkbox is checked
+                $(this).toggleClass('active', checkbox.prop('checked')) 
+            });
+
+        });
+
+    });
+</script>
 {% endblock %}

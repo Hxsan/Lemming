@@ -159,14 +159,19 @@ def remove_member(request, team_id, member_username):
     return redirect('show_team', team_id=team_id)
 
 @login_required
-def view_task(request, task_id=1):
+def view_task(request, task_id):
     user = get_user(request)
+    is_admin = True
     try:
         task = Task.objects.get(pk=task_id)
     except Task.DoesNotExist:
         task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = user)
 
-    return render(request, 'task_information.html', {'task': task})
+    return render(request, 'task_information.html', {'task': task, 'is_admin': is_admin,'task_id' : task_id})
+
+def remove_task(request,task_id):
+    Task.objects.filter(pk=task_id).delete()
+    return redirect("dashboard")
 
 @login_prohibited
 def home(request):

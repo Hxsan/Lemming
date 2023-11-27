@@ -114,11 +114,12 @@ def create_team(request):
 def show_team(request, team_id):
     user = get_user(request)
     try:
-         team = Team.objects.get(pk=team_id)
+
+        team = Team.objects.get(pk=team_id)
     except Team.DoesNotExist:
-         admin_user = request.user
-         team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
-         team.members.add(admin_user)
+        admin_user = request.user
+        team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
+        team.members.add(admin_user)
     is_admin = user == team.admin_user
     team_members = team.members.all()
 

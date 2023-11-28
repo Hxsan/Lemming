@@ -157,7 +157,7 @@ def remove_task(request,task_id):
 def view_task(request, team_id=1, task_id=1):
     team = Team.objects.get(pk=team_id)
     task = Task.objects.get(pk=task_id)
-
+    user =  get_user(request)
     alert_message = remove_message = None
     selected_users = (None, None)
 
@@ -213,6 +213,8 @@ def view_task(request, team_id=1, task_id=1):
         'remove_message': remove_message,
         'new_users': selected_users[0],
         'removed_users': selected_users[1],
+        'is_admin' : team.admin_user==user,
+        'can_mark_as_complete': task.assigned_to.contains(user) or team.admin_user==user
     }
 
     return render(request, 'task_information.html', context)

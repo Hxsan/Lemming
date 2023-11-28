@@ -109,7 +109,12 @@ def create_team(request):
         form = CreateTeamForm()
     return render(request, 'create_team.html', {'form' : form})
 
-#Change this view, this is just a prototype
+def delete_team(request, team_id):
+    team = Team.objects.get(pk=team_id)
+
+    team.delete()
+    return redirect('dashboard')  
+    
 @login_required
 def show_team(request, team_id):
     user = get_user(request)

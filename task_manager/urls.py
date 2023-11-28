@@ -33,6 +33,7 @@ urlpatterns = [
     path('dashboard/create_task/<int:pk>/', views.CreateTaskView.as_view(), name='create_task'),
     path('search_users/', views.search_users, name='search_users'),
     #path('test_task/', views.task_date_selector, name = "show_task") #this is a test view, so maybe don't keep this here
-    path('dashboard/show_team/<int:team_id>/remove_member/<str:member_username>/', views.remove_member, name='remove_member')
+    path('dashboard/show_team/<int:team_id>/remove_member/<str:member_username>/', views.remove_member, name='remove_member'),
+    path('delete-team/<int:team_id>/', views.delete_team, name='delete_team')
 ]
 

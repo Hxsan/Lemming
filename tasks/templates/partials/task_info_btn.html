@@ -17,7 +17,7 @@ taskbtn:hover {
 </style>
 
 <div class="task-button-container">
-    <a href="{% url 'view_task' task_id=task_id %}" class="btn btn-md btn-primary taskbtn">
+    <a href="{% url 'view_task' team_id=team.id task_id=task_id %}" class="btn btn-md btn-primary taskbtn">
         View Task Information
     </a>
 </div>

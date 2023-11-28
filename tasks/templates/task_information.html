@@ -42,11 +42,12 @@
         <div class="col-md-6">
             <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="margin-bottom:5px;">Back to Dashboard</a>
             <!-- ADD PROPER ADMIN CHECK-->
-            {% if is_admin %}
-                <form method="POST" action="{% url 'remove_task' task_id=task_id %}">
+            {% if True %}
+                <form method="POST" action="{% url 'remove_task' task_id=task.id %}">
                     {% csrf_token %}
                     <button class="btn btn-danger" type="submit">Remove Task</button>
                 </form>
+            {% endif %}
         <div class="col-auto">
             <div class="mt-5" style="border-left: 2px dashed black; height: 81%"></div>
         </div>

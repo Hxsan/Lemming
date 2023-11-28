@@ -1,29 +1,35 @@
 <div class="container-fluid">
     <div class="row flex-nowrap">
-        <div class="col-md-3 col-xl-2 px-sm-2 px-">
+        <div class="col-md-12 px-sm-2 px-1">
             <div class="row row-md-12">
                 <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                         <li class="nav-item">
-                            <a href="{% url 'dashboard' %}" class="nav-link align-middle px-0 p-1">
-                                <i class="fs-4 bi-house"></i> <span class="d-none d-sm-inline">Dashboard</span>
+                            <a class="nav-link active" data-bs-toggle="pill" href="{% url 'dashboard' %}">
+                                <span class="d-none d-sm-inline"><i class="fs-2 bi-file-bar-graph"></i> Dashboard</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="#" class="nav-link px-0 align-middle p-2">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Tasks</span></a>
+                        <li class="nav-item">
+                            <div class="btn-group dropend">
+                                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="d-none d-sm-inline"><i class="fs-2 bi-people-fill"></i> Teams</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="nav-link" href="{% url 'create_team' %}">Create</a>
+                                    </li>
+                                    {% for team in teams %}
+                                    <li class="nav-object">
+                                        <a class="nav-link {% if forloop.first %} {% endif %}" id="{{ team.id }}-tab" data-bs-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
+                                            {{ team.team_name }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </li>
-                        <li>
-                            <a href="#submenu2" data-bs-toggle="collapse" class="nav-link px-0 align-middle ">
-                                <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">Teams</span></a>
-                            <ul class="collapse nav flex-column ms-1" id="submenu2" data-bs-parent="#menu">
-                                <li class="w-100">
-                                    <div class="container-fluid">
-                                </li>
-                                <li>
-                                    <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">Item</span> 2</a>
-                                </li>
-                            </ul>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="pill" href="#menu2">Menu 2</a>
                         </li>
                     </ul>
                 </div>
@@ -31,3 +37,73 @@
         </div>
     </div>
 </div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+
+        // Activates content of nav-items on click
+
+        $('.nav-object').on('click', function(e) {
+            e.preventDefault();
+
+            $('.nav-link').removeClass('active');
+            $('.tab-pane').removeClass('active');
+
+            var tag = $(this).find('a');
+            $(tag).addClass('active');
+            $(tag.attr('href')).addClass('active');
+
+            window.location.href = tag.attr('href');
+        });
+        
+        // // Moves nav-items offscreen / onscreen
+        
+        // $('.move').on('click', function(e) {
+        //     e.preventDefault();
+        //     var sidebar = $('.sidebar');
+        //     var arrowOut = $('.arrow-out');
+
+        //     if (sidebar.hasClass('slide-off')) {
+        //         arrowOut.animate({ left: '-=50px'}, 'fast')
+
+        //         sidebar.removeClass('slide-off');
+        //         sidebar.addClass('slide-on');
+        //         // Slide arrow-out offscreen THEN menu onscreen
+        //     } else {
+        //         sidebar.removeClass('slide-on');
+        //         sidebar.addClass('slide-off');
+
+        //         arrowOut.animate({ left: '+=50px'}, 'slow')
+        //         // Slide menu offscreen THEN arrow-out onscreen
+        //     }
+
+        // });
+
+        // Redirects to correct team page based on which team was clicked
+
+        $('.view-team-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/show_team/' + teamId + '/';
+                window.location.href = url;
+            }
+
+        });
+
+        $('.create-task-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/create_task/' + teamId + '/';
+                window.location.href = url;
+            }
+
+        });
+
+    });
+</script>

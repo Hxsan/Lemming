@@ -23,7 +23,7 @@
 					<div class="card-body">
 					  <h5 class="card-title">Create A Task</h5>
 					  <p class="card-text"> + </p>
-					  <a href="{% url 'create_task' %}" class="stretched-link"></a>
+					  <a href="#" class="stretched-link create-task-button"></a>
 					</div>
 				</div>
 			 </div>
@@ -33,7 +33,13 @@
 	<!-- Sidebar right -->
 	<div class="col-2 flex-column bg-gradient bg-success">
 		<div class="border m-3 p-4 bg-secondary">
-			{{ teams.team_name.team_id }}
+			<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
+				<div class="card-body">
+				  <h5 class="card-title">View Team</h5>
+				  <p class="card-text"> + </p>
+				  <a href="#" class="stretched-link view-team-button"></a>
+				</div>
+			</div>
 		</div>
 		<div class="p-2 border align-self-start bg-info">
 			List of Due Dates Placeholder

@@ -378,5 +378,4 @@ class CreateTaskView(LoginRequiredMixin, FormView):
     def get_success_url(self):
         """Redirect the user after task creation."""
 
-        messages.add_message(self.request, messages.SUCCESS, "Task created successfully!")
         return reverse('dashboard')

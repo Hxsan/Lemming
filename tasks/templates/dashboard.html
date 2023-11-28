@@ -1,7 +1,8 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class="container-fluid">
-  <div class="row row-cols-3 bg-gradient">
+  <!-- Height is calculated by the height of the page minus the nav-menu height --> 
+  <div class="row row-cols-3 bg-gradient" style="height: calc(100vh - 55.99px)"> 
 	<!-- Sidebar Left -->
 	<div class="col-2 bg-dark">
 		{% include 'partials/sidebar.html' %}
@@ -15,9 +16,6 @@
 		  </div>
 		  <div class="row">
 			 <div class="row m-2">
-				{% for task in tasks %}
-				  {% include 'partials/task_card.html' %}
-				{% endfor %}
 				<!-- `Create a new Task` Card -->
 				<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
 					<div class="card-body">
@@ -26,6 +24,7 @@
 					  <a href="#" class="stretched-link create-task-button"></a>
 					</div>
 				</div>
+				{% include 'partials/task_card.html' %}
 			 </div>
 		  </div>
 		</div>
@@ -48,4 +47,53 @@
 	</div>
   </div>
 </div>
+
+
+
+<!-- Specific jQuery to sidebar partial-->
+<script>
+    $(document).ready(function() {
+
+        // Activates content of nav-items on click
+
+        $('.nav-object').on('click', function(e) {
+            e.preventDefault();
+
+            $('.nav-link').removeClass('active');
+            $('.tab-pane').removeClass('active');
+
+            var tag = $(this).find('a');
+            $(tag).addClass('active');
+            $(tag.attr('href')).addClass('active');
+
+            window.location.href = tag.attr('href');
+        });
+
+        // Redirects to correct pages based on which team was clicked on sidebar
+
+        $('.view-team-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/show_team/' + teamId + '/';
+                window.location.href = url;
+            }
+
+        });
+
+        $('.create-task-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/create_task/' + teamId + '/';
+                window.location.href = url;
+            }
+
+        });
+
+    });
+</script>
+
 {% endblock %}

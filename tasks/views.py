@@ -149,6 +149,11 @@ def remove_member(request, team_id, member_username):
     return redirect('show_team', team_id=team_id)
 
 @login_required
+def remove_task(request,task_id):
+    Task.objects.filter(pk=task_id).delete()
+    return redirect("dashboard")
+
+@login_required
 def view_task(request, team_id=1, task_id=1):
     team = Team.objects.get(pk=team_id)
     task = Task.objects.get(pk=task_id)

@@ -24,7 +24,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/create_team', views.create_team, name = "create_team"),
     path('dashboard/show_team/<int:team_id>/', views.show_team, name = "show_team"),
-    path('dashboard/view-task/<int:task_id>/', views.view_task, name='view_task'),
+    path('dashboard/view-task/<int:team_id>/<int:task_id>/', views.view_task, name='view_task'),
     path('log_in/', views.LogInView.as_view(), name='log_in'),
     path('log_out/', views.log_out, name='log_out'),
     path('password/', views.PasswordView.as_view(), name='password'),
@@ -32,7 +32,7 @@ urlpatterns = [
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('dashboard/create_task/<int:pk>/', views.CreateTaskView.as_view(), name='create_task'),
     path('search_users/', views.search_users, name='search_users'),
-    #path('test_task/', views.task_date_selector, name = "show_task") #this is a test view, so maybe don't keep this here
-    path('dashboard/show_team/<int:team_id>/remove_member/<str:member_username>/', views.remove_member, name='remove_member')
+    path('dashboard/show_team/<int:team_id>/remove_member/<str:member_username>/', views.remove_member, name='remove_member'),
+    path('assign_task/', views.assign_task, name='assign_task'),
 ]
 

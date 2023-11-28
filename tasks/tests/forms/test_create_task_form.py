@@ -19,6 +19,7 @@ class CreateTaskFormTestCase(TestCase):
         }
     
     def test_valid_task_form(self):
+        self.client.login(username=self.user.username, password='Password123')
         form = CreateTaskForm(data=self.form_input)
         self.assertTrue(form.is_valid())
     

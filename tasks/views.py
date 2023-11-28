@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team
 
@@ -51,11 +51,6 @@ def dashboard(request):
 
     tasks = Task.objects.all()
 
-    """
-    if not tasks:
-        this is #task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = current_user)
-    """
-
 
     # List of pairs matching each team with their created tasks
     team_tasks = []
@@ -66,22 +61,6 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks})
 
-
-"""A view that allows you to select a date for the task and have it be saved"""
-#this is not actually meant to be the real view
-@login_required
-#test view
-def task_date_selector(request):
-    #pass in first task randomly
-    task = Task.objects.get(created_by=request.user)
-    if request.method == "POST":
-        form = EditTaskForm(request.POST)
-        if form.is_valid():
-            form.save(task)
-            return redirect('show_task')
-    else:
-        form = EditTaskForm()
-    return render(request, 'test_show_task.html', {'form': form, 'due_date': task.due_date})
 
 @login_required
 def create_team(request):
@@ -155,18 +134,77 @@ def remove_member(request, team_id, member_username):
             if team.members.filter(username=member_username).exists():
                 team.members.remove(member_to_remove)
                 member_to_remove.teams.remove(team)
+            # remove user from assignment if assigned to any tasks
+            updated_tasks = Task.objects.filter(assigned_to=member_to_remove)
+            if updated_tasks:
+                for task in updated_tasks:
+                    task.assigned_to.remove(member_to_remove)
 
     return redirect('show_team', team_id=team_id)
 
 @login_required
-def view_task(request, task_id=1):
-    user = get_user(request)
-    try:
-        task = Task.objects.get(pk=task_id)
-    except Task.DoesNotExist:
-        task = Task.objects.create(title='Test Task', description="this is an example task", due_date = "2023-12-31", created_by = user)
+def view_task(request, team_id=1, task_id=1):
+    team = Team.objects.get(pk=team_id)
+    task = Task.objects.get(pk=task_id)
 
-    return render(request, 'task_information.html', {'task': task})
+    alert_message = remove_message = None
+    selected_users = (None, None)
+
+    if request.method == "POST":
+        #If we clicked the complete button 
+        if "task_completion_value" in request.POST: #so this is for submitting the actual form itself
+            if request.POST['task_completion_value'] == "Completed":
+                task.task_completed = False #we clicked on Completed, so it must now be incomplete
+            else:
+                task.task_completed = True #we clicked on mark as done, so it is now done
+        elif 'edit_submit' in request.POST:
+            form = EditTaskForm(request.POST)
+            #otherwise, we have submitted the whole form, so save it
+            #get the value of the complete button 
+            if form.is_valid():
+                task.task_completed = request.POST['task_completed']
+                form.save(task)
+                return redirect('dashboard')
+        elif 'assign_submit' in request.POST:
+            form2 = AssignTaskForm(specific_team=team, specific_task=task, data=request.POST)
+            if form2.is_valid():
+                # This is all code to do with generating messages to be displayed
+                selected_users = form2.save(task)
+                if selected_users:
+                    new_users_list = "<br>".join(f"- {user.username}" for user in selected_users[0])
+                    alert_message = f"Successfully assigned:<br>{new_users_list}<br>to this task."
+                    removed_users_list = "<br>".join(f"- {user.username}" for user in selected_users[1])
+                    remove_message = f"Successfully removed:<br>{removed_users_list}<br>from this task."
+
+    #fill the form with the values from the task itself to begin with
+    form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date})
+    form2 = AssignTaskForm(specific_team=team, specific_task=task)
+
+
+    # Checking if a user has been added / removed to a task
+    if not selected_users[0]:
+        alert_message = None
+    if not selected_users[1]:
+        remove_message = None
+
+    # Checking if no users have been assigned to a task
+    if not form2.get_assigned_users(task):
+        alert_message = "This task has no assigned users." 
+
+    
+
+    context = {
+        'team': team,
+        'task': task,
+        'form': form,
+        'form2': form2,
+        'alert_message': alert_message,
+        'remove_message': remove_message,
+        'new_users': selected_users[0],
+        'removed_users': selected_users[1],
+    }
+
+    return render(request, 'task_information.html', context)
 
 @login_prohibited
 def home(request):
@@ -331,3 +369,19 @@ class CreateTaskView(LoginRequiredMixin, FormView):
 
         messages.add_message(self.request, messages.SUCCESS, "Task created successfully!")
         return reverse('dashboard')
+
+@login_required
+def assign_task(request):
+    if request.method =='POST':
+        """Handle assignment of tasks"""
+        form = AssignTaskForm(request.POST)
+        # request.POST.get() needs to be used to retrieve the selected task
+        if form.is_valid():
+            form.assign_task() # Selected task needs to be passed in this parameter
+            messages.add_message(request, messages.SUCCESS, "Tasks assigned!")
+            return redirect('dashboard')
+    else:
+        form = AssignTaskForm()
+
+    """GET request = no change, JavaScript should handle this"""
+    return HttpResponse("") 

@@ -1,50 +1,45 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<style>
-  .view-team-button{
-    background-color: rgb(75, 74, 74);
-    border: 1px solid #121313;
-    border-radius: 5px;
-    font-size: 12px;
-    padding: 8px 16;
-    color: white;
-  }
-
-  .view-team-button:hover{
-    background-color: rgb(30, 29, 29);
-  }
-</style>
-<div class="container">
-  <div class="row">
-    <div class="col-12 d-flex justify-content-center">
-      <h1>Welcome to your dashboard {{ user.username }}</h1>
-    </div>
-    
-    <div class="col-6 mb-3">
-      <a href="#" class="btn btn-sm btn-secondary create-task-button">
-        Create Task
-      </a>
-    </div>
-    <div class="col-6">
-      <div class="d-flex justify-content-end">
-        <a href="{% url 'show_team' team_id=team_id %}" class="btn btn-md btn-secondary view-team-button">
-          View Team Members
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 mt-4">
-      <a href="{% url 'create_team' %}" class="btn btn-sm btn-secondary">
-          Create Team
-      <a href="#" class="btn btn-md btn-secondary view-team-button">
-        View Team Members
-
-      </a>
-    </div>
-    <div class="col-auto d-flex mt-2">
-      {% include 'partials/sidebar.html' %}
-    </div>
+<div class="container-fluid">
+  <div class="row row-cols-3 bg-gradient">
+	<!-- Sidebar Left -->
+	<div class="col-2 bg-dark">
+		{% include 'partials/sidebar.html' %}
+	</div>
+	<!-- Main Content Section -->
+	<div class="border col-8 align-items-center">
+		<div class="container-fluid">
+		<!-- Main content Header -->
+		  <div class="row m-1 border text-center bg-success bg-gradient">
+			 <h1>Welcome to your dashboard {{ user.username }}</h1>
+		  </div>
+		  <div class="row">
+			 <div class="row m-2">
+				{% for task in tasks %}
+				  {% include 'partials/task_card.html' %}
+				{% endfor %}
+				<!-- `Create a new Task` Card -->
+				<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
+					<div class="card-body">
+					  <h5 class="card-title">Create A Task</h5>
+					  <p class="card-text"> + </p>
+					  <a href="{% url 'create_task' %}" class="stretched-link"></a>
+					</div>
+				</div>
+			 </div>
+		  </div>
+		</div>
+	</div>
+	<!-- Sidebar right -->
+	<div class="col-2 flex-column bg-gradient bg-success">
+		<div class="border m-3 p-4 bg-secondary">
+			{{ teams.team_name.team_id }}
+		</div>
+		<div class="p-2 border align-self-start bg-info">
+			List of Due Dates Placeholder
+		</div>
+		</div>
+	</div>
   </div>
 </div>
 {% endblock %}

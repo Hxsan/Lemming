@@ -1,56 +1,44 @@
-<div class="sidebar">
-    <ul class="nav nav-pills flex-column bg-primary bg-opacity-10 p-2" id="menu" role="tablist">
-        <div class="row">
-            <div class="col">
-                <p class="mx-1 mb-1" style="font-size:20px; padding-right: 77px"> <b>Teams:</b> </p>
-            </div>
-        </div>
-        <div class="move-row overflow-auto" style="max-height: calc(100vh - 250px)">
-        {% for team in teams %}
-            <li class="nav-object my-1">
-                <div class="text-start border border-primary rounded">
-                    <a class="nav-link {% if forloop.first %} active {% endif %}" id="{{ team.id }}-tab" data-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
-                        {{ team.team_name }}
-                    </a>
+<div class="container-fluid">
+    <div class="row flex-nowrap">
+        <div class="col-md-12 px-sm-2 px-1">
+            <div class="row row-md-12">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="pill" href="{% url 'dashboard' %}">
+                                <span class="d-none d-sm-inline"><i class="fs-2 bi-file-bar-graph"></i> Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <div class="btn-group dropend">
+                                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="d-none d-sm-inline"><i class="fs-2 bi-people-fill"></i> Teams</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="nav-link" href="{% url 'create_team' %}">Create</a>
+                                    </li>
+                                    {% for team in teams %}
+                                    <li class="nav-object">
+                                        <a class="nav-link {% if forloop.first %} {% endif %}" id="{{ team.id }}-tab" data-bs-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
+                                            {{ team.team_name }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="pill" href="#menu2">Menu 2</a>
+                        </li>
+                    </ul>
                 </div>
-            </li>
-        {% endfor %}
-        </div>
-    </ul>
-</div>
-<div class="sidebar arrow-in">
-    <div class="semi-circle bg-primary bg-opacity-10">
-        <a href="" class="arrow-content text-black move">
-            <span class="bi-caret-left-fill larger"></span>
-        </a>
-    </div>
-</div>
-<div class="arrow-out">
-    <div class="semi-circle bg-primary bg-opacity-10">
-        <a href="" class="arrow-content text-black move">
-            <span class="bi-caret-right-fill larger"></span>
-        </a>
-    </div>
-</div>
-
-<div class="tab-content" id="content">
-    {% for team, tasks in team_tasks %}
-    <div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
-        <!-- displaying dashboard with tasks could go here -->
-        {{ team.team_name }}
-        {% for task in tasks %}
-            <div class="mx-auto text-center">
-                {% include 'partials/task_info_btn.html' with task_id=task.id %}
             </div>
-        {% endfor %}
+        </div>
     </div>
-    {% endfor %}
 </div>
 
-
-
-
-<!-- Specific jQuery to this partial -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
     $(document).ready(function() {
 
@@ -69,28 +57,28 @@
             window.location.href = tag.attr('href');
         });
         
-        // Moves nav-items offscreen / onscreen
+        // // Moves nav-items offscreen / onscreen
         
-        $('.move').on('click', function(e) {
-            e.preventDefault();
-            var sidebar = $('.sidebar');
-            var arrowOut = $('.arrow-out');
+        // $('.move').on('click', function(e) {
+        //     e.preventDefault();
+        //     var sidebar = $('.sidebar');
+        //     var arrowOut = $('.arrow-out');
 
-            if (sidebar.hasClass('slide-off')) {
-                arrowOut.animate({ left: '-=50px'}, 'fast')
+        //     if (sidebar.hasClass('slide-off')) {
+        //         arrowOut.animate({ left: '-=50px'}, 'fast')
 
-                sidebar.removeClass('slide-off');
-                sidebar.addClass('slide-on');
-                // Slide arrow-out offscreen THEN menu onscreen
-            } else {
-                sidebar.removeClass('slide-on');
-                sidebar.addClass('slide-off');
+        //         sidebar.removeClass('slide-off');
+        //         sidebar.addClass('slide-on');
+        //         // Slide arrow-out offscreen THEN menu onscreen
+        //     } else {
+        //         sidebar.removeClass('slide-on');
+        //         sidebar.addClass('slide-off');
 
-                arrowOut.animate({ left: '+=50px'}, 'slow')
-                // Slide menu offscreen THEN arrow-out onscreen
-            }
+        //         arrowOut.animate({ left: '+=50px'}, 'slow')
+        //         // Slide menu offscreen THEN arrow-out onscreen
+        //     }
 
-        });
+        // });
 
         // Redirects to correct pages based on which team was clicked on sidebar
 
@@ -118,56 +106,3 @@
 
     });
 </script>
-
-
-
-
-<!-- Specific CSS to this partial -->
-<style>
-/* CSS for positioning arrow */
-.arrow-in {
-    position: relative;
-    overflow: hidden;
-}
-.arrow-out{
-    position: fixed;
-    left: -50px;
-
-}
-.semi-circle {
-    width: 30px;
-    height: 50px;
-    border-bottom-right-radius: 15px;
-    border-top-right-radius: 15px;
-}
-.arrow-content{
-    position: absolute;
-    top: 9px;
-    left: 2px;
-    white-space: nowrap;
-}
-.larger{
-    font-size: 1.4em;
-}
-
-
-.sidebar{
-    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.3, 1.2);
-}
-.slide-off{
-    transform: translateX(-330px);
-}
-.slide-on{
-    transform: translateX(0);
-}
-
-
-/* Menu and content for sidebar */
-#menu {
-    border-radius: 20px 0 0 20px;
-    max-width: 165px;
-}
-#content{
-    padding:20px;
-}
-</style>

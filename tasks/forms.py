@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User, Task, Team
-from datetime import date
+from datetime import date, timedelta
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -147,7 +147,7 @@ class CreateTeamForm(forms.ModelForm):
 
         model = Team
         fields = ['team_name']
-        exclude = ['team_id']
+        #exclude = ['team_id']
 
     def save(self, user):
         super().save(commit=False)
@@ -169,6 +169,10 @@ class EditTaskForm(forms.ModelForm):
         widgets = {'title': forms.TextInput(attrs={'class': 'form-control','id':'task_title'}),
                    'description': forms.Textarea(attrs={'class': 'form-control','id':'task_description'}),
                    'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today})}
+
+    def is_valid(self):
+        original_valid =  super().is_valid()
+        return original_valid and self.cleaned_data['due_date']>(date.today() - timedelta(1)) #ensure due date is later or equal to today
 
     def save(self, old_task):
         task = super().save(commit=False)

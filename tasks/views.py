@@ -160,8 +160,8 @@ def view_task(request, team_id=1, task_id=1):
     user =  get_user(request)
     alert_message = remove_message = None
     selected_users = (None, None)
-
     if request.method == "POST":
+
         #If we clicked the complete button 
         if "task_completion_value" in request.POST: #so this is for submitting the actual form itself
             if request.POST['task_completion_value'] == "Completed":

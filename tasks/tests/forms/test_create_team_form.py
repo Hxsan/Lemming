@@ -20,7 +20,7 @@ class CreateTeamFormTestCase(TestCase):
 
 
     def test_valid_create_team_form(self):
-        form = CreateTeamForm({'team_name':'NewTeam'})
+        form = CreateTeamForm(self.form_input)
         self.assertTrue(form.is_valid())
 
     def test_form_has_necessary_fields(self):
@@ -40,4 +40,5 @@ class CreateTeamFormTestCase(TestCase):
         self.assertEqual(after_count, before_count + 1)
         team = Team.objects.get(team_name = 'NewTeam')
         self.assertIsNotNone(team)
+        self.assertEqual(team.admin_user, self.user)
 

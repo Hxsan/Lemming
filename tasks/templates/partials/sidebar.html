@@ -3,31 +3,39 @@
         <div class="col-md-2 px-sm-2 px-1">
             <div class="row row-md-12">
                 <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="pill" href="{% url 'dashboard' %}">
-                                <span class="d-none d-sm-inline"><i class="fs-2 bi-file-bar-graph"></i> Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <div class="btn-group dropend">
-                                <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="d-none d-sm-inline"><i class="fs-2 bi-people-fill"></i> Teams</span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="nav-link" href="{% url 'create_team' %}">Create</a>
-                                    </li>
-                                    {% for team in teams %}
-                                    <li class="nav-object">
-                                        <a class="nav-link {% if forloop.first %} {% endif %}" id="{{ team.id }}-tab" data-bs-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
-                                            {{ team.team_name }}
-                                        </a>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
+                    <!-- Smaller screens have a dropdown menu -->
+                    <div class="dropdown d-md-none">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Teams
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for team in teams %}
+                                <li class="nav-object">
+                                    <a class="dropdown-item nav-link {% if forloop.first %} active {% endif %}" href="#{{ team.id }}">
+                                        {{ team.team_name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <!-- Medium / large screens have content shown normally -->
+                    <ul class="nav nav-pills flex-column p-2 d-none d-md-block" id="menu" role="tablist">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="mx-1 mb-1 text-white" style="padding-right: 77px">Teams:</h5>
                             </div>
-                        </li>
+                        </div>
+                        <div class="move-row">
+                        {% for team in teams %}
+                            <li class="nav-object my-1">
+                                <div class="text-start border border-primary rounded">
+                                    <a class="nav-link {% if forloop.first %} active {% endif %} text-white" id="{{ team.id }}-tab" data-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
+                                        {{ team.team_name }}
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        </div>
                     </ul>
                 </div>
             </div>

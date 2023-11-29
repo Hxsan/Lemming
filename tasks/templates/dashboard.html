@@ -1,7 +1,8 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class="container-fluid">
-  <div class="row row-cols-3 bg-gradient">
+  <!-- Height is calculated by the height of the page minus the nav-menu height --> 
+  <div class="row row-cols-3 bg-gradient" style="height: calc(100vh - 55.99px)"> 
 	<!-- Sidebar Left -->
 	<div class="col-2 bg-dark">
 		{% include 'partials/sidebar.html' %}
@@ -55,4 +56,6 @@
 	</div>
   </div>
 </div>
+
+
 {% endblock %}

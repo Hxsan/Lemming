@@ -32,22 +32,19 @@
                     <input type="Submit" class="btn btn-outline-success" name="task_completion_value" value="Mark Task As Complete"><!--</a>-->
                 {%endif%}
                 <!--This below hidden input is to store the value of task_completed as it changes-->
+            <div class="d-inline-block">
                 <input type="text" hidden="True" name="task_completed" value={{task.task_completed}}>
                 <input type="Submit" name="edit_submit" value = "Save" class="btn btn-primary">
             </form>
-        </div>
-    </div>
-
-    <div class="row mt-3">
-        <div class="col-md-6">
-            <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="margin-bottom:5px;">Back to Dashboard</a>
             <!-- ADD PROPER ADMIN CHECK-->
             {% if True %}
-                <form method="POST" action="{% url 'remove_task' task_id=task.id %}">
+                <form class="d-inline" action="{% url 'remove_task' task_id=task.id %}" method="POST">
                     {% csrf_token %}
                     <button class="btn btn-danger" type="submit">Remove Task</button>
                 </form>
+            </div>
             {% endif %}
+        </div>
         <div class="col-auto">
             <div class="mt-5" style="border-left: 2px dashed black; height: 81%"></div>
         </div>

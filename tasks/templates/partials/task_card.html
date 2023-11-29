@@ -1,8 +1,8 @@
-<div class="card box-shadow border border-2 rounded-3 text-white bg-primary m-1" style="max-width: 18rem;">
+<div class="card box-shadow border border-2 rounded-3 text-white bg-primary m-1 w-100" style="max-width: 18rem;">
     <div class="card-header">{{task.title}}</div>
     <div class="card-body">
       <h5 class="card-title">{{ task.due_date }}</h5>
       <p class="card-text">{{ task.description }}</p>
     </div>
-    <a href="{% url 'view_task' task.id %}" class="stretched-link"></a>
+    <a href="{% url 'view_task' team_id=team.id task_id=task_id %}" class="stretched-link "></a>
 </div>

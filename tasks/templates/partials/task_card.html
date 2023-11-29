@@ -4,5 +4,10 @@
       <h5 class="card-title">{{ task.due_date }}</h5>
       <p class="card-text">{{ task.description }}</p>
     </div>
+    {% if request.user in task.assigned_to.all %}
+      <div class="card-footer">
+        This task is assigned to you.
+      </div>
+    {% endif %}
     <a href="{% url 'view_task' team_id=team.id task_id=task_id %}" class="stretched-link "></a>
 </div>

@@ -1,17 +1,13 @@
-<div class="tab-content" id="content">
-    {% for team, tasks in team_tasks %}
-    <div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
-        {% for task in tasks %}
-            <!-- This is where you can display each task -->
-            <!-- View Task Info should have the rest of the task's details -->
-            {{ task.title }}
-            {% if request.user in task.assigned_to.all %}
-              <p>This task is assigned to you.</p>
-            {% endif %}
-            <div class="mx-auto text-center">
-                {% include 'partials/task_info_btn.html' with task_id=task.id %}
-            </div>
-        {% endfor %}
+<div class="card box-shadow border border-2 rounded-3 text-white bg-primary m-1 w-100" style="max-width: 18rem;">
+    <div class="card-header">{{task.title}}</div>
+    <div class="card-body">
+      <h5 class="card-title">{{ task.due_date }}</h5>
+      <p class="card-text">{{ task.description }}</p>
     </div>
-    {% endfor %}
+    {% if request.user in task.assigned_to.all %}
+      <div class="card-footer">
+        This task is assigned to you.
+      </div>
+    {% endif %}
+    <a href="{% url 'view_task' team_id=team.id task_id=task_id %}" class="stretched-link "></a>
 </div>

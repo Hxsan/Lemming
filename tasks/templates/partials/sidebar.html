@@ -1,48 +1,169 @@
-<div class="sidebar">
-    <!-- Smaller screens have a dropdown menu -->
-    <div class="dropdown d-md-none">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-            Teams
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            {% for team in teams %}
-                <li class="nav-object">
-                    <a class="dropdown-item nav-link {% if forloop.first %} active {% endif %}" href="#{{ team.id }}">
-                        {{ team.team_name }}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <!-- Medium / large screens have content shown normally -->
-    <ul class="nav nav-pills flex-column p-2 d-none d-md-block" id="menu" role="tablist">
-        <div class="row">
-            <div class="col">
-                <h5 class="mx-1 mb-1 text-white" style="padding-right: 77px">Teams:</h5>
+<div class="container-fluid">
+    <div class="row flex-nowrap">
+        <div class="col-md-2 px-sm-2 px-1">
+            <div class="row row-md-12">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                    <!-- Smaller screens have a dropdown menu -->
+                    <div class="dropdown d-md-none">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Teams
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for team in teams %}
+                                <li class="nav-object">
+                                    <a class="dropdown-item nav-link {% if forloop.first %} active {% endif %}" href="#{{ team.id }}">
+                                        {{ team.team_name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <!-- Medium / large screens have content shown normally -->
+                    <ul class="nav nav-pills flex-column p-2 d-none d-md-block" id="menu" role="tablist">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="mx-1 mb-1 text-white" style="padding-right: 77px">Teams:</h5>
+                            </div>
+                        </div>
+                        <div class="move-row">
+                        {% for team in teams %}
+                            <li class="nav-object my-1">
+                                <div class="text-start border border-primary rounded">
+                                    <a class="nav-link {% if forloop.first %} active {% endif %} text-white" id="{{ team.id }}-tab" data-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
+                                        {{ team.team_name }}
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        </div>
+                    </ul>
+                </div>
             </div>
         </div>
-        <div class="move-row">
-        {% for team in teams %}
-            <li class="nav-object my-1">
-                <div class="text-start border border-primary rounded">
-                    <a class="nav-link {% if forloop.first %} active {% endif %} text-white" id="{{ team.id }}-tab" data-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
-                        {{ team.team_name }}
-                    </a>
-                </div>
-            </li>
-        {% endfor %}
-        </div>
-    </ul>
+    </div>
 </div>
 
-<!-- jQuery (JavaScript) just for initializing the dropdown, Bootstrap does the rest -->
+
+
+
+<!-- Specific jQuery to this partial -->
 <script>
     $(document).ready(function() {
-        $('.dropdown-toggle').each(function() {
-            new bootstrap.Dropdown(this);
+
+        // Activates content of nav-items on click
+
+        $('.nav-object').on('click', function(e) {
+            e.preventDefault();
+
+            $('.nav-link').removeClass('active');
+            $('.tab-pane').removeClass('active');
+
+            var tag = $(this).find('a');
+            $(tag).addClass('active');
+            $(tag.attr('href')).addClass('active');
+
+            window.location.href = tag.attr('href');
         });
+        
+        // Moves nav-items offscreen / onscreen
+        
+        $('.move').on('click', function(e) {
+            e.preventDefault();
+            var sidebar = $('.sidebar');
+            var arrowOut = $('.arrow-out');
+
+            if (sidebar.hasClass('slide-off')) {
+                arrowOut.animate({ left: '-=50px'}, 'fast')
+
+                sidebar.removeClass('slide-off');
+                sidebar.addClass('slide-on');
+                // Slide arrow-out offscreen THEN menu onscreen
+            } else {
+                sidebar.removeClass('slide-on');
+                sidebar.addClass('slide-off');
+
+                arrowOut.animate({ left: '+=50px'}, 'slow')
+                // Slide menu offscreen THEN arrow-out onscreen
+            }
+
+        });
+
+        // Redirects to correct pages based on which team was clicked on sidebar
+
+        $('.view-team-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/show_team/' + teamId + '/';
+                window.location.href = url;
+            }
+
+        });
+
+        $('.create-task-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/create_task/' + teamId + '/';
+                window.location.href = url;
+            }
+
+        });
+
     });
 </script>
 
 
 
+
+<!-- Specific CSS to this partial -->
+<style>
+/* CSS for positioning arrow */
+.arrow-in {
+    position: relative;
+    overflow: hidden;
+}
+.arrow-out{
+    position: fixed;
+    left: -50px;
+
+}
+.semi-circle {
+    width: 30px;
+    height: 50px;
+    border-bottom-right-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.arrow-content{
+    position: absolute;
+    top: 9px;
+    left: 2px;
+    white-space: nowrap;
+}
+.larger{
+    font-size: 1.4em;
+}
+
+
+.sidebar{
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.3, 1.2);
+}
+.slide-off{
+    transform: translateX(-330px);
+}
+.slide-on{
+    transform: translateX(0);
+}
+
+
+/* Menu and content for sidebar */
+#menu {
+    border-radius: 20px 0 0 20px;
+    max-width: 165px;
+}
+#content{
+    padding:20px;
+}
+</style>

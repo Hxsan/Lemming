@@ -15,29 +15,38 @@
 			 <h1>Welcome to your dashboard {{ user.username }}</h1>
 		  </div>
 		  <div class="row">
-			 <div class="row m-2">
-				<!-- `Create a new Task` Card -->
-				<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
-					<div class="card-body">
-					  <h5 class="card-title">Create A Task</h5>
-					  <p class="card-text"> + </p>
-					  <a href="#" class="stretched-link create-task-button"></a>
-					</div>
+				<div class="tab-content w-100 align-items-center">
+					{% for team, tasks in team_tasks %}
+						<div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
+							{% ifchanged team.team_name %}
+							<div class="row m-1 border text-center bg-danger bg-gradient">
+								<h3>Current Team : {{ team.team_name }}</h3>
+							</div>
+							<div class="row m-1">
+								{% for task in tasks %}
+									{% include 'partials/task_card.html' with task_id=task.id %}
+								{% endfor %}
+								<div class="card text-center border-dark m-1" style="max-width: 18rem;">
+									<div class="card-body">
+										<h5 class="card-title">Create A Task</h5>
+										<p class="card-text"> + </p>
+										<a href="#" class="stretched-link create-task-button"></a>
+									</div>
+								</div>
+							</div>
+							{% endifchanged %}
+						</div>
+					{% endfor %}
 				</div>
-				{% include 'partials/task_card.html' %}
-			 </div>
-		  </div>
+		  	</div>
 		</div>
 	</div>
 	<!-- Sidebar right -->
 	<div class="col-2 flex-column bg-gradient bg-success">
-		<div class="border m-3 p-4 bg-secondary">
-			<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
-				<div class="card-body">
-				  <h5 class="card-title">View Team</h5>
-				  <p class="card-text"> + </p>
-				  <a href="#" class="stretched-link view-team-button"></a>
-				</div>
+		<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
+			<div class="card-body">
+				<h5 class="card-title">View Team</h5>
+				<a href="#" class="stretched-link view-team-button"></a>
 			</div>
 		</div>
 		<div class="p-2 border align-self-start bg-info">
@@ -48,52 +57,5 @@
   </div>
 </div>
 
-
-
-<!-- Specific jQuery to sidebar partial-->
-<script>
-    $(document).ready(function() {
-
-        // Activates content of nav-items on click
-
-        $('.nav-object').on('click', function(e) {
-            e.preventDefault();
-
-            $('.nav-link').removeClass('active');
-            $('.tab-pane').removeClass('active');
-
-            var tag = $(this).find('a');
-            $(tag).addClass('active');
-            $(tag.attr('href')).addClass('active');
-
-            window.location.href = tag.attr('href');
-        });
-
-        // Redirects to correct pages based on which team was clicked on sidebar
-
-        $('.view-team-button').on('click', function(e) {
-            e.preventDefault();
-
-            var teamId = $('.nav-link.active').attr('href').replace('#','');
-            if (teamId) {
-                var url = '/dashboard/show_team/' + teamId + '/';
-                window.location.href = url;
-            }
-
-        });
-
-        $('.create-task-button').on('click', function(e) {
-            e.preventDefault();
-
-            var teamId = $('.nav-link.active').attr('href').replace('#','');
-            if (teamId) {
-                var url = '/dashboard/create_task/' + teamId + '/';
-                window.location.href = url;
-            }
-
-        });
-
-    });
-</script>
 
 {% endblock %}

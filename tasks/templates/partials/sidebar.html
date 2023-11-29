@@ -6,9 +6,12 @@
                     <!-- Smaller screens have a dropdown menu -->
                     <div class="dropdown d-md-none">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            Teams
+                            Teams:
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li>
+                                <a class="nav-link" href="{% url 'create_team' %}"> Create +</a>
+                            </li> 
                             {% for team in teams %}
                                 <li class="nav-object">
                                     <a class="dropdown-item nav-link {% if forloop.first %} active {% endif %}" href="#{{ team.id }}">
@@ -26,6 +29,9 @@
                             </div>
                         </div>
                         <div class="move-row">
+                            <li>
+                                <a class="nav-link" href="{% url 'create_team' %}"> Create +</a>
+                            </li> 
                         {% for team in teams %}
                             <li class="nav-object my-1">
                                 <div class="text-start border border-primary rounded">

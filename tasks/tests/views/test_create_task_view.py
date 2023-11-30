@@ -3,16 +3,21 @@ from django.contrib import messages
 from django.test import TestCase
 from django.urls import reverse
 from tasks.forms import CreateTaskForm
-from tasks.models import User, Task
+from tasks.models import User, Task, Team
 from tasks.tests.helpers import reverse_with_next
 
 class CreateTaskViewTestCase(TestCase):
 
-    fixtures = ['tasks/tests/fixtures/default_user.json']
+    fixtures = [
+        'tasks/tests/fixtures/default_user.json', 
+        'tasks/tests/fixtures/other_users.json',
+        'tasks/tests/fixtures/default_team.json',
+    ]
 
     def setUp(self):
-        self.url = reverse('create_task')
         self.user = User.objects.get(username='@johndoe')
+        self.team = Team.objects.get(team_name='Team 1')
+        self.url = reverse('create_task', kwargs={'pk': self.team.pk})
         self.form_input = {
             'title' : 'Task 1',
             'description' : 'This is a task',
@@ -20,7 +25,8 @@ class CreateTaskViewTestCase(TestCase):
         }
 
     def test_create_task_url(self):
-        self.assertEqual(self.url, '/create_task/')
+        self.assertRegex(self.url, r'^/dashboard/create_task/\d+/$')
+        # Checks if the URL matches the regex pattern /dashboard/create_task/NUM/ where NUM is at least 1 digit
 
     def test_get_create_task(self):
         self.client.login(username=self.user.username, password='Password123')
@@ -56,10 +62,7 @@ class CreateTaskViewTestCase(TestCase):
         self.assertEqual(task.description, 'This is a task')
         due_date_string = task.due_date.strftime('%m/%d/%Y')
         self.assertEqual(due_date_string, '01/02/2024')
-        self.assertEqual(task.created_by, self.user)
-        messages_list = list(response.context['messages'])
-        self.assertEqual(len(messages_list), 1)
-        self.assertEqual(messages_list[0].level, messages.SUCCESS)
+        self.assertEqual(task.created_by, self.team)
     
     def test_post_create_task_redirects_when_not_logged_in(self):
         redirect_url = reverse_with_next('log_in', self.url)

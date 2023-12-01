@@ -115,6 +115,7 @@ def show_team(request, team_id):
             userToAdd.teams.add(team)
             return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
         else:
+            # User has searched for something on the search bar
             q = request.POST["q"]
             results = q.split()
             if len(results) >= 2:
@@ -150,6 +151,7 @@ def remove_member(request, team_id, member_username):
 
 @login_required
 def remove_task(request,task_id):
+    # Removal of task should also remove team members assosciated through CASCADE
     Task.objects.filter(pk=task_id).delete()
     return redirect("dashboard")
 

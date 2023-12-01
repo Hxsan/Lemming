@@ -21,8 +21,8 @@ class CreateTaskViewTestCase(TestCase):
             team_name='Team 1',
             admin_user=self.user,
         )
-        self.team.members.add(self.user.id)
-        print(self.team.members)
+        self.team.members.set([self.user])
+        self.user.teams.set([self.team])
         self.url = reverse('create_task', kwargs={'pk': self.team.pk})
         self.form_input = {
             'title' : 'Task 1',

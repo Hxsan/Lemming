@@ -21,7 +21,10 @@ class AssignTaskFormTestCase(TestCase):
             team_name='Team 1',
             admin_user=self.user,
         )
-        self.team.members.set([self.second_user, self.third_user])
+        self.team.members.set([self.user, self.second_user, self.third_user])
+        self.user.teams.set([self.team])
+        self.second_user.teams.set([self.team])
+        self.third_user.teams.set([self.team])
         self.task = Task.objects.create(
             title='Task 1',
             description='This is a task',
@@ -58,7 +61,7 @@ class AssignTaskFormTestCase(TestCase):
     
     def test_assign_multiple_users_to_task_saves_correctly(self):
         self.client.login(username=self.user.username, password='Password123')
-        self.form_input['usernames'] = ['@janedoe', '@peterpickles', '@petrapickles']
+        self.form_input['usernames'] = ['@johndoe', '@janedoe', '@petrapickles']
         before_count = self.task.assigned_to.count()
         self.client.post(self.url, self.form_input)
         after_count = self.task.assigned_to.count()

@@ -5,7 +5,7 @@ from tasks.models import User, Team
 
 class DeleteTeamViewTestCase(TestCase):
     """Tests of the delete team view."""
-    fixtures = ['tasks/tests/fixtures/default_user.json']
+    fixtures = ['tasks/tests/fixtures/default_user.json', 'tasks/tests/fixtures/other_users.json']
 
     def setUp(self):
         # create admin and non-admin users and add them to a team
@@ -21,7 +21,7 @@ class DeleteTeamViewTestCase(TestCase):
         response = self.client.get(reverse('show_team', args=[self.team.id]))
 
         # make sure the the delete team button is shown 
-        self.assertContains(response, 'Delete Team', html=True)
+        self.assertContains(response, 'Delete Team')
 
     def test_delete_team_button_not_displayed_for_non_admin(self):
         # send a get request to the show_team view as a non-admin user
@@ -29,4 +29,4 @@ class DeleteTeamViewTestCase(TestCase):
         response = self.client.get(reverse('show_team', args=[self.team.id]))
 
         # make sure that the non-admin user can't see the delete team button
-        self.assertNotContains(response, 'Delete Team', html=True)
+        self.assertNotContains(response, 'Delete Team')

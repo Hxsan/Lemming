@@ -88,6 +88,7 @@ def create_team(request):
         form = CreateTeamForm()
     return render(request, 'create_team.html', {'form' : form})
 
+@login_required
 def delete_team(request, team_id):
     team = Team.objects.get(pk=team_id)
 

@@ -1,38 +1,61 @@
 "Tests of the show team view."""
 
-# from django.test import TestCase
-# from django.urls import reverse
-# from tasks.models import User, Team
-# from tasks.forms import CreateTeamForm
+from django.test import TestCase
+from django.urls import reverse
+from tasks.models import User, Team
+from tasks.forms import CreateTeamForm
 
-# class ShowTeamViewTestCase(TestCase):
-#     """Tests of the show team view."""
+class ShowTeamViewTestCase(TestCase):
+    """Tests of the show team view."""
 
-#     fixtures = ['tasks/tests/fixtures/default_user.json']
+    fixtures = ['tasks/tests/fixtures/default_user.json']
 
-#     def setUp(self):
-#         #need to have logged in and created team first, do this in setup
-#         self.client.login(username='@johndoe', password='Password123')
-#         #create a team for this guy
-#         self.client.post(reverse("create_team"), {'team_name':'NewTeam'}, follow = True)
-#         self.url = reverse('show_team')
-#         self.user = User.objects.get(username='@johndoe')
+    def setUp(self):
 
-#     def test_show_team_url(self):
-#         self.assertEqual(self.url,'/dashboard/show_team')
+        #need to have logged in and created team first
+        self.client.login(username='@johndoe', password='Password123')
+        self.user = User.objects.get(username='@johndoe')
+        #create a non-admin user too for safety
+        self.non_admin_user = User.objects.get(username='@janedoe')
 
-#     def test_get_show_team(self):
-#         response = self.client.get(self.url)
-#         self.assertEqual(response.status_code, 200)
-#         self.assertTemplateUsed(response, 'show_team.html')
+        #create a team for these people
+        self.team = Team.objects.create(team_name='TestTeam', admin_user=self.user)
+        self.team.members.add(self.admin_user, self.non_admin_user)
+        self.url = reverse('show_team', args=[self.team.id])
+        
 
-#     def test_team_members_passed_in(self):
-#         #check if a list of users and the team is provided and that they are all valid teams and users
-#         response = self.client.get(self.url, follow=True)
-#         #user_list = response.context['users'] comment out for now
-#         team = response.context['team']
-#         self.assertNotEqual(team, None)
-#         self.assertEqual(team.team_name, 'NewTeam')
-#         #self.assertEqual(user_list.count(), 1)
+    def test_show_team_url(self):
+        url_with_id = f'/dashboard/show_team/{self.team.id}/'
+        self.assertEqual(self.url, url_with_id)
 
-#         #can't do this test yet
+    def test_get_show_team(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'show_team.html')
+
+    def test_all_team_members_showing(self):
+        # check that every single team member is displayed
+        response = self.client.get(self.url)
+        team_members = self.team.members.all()
+
+        for member in team_members:
+            self.assertContains(response, member.username, html=True)
+
+
+    def test_team_members_passed_in(self):
+        response = self.client.get(self.url, follow=True)
+        team = response.context['team']
+        team_members = response.context.get("team_members")
+
+        self.assertNotEqual(team, None)
+        self.assertNotEqual(team_members, None)
+        
+        # check if the admin is part of the passed in team
+        self.assertIn('@johndoe', [member.username for member in team_members])
+
+        # Check if the non-admin user is part of the passed in team
+        self.assertIn('@janedoe', [member.username for member in team_members])
+
+        self.assertEqual(len(team_members), 2)
+
+

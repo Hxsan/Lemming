@@ -46,16 +46,16 @@ class CreateTeamViewTestCase(TestCase):
         self.assertEqual(user.teams.count(), 0)
         #create a team for this guy
         response = self.client.post(self.url , self.form_input, follow = True)
+        team = Team.objects.get(team_name = "NewTeam")
         after_count = Team.objects.count()
         self.assertEqual(before_count + 1, after_count)
-        response_url = reverse('show_team')
+        response_url = reverse('show_team', kwargs={'team_id': team.id})
         self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
         self.assertTemplateUsed(response, 'show_team.html')
-        team = Team.objects.get(team_name = "NewTeam")
         #check user team is set
         user.refresh_from_db() #refresh to check changes
         self.assertEqual(user.teams.count(), 1)
-        #self.assertTrue(user.is_admin) #check they have become the admin
         self.assertEqual(user.teams.all()[0].team_name, 'NewTeam')
         self.assertEqual(team.admin_user, user)
+        self.assertTrue(team.members.contains(user))
         self.assertEqual(team.team_name, 'NewTeam')

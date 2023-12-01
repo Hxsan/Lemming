@@ -26,10 +26,12 @@
                 {% csrf_token %}
                 <!--The below part with dont show feedback is is so that we don't show the validation mesages when the form is opened with the values-->
                 {% include 'partials/bootstrap_form.html' with form=form dont_show_feedback=True%} 
-                {%if task.task_completed %}
-                    <input type="Submit" class="btn btn-success" name="task_completion_value" value="Completed"><!--</a>-->
-                {%else%}
-                    <input type="Submit" class="btn btn-outline-success" name="task_completion_value" value="Mark Task As Complete"><!--</a>-->
+                {%if can_mark_as_complete %} <!--So either team admin or assigned to this task-->
+                    {%if task.task_completed %}
+                        <input type="Submit" class="btn btn-success" name="task_completion_value" value="Completed"><!--</a>-->
+                    {%else%}
+                        <input type="Submit" class="btn btn-outline-success" name="task_completion_value" value="Mark Task As Complete"><!--</a>-->
+                    {%endif%}
                 {%endif%}
                 <!--This below hidden input is to store the value of task_completed as it changes-->
             <div class="d-inline-block">
@@ -37,8 +39,8 @@
                 <input type="Submit" name="edit_submit" value = "Save" class="btn btn-primary">
             </form>
             <!-- ADD PROPER ADMIN CHECK-->
-            {% if True %}
-                <form class="d-inline" action="{% url 'remove_task' task_id=task.id %}" method="POST">
+            {% if is_admin %}
+                <form method="POST" action="{% url 'remove_task' task_id=task.id %}">
                     {% csrf_token %}
                     <button class="btn btn-danger" type="submit">Remove Task</button>
                 </form>

@@ -8,16 +8,16 @@ from tasks.forms import CreateTeamForm
 class ShowTeamViewTestCase(TestCase):
     """Tests of the show team view."""
 
-    fixtures = ['tasks/tests/fixtures/default_user.json']
+    fixtures = ['tasks/tests/fixtures/default_user.json', 'tasks/tests/fixtures/other_users.json']
 
     def setUp(self):
 
         #need to have logged in and created team first
         self.client.login(username='@johndoe', password='Password123')
         self.user = User.objects.get(username='@johndoe')
+        self.admin_user = self.user
         #create a non-admin user too for safety
         self.non_admin_user = User.objects.get(username='@janedoe')
-
         #create a team for these people
         self.team = Team.objects.create(team_name='TestTeam', admin_user=self.user)
         self.team.members.add(self.admin_user, self.non_admin_user)
@@ -39,7 +39,7 @@ class ShowTeamViewTestCase(TestCase):
         team_members = self.team.members.all()
 
         for member in team_members:
-            self.assertContains(response, member.username, html=True)
+            self.assertContains(response, member.username)
 
 
     def test_team_members_passed_in(self):

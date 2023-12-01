@@ -17,7 +17,11 @@ class AssignTaskFormTestCase(TestCase):
         self.user = User.objects.get(username='@johndoe')
         self.second_user = User.objects.get(username='@janedoe')
         self.third_user = User.objects.get(username='@petrapickles')
-        self.team = Team.objects.get(team_name='Team 1')
+        self.team = Team.objects.create(
+            team_name='Team 1',
+            admin_user=self.user,
+        )
+        self.team.members.set([self.second_user, self.third_user])
         self.task = Task.objects.create(
             title='Task 1',
             description='This is a task',

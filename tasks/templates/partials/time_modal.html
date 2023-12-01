@@ -1,0 +1,32 @@
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tracking time spent on task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p> Total time spent on this task so far: <p>
+                <br>
+                <form>
+                    <p> Enter how much 
+                    <span data-toggle="tooltip" title="Time submitted accumulates">
+                        <b> more </b> 
+                    </span> 
+                        time you've spent on this task. </p>
+                    <input class="form-control" type="text" name="time_submit" placeholder="e.g. 2 hours 30 minutes">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <input type="submit" class="btn btn-primary" value="Add Time">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>

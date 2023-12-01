@@ -42,7 +42,7 @@ class RemoveMemberViewTests(TestCase):
         response = self.client.get(reverse('show_team', args=[self.team.id]))
 
         # Check that the "Remove" button is present in the HTML
-        self.assertContains(response, 'Remove', html=True)
+        self.assertContains(response, 'Remove Member', html=True)
 
     def test_remove_button_not_shown_for_non_admin(self):
         # Make a get request to show_team as a non-admin member
@@ -50,4 +50,4 @@ class RemoveMemberViewTests(TestCase):
         response = self.client.get(reverse('show_team', args=[self.team.id]))
 
         # making sure the html doesnt show the remove buuton for non-admin member
-        self.assertNotContains(response, 'Remove', html=True)
+        self.assertNotContains(response, 'Remove Member', html=True)

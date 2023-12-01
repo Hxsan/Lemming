@@ -68,7 +68,7 @@
                                     <td>
                                         <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
                                         {% csrf_token %}
-                                        <button class="remove-member-button" type="submit">Remove</button>
+                                        <button class="remove-member-button" type="submit">Remove Member</button>
                                         </form>
                                     </td>
                                     {% endif %}

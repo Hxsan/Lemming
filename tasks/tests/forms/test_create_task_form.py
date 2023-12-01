@@ -3,15 +3,20 @@ from django import forms
 from django.test import TestCase
 from django.urls import reverse
 from tasks.forms import CreateTaskForm
-from tasks.models import User, Task
+from tasks.models import User, Task, Team
 
 class CreateTaskFormTestCase(TestCase):
 
-    fixtures = ['tasks/tests/fixtures/default_user.json']
+    fixtures = [
+        'tasks/tests/fixtures/default_user.json', 
+        'tasks/tests/fixtures/other_users.json',
+        'tasks/tests/fixtures/default_team.json',
+    ]
 
     def setUp(self):
-        self.url = reverse('create_task')
         self.user = User.objects.get(username='@johndoe')
+        self.team = Team.objects.get(team_name='Team 1')
+        self.url = reverse('create_task', kwargs={'pk': self.team.pk})
         self.form_input = {
             'title' : 'Task 1',
             'description' : 'This is a task',
@@ -29,6 +34,8 @@ class CreateTaskFormTestCase(TestCase):
         self.assertIn('description', form.fields)
         self.assertIn('due_date', form.fields)
         self.assertNotIn('created_by', form.visible_fields())
+        self.assertNotIn('assigned_to', form.visible_fields())
+        self.assertNotIn('task_completed', form.visible_fields())
     
     def test_title_must_not_be_empty(self):
         self.client.login(username=self.user.username, password='Password123')
@@ -61,7 +68,7 @@ class CreateTaskFormTestCase(TestCase):
         self.assertEqual(task.description, 'This is a task')
         due_date_string = task.due_date.strftime('%m/%d/%Y')
         self.assertEqual(due_date_string, '01/02/2024')
-        self.assertEqual(task.created_by, self.user)
+        self.assertEqual(task.created_by, self.team)
 
     def test_user_can_create_multiple_tasks(self):
         self.client.login(username=self.user.username, password='Password123')
@@ -77,7 +84,7 @@ class CreateTaskFormTestCase(TestCase):
         self.assertEqual(after_count, before_count+2)
         task1 = Task.objects.get(title='Task 1')
         task2 = Task.objects.get(title='Task 2')
-        self.assertEqual(task1.created_by, self.user)
-        self.assertEqual(task2.created_by, self.user)
+        self.assertEqual(task1.created_by, self.team)
+        self.assertEqual(task2.created_by, self.team)
 
 

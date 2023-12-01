@@ -222,6 +222,10 @@ def view_task(request, team_id=1, task_id=1):
 
     return render(request, 'task_information.html', context)
 
+@login_required
+def summary_report(request):
+    return render(request, 'summary_report.html')
+
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""

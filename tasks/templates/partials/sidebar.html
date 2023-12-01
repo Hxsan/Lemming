@@ -70,29 +70,6 @@
 
             window.location.href = tag.attr('href');
         });
-        
-        // Moves nav-items offscreen / onscreen
-        
-        $('.move').on('click', function(e) {
-            e.preventDefault();
-            var sidebar = $('.sidebar');
-            var arrowOut = $('.arrow-out');
-
-            if (sidebar.hasClass('slide-off')) {
-                arrowOut.animate({ left: '-=50px'}, 'fast')
-
-                sidebar.removeClass('slide-off');
-                sidebar.addClass('slide-on');
-                // Slide arrow-out offscreen THEN menu onscreen
-            } else {
-                sidebar.removeClass('slide-on');
-                sidebar.addClass('slide-off');
-
-                arrowOut.animate({ left: '+=50px'}, 'slow')
-                // Slide menu offscreen THEN arrow-out onscreen
-            }
-
-        });
 
         // Redirects to correct pages based on which team was clicked on sidebar
 

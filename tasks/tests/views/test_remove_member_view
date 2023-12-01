@@ -1,8 +1,10 @@
+"""Tests of the remove member view."""
 from django.test import TestCase
 from django.urls import reverse
 from tasks.models import User, Team, Task
 
 class RemoveMemberViewTests(TestCase):
+    """Tests of the remove member view."""
     fixtures = ['tasks/tests/fixtures/default_user.json']
 
     def setUp(self):

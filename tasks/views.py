@@ -152,7 +152,7 @@ def remove_member(request, team_id, member_username):
 
 @login_required
 def remove_task(request,task_id):
-    # Removal of task should also remove team members assosciated through CASCADE
+    # Removal of task should also remove team members associated through CASCADE
     Task.objects.filter(pk=task_id).delete()
     return redirect("dashboard")
 

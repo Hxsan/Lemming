@@ -113,3 +113,16 @@ h3.profile-title {
   text-decoration: underline;
   color: #0d6efd;
 }
+
+/*
+ * HTML IDs
+ */
+#search-users-items{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#query{
+  margin-bottom: auto;
+}

@@ -89,12 +89,12 @@
 
             {% if q %}
 
-                <h2>Users: {{q}}</h2>
+                <h2 style="margin-top: 10px;">Users: {{q}}</h2>
                 <br/>
                 <div class="list-group">
                     {% for user in users %}
                         {% if not user in team_members %}
-                            <li class="list-group-item">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
+                            <li class="list-group-item" id="search-users-items">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
                                 <form method="POST" action="">
                                     {% csrf_token %}
                                     {% if is_admin %}
@@ -106,17 +106,23 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-            {% endif%}
+
+            {% endif %}
+
         </div>
         
         </div>
     </div>
+    <div class = "row2">
+        <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+        {% if is_admin %}
+            <form method="post" action="{% url 'delete_team' team_id=team.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger float-end">Delete Team</button>
+            </form>
+        {% endif %}
+        </div>
+    </div>
 </div>
-{% if is_admin %}
-<form method="post" action="{% url 'delete_team' team_id=team.id %}" class="d-inline">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger float-end">Delete Team</button>
-</form>
-{% endif %}
     
 {% endblock %}  

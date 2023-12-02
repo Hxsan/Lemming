@@ -1,6 +1,7 @@
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import datetime
 from datetime import date
 from libgravatar import Gravatar
 
@@ -62,6 +63,7 @@ class Task(models.Model):
     created_by = models.ForeignKey('Team', on_delete=models.CASCADE, null=True)
     assigned_to = models.ManyToManyField(User)
     task_completed = models.BooleanField(default=False)
+    time_spent = models.DurationField(default=datetime.timedelta(0), null=True)
 
 class Team(models.Model):
     """Model used to represent a team"""

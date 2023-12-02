@@ -126,3 +126,8 @@ h3.profile-title {
 #query{
   margin-bottom: auto;
 }
+#show-team-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

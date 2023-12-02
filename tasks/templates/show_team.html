@@ -41,8 +41,8 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12" id="show-team-table">
-            <h1>Team {{team.team_name}}</h1>
+        <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12" id="show-team-table">
+            <h1 id="show-team-header">Team {{team.team_name}}</h1>
             <!--Show the team members in the team as a list-->
             <table>
                 <thead>
@@ -77,14 +77,24 @@
                     {% endfor %}
                 </tbody>
             </table>
-            
+
+            {% if is_admin %}
+                <form method="post" action="{% url 'delete_team' team_id=team.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger float-end" style="margin-top:20px">Delete Team</button>
+                </form>
+            {% endif %}
+
     <!--Use code from finding all the users, and filter and find only those who are not in the same team as the current user-->
+        </div>
+        <div class="col-auto">
+            <div class="mt-5" style="border-left: 2px solid black; height: 100%"></div>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
             <form class="d-flex" method="POST" action="{% url 'show_team' team_id=team.id  %}">
                 {% csrf_token %}
-                <input class="form-control me-2" type="search" id="query" name="q" placeholder="Search...">
-                <button class="btn btn-outline-secondary">Search</button>
+                <input class="form-control me-2" type="search" id="query" name="q" placeholder="Search..." style="margin-top:10px">
+                <button class="btn btn-outline-secondary" style="margin-top:10px">Search</button>
             </form>
 
             {% if q %}
@@ -111,17 +121,7 @@
 
         </div>
         
-        </div>
-    </div>
-    <div class = "row2">
-        <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
-        {% if is_admin %}
-            <form method="post" action="{% url 'delete_team' team_id=team.id %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger float-end">Delete Team</button>
-            </form>
-        {% endif %}
-        </div>
+        </div>  
     </div>
 </div>
     

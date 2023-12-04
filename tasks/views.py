@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm, SubmitTimeForm
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team
 
@@ -226,6 +226,22 @@ def view_task(request, team_id=1, task_id=1):
 def summary_report(request):
     return render(request, 'summary_report.html')
 
+@login_required
+def submit_time(request, team_id, task_id): 
+    task = Task.objects.get(pk=task_id)
+    if request.method == 'POST':
+        form = SubmitTimeForm(request.POST)
+        if form.is_valid():
+            form.save(task)
+    return redirect('view_task', team_id=team_id, task_id=task_id)
+
+@login_required
+def reset_time(request, team_id, task_id):
+    task = Task.objects.get(pk=task_id)
+    task.time_spent = 0
+    task.save()
+    return redirect('view_task', team_id=team_id, task_id=task_id) 
+    
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""

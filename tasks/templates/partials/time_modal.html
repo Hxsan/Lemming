@@ -1,23 +1,37 @@
+{% load format_time %}
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Tracking time spent on task</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p> Total time spent on this task so far: <p>
-                <br>
-                <form>
+                <div> Total time spent on this task so far: </div>
+                <h3 class="my-0 p-3 text-center">
+                    {{ task.time_spent|format }}
+                </h3>
+                <form method="post" action="{% url 'submit_time' team_id=team.id task_id=task.id %}">
+                    {% csrf_token %} 
                     <p> Enter how much 
                     <span data-toggle="tooltip" title="Time submitted accumulates">
                         <b> more </b> 
                     </span> 
                         time you've spent on this task. </p>
-                    <input class="form-control" type="text" name="time_submit" placeholder="e.g. 2 hours 30 minutes">
+                    <div class="row">
+                        <div class="col-4">
+                            <input class="form-control" type="number" min="0" name="hours" placeholder="Hours">
+                        </div>
+                        <div class="col-4">
+                            <input class="form-control" type="number" min="0" name="minutes" placeholder="Minutes">
+                        </div>
+                        <div class="col-4">
+                            <input class="form-control" type="number" min="0" name="seconds" placeholder="Seconds">
+                        </div>
+                    </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'reset_time' team_id=team.id task_id=task.id %}" class="btn btn-secondary">Reset</a>
                 <input type="submit" class="btn btn-primary" value="Add Time">
                 </form>
             </div>

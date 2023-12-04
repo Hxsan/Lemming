@@ -211,3 +211,31 @@ class AssignTaskForm(forms.Form):
         removed_users = original_users - set(selected_users)
 
         return (list(new_users), list(removed_users))
+
+class SubmitTimeForm(forms.Form):
+    class Meta:
+        model = Task
+        fields = ['time_spent']
+
+    hours = forms.IntegerField(required=False)
+    minutes = forms.IntegerField(required=False)
+    seconds = forms.IntegerField(required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        hours = cleaned_data.get('hours')
+        minutes = cleaned_data.get('minutes')
+        seconds = cleaned_data.get('seconds')
+        self.cleaned_hours = hours if hours is not None else 0
+        self.cleaned_minutes = minutes if minutes is not None else 0
+        self.cleaned_seconds = seconds if seconds is not None else 0
+
+
+    def save(self, task):
+        total_seconds = self.cleaned_hours * 3600 + self.cleaned_minutes * 60 + self.cleaned_seconds
+
+        task.time_spent += total_seconds
+
+        task.save()
+
+        return task

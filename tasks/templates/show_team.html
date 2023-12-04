@@ -70,6 +70,7 @@
                                         {% csrf_token %}
                                         <button class="remove-member-button" type="submit">Remove Member</button>
                                         </form>
+                                        <a href="{%url 'activity_log' team_id=team.id user_id=member.id%}" class="btn btn-secondary btn-sm">View Activity Log</a>
                                     </td>
                                     {% endif %}
                             {% endif %}
@@ -81,12 +82,13 @@
     <!--Use code from finding all the users, and filter and find only those who are not in the same team as the current user-->
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+            {% if is_admin %}
             <form class="d-flex" method="POST" action="{% url 'show_team' team_id=team.id  %}">
                 {% csrf_token %}
                 <input class="form-control me-2" type="search" id="query" name="q" placeholder="Search...">
                 <button class="btn btn-outline-secondary">Search</button>
             </form>
-
+            {%endif%}
             {% if q %}
 
                 <h2>Users: {{q}}</h2>
@@ -107,9 +109,7 @@
                     {% endfor %}
                 </div>
             {% endif%}
-        </div>
-        
-        </div>
+        </div>        
     </div>
 </div>
 {% if is_admin %}

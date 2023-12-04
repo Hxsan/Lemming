@@ -7,7 +7,7 @@ from tasks.models import User, Task, Team
 from tasks.tests.helpers import reverse_with_next
 
 class CreateTaskViewTestCase(TestCase):
-
+    """Tests of the create task view."""
     fixtures = [
         'tasks/tests/fixtures/default_user.json', 
         'tasks/tests/fixtures/other_users.json',
@@ -76,10 +76,3 @@ class CreateTaskViewTestCase(TestCase):
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
     
 
-
-    # Creating a task redirects you to dashboard
-    # with appropriate message ?
-
-    # Task created is linked to the user who created it
-
-    # 

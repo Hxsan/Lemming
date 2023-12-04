@@ -4,13 +4,15 @@ from django.contrib.auth import login, logout, get_user
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
+from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
+from django.views.generic.list import ListView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
-from tasks.models import User, Task, Team
+from tasks.models import User, Task, Team, Activity_Log
 
 @login_required
 def search_users(request):
@@ -71,18 +73,6 @@ def create_team(request):
         if form.is_valid():
             user = get_user(request)
             team = form.save(user)
-            #add current user to their own team
-
-            #user.team = team 
-
-            team_id=team.id
-            user.teams.add(team)
-            #user.is_admin = True #make them admin of this team
-            user.save()
-
-            team.save()
-            team.members.add(user)
-
             return redirect('show_team', team_id=team.id)
     else:
         form = CreateTeamForm()
@@ -98,16 +88,9 @@ def delete_team(request, team_id):
 @login_required
 def show_team(request, team_id):
     user = get_user(request)
-    try:
-
-        team = Team.objects.get(pk=team_id)
-    except Team.DoesNotExist:
-        admin_user = request.user
-        team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
-        team.members.add(admin_user)
+    team = Team.objects.get(pk=team_id)
     is_admin = user == team.admin_user
     team_members = team.members.all()
-
     if request.method == "POST":
         if request.POST.get("userToAdd"):
             userToAddString = request.POST['userToAdd']
@@ -134,7 +117,6 @@ def show_team(request, team_id):
 def remove_member(request, team_id, member_username):
     user = get_user(request)
     team = get_object_or_404(Team, pk=team_id)
-
     # make sure that the user is an admin and the member exists in the team
     if user == team.admin_user:
         if member_username:
@@ -147,7 +129,6 @@ def remove_member(request, team_id, member_username):
             if updated_tasks:
                 for task in updated_tasks:
                     task.assigned_to.remove(member_to_remove)
-
     return redirect('show_team', team_id=team_id)
 
 @login_required
@@ -221,6 +202,20 @@ def view_task(request, team_id=1, task_id=1):
     }
 
     return render(request, 'task_information.html', context)
+
+@login_required
+def user_activity_log(request, team_id, user_id):
+    user = User.objects.get(pk=user_id)
+    if Activity_Log.objects.filter(user=user).exists():
+        log = Activity_Log.objects.get(user=user)
+        #contact_list = Contact.objects.all()
+        log.log.reverse() #reverse to have it in order of most recent
+        paginator = Paginator(log.log, 10)  # Show 25 contacts per page.
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        return render(request, "activity_log.html", {"page_obj": page_obj})
+    #otherwise, redirect them back to show team
+    return redirect('show_team', team_id=team_id)
 
 @login_prohibited
 def home(request):

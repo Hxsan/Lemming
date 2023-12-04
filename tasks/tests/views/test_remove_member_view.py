@@ -5,7 +5,7 @@ from tasks.models import User, Team, Task
 
 class RemoveMemberViewTests(TestCase):
     """Tests of the remove member view."""
-    fixtures = ['tasks/tests/fixtures/default_user.json']
+    fixtures = ['tasks/tests/fixtures/default_user.json', 'tasks/tests/fixtures/other_users.json']
 
     def setUp(self):
         # create objects for tests
@@ -21,12 +21,12 @@ class RemoveMemberViewTests(TestCase):
         member_to_remove = self.non_admin_user
 
         # assign task to member
-        task = Task.objects.create(title='Test Task', assigned_to=member_to_remove)
+        task = Task.objects.create(title='Test Task')
+        task.assigned_to.add(member_to_remove)
 
         response = self.client.post(
             reverse('remove_member', args=[self.team.id, member_to_remove.username])
         )
-
         # making sure that it redirects to show_team view
         self.assertRedirects(response, reverse('show_team', args=[self.team.id]))
 
@@ -40,7 +40,6 @@ class RemoveMemberViewTests(TestCase):
     def test_remove_button_shown_for_admin(self):
         # Make a get request to the show_team view as the admin
         response = self.client.get(reverse('show_team', args=[self.team.id]))
-
         # Check that the "Remove" button is present in the HTML
         self.assertContains(response, 'Remove Member', html=True)
 

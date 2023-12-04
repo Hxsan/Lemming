@@ -119,7 +119,9 @@ def show_team(request, team_id):
             # User has searched for something on the search bar
             q = request.POST["q"]
             results = q.split()
-            if len(results) >= 2:
+            if q.startswith("@"):
+                queried_users = User.objects.filter(username__istartswith = results[0])
+            elif len(results) >= 2:
                 queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
             else:
                 queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)

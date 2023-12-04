@@ -26,6 +26,12 @@ class SearchTeamViewTestCase(TestCase):
         response = self.client.post(self.url, {"q":q, "users":userToReturn, "team": self.team, "team_id" : 1, 'team_members': self.team.members.all(), 'is_admin': True}, follow=True)
         self.assertContains(response, "Jane Doe")
 
+    def test_user_appears_in_search_with_username(self):
+        q = "@jan"
+        userToReturn = User.objects.get(username = "@janedoe")
+        response = self.client.post(self.url, {"q":q, "users":userToReturn, "team": self.team, "team_id" : 1, 'team_members': self.team.members.all(), 'is_admin': True}, follow=True)
+        self.assertContains(response, "Jane Doe")
+
     def test_user_does_not_appear_in_search_when_incorrect_spelling(self):
         q = "jan"
         userToReturn = User.objects.get(username = "@janedoe")

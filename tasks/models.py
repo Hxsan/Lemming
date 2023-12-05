@@ -1,7 +1,7 @@
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from datetime import date
+from datetime import date, timedelta
 from libgravatar import Gravatar
 
 class User(AbstractUser):
@@ -55,13 +55,23 @@ class User(AbstractUser):
 
 class Task(models.Model):
     """Model used for task creation, and assignment on team members"""
-
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
     title = models.CharField(max_length=30, blank=False)
     description = models.CharField(max_length=300, blank=True)
     due_date = models.DateField(blank=False, default=date.today)
     created_by = models.ForeignKey('Team', on_delete=models.CASCADE, null=True)
     assigned_to = models.ManyToManyField(User)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     task_completed = models.BooleanField(default=False)
+    def is_high_priority_due_soon(self):
+        today = date.today()
+        due_tomorrow = today + timedelta(days=1)
+        return self.priority == "high" and self.due_date >= today and self.due_date <= due_tomorrow
+        
 
 class Team(models.Model):
     """Model used to represent a team"""

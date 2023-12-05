@@ -118,10 +118,11 @@ class CreateTaskForm(forms.ModelForm):
         """Form options."""
 
         model = Task
-        fields = ['title', 'description', 'due_date']
+        fields = ['title', 'description', 'due_date', 'priority']
         exclude = ['created_by', 'task_completed']
         widgets = { 'description': forms.Textarea(),
-                    'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today})}
+                    'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today}), 
+                    'priority': forms.Select(attrs={'class': 'form-control'})}
 
     def __init__(self, user=None, **kwargs):
         """Construct new form instance with a user instance."""
@@ -164,11 +165,12 @@ class EditTaskForm(forms.ModelForm):
         """Form options."""
 
         model = Task
-        fields = ['title', 'description', 'due_date']
+        fields = ['title', 'description', 'due_date', 'priority']
         exclude = ['created_by', 'task_completed']
         widgets = {'title': forms.TextInput(attrs={'class': 'form-control','id':'task_title'}),
-                   'description': forms.Textarea(attrs={'class': 'form-control','id':'task_description'}),
-                   'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today})}
+                'description': forms.Textarea(attrs={'class': 'form-control','id':'task_description'}),
+                'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today}),
+                'priority': forms.Select(attrs={'class': 'form-control'})}
 
     def is_valid(self):
         original_valid =  super().is_valid()

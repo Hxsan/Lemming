@@ -175,9 +175,14 @@ def view_task(request, team_id=1, task_id=1):
             form = EditTaskForm(request.POST)
             #otherwise, we have submitted the whole form, so save it
             #get the value of the complete button 
-            if form.is_valid():
+            if form.is_valid():        
                 task.task_completed = request.POST['task_completed']
                 form.save(task)
+                task.priority = request.POST.get('priority')
+                task.save()
+                form.fields['priority'].initial = request.POST.get('priority')
+                form.save(task)
+
                 return redirect('dashboard')
         elif 'assign_submit' in request.POST:
             form2 = AssignTaskForm(specific_team=team, specific_task=task, data=request.POST)
@@ -191,7 +196,7 @@ def view_task(request, team_id=1, task_id=1):
                     remove_message = f"Successfully removed:<br>{removed_users_list}<br>from this task."
 
     #fill the form with the values from the task itself to begin with
-    form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date})
+    form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date, 'priority': task.priority})
     form2 = AssignTaskForm(specific_team=team, specific_task=task)
 
 
@@ -204,8 +209,6 @@ def view_task(request, team_id=1, task_id=1):
     # Checking if no users have been assigned to a task
     if not form2.get_assigned_users(task):
         alert_message = "This task has no assigned users." 
-
-    
 
     context = {
         'team': team,

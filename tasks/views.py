@@ -196,7 +196,7 @@ def view_task(request, team_id=1, task_id=1):
                     remove_message = f"Successfully removed:<br>{removed_users_list}<br>from this task."
 
     #fill the form with the values from the task itself to begin with
-    form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date, 'priority': task.priority})
+    form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date, 'priority': task.priority, 'reminder_days': task.reminder_days})
     form2 = AssignTaskForm(specific_team=team, specific_task=task)
 
 

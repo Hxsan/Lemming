@@ -8,6 +8,12 @@
               <i class="fas fa-bell"></i> HIGH PRIORITY! - Due on {{ task.due_date }}
           </div>
       {% endif %}
+
+      {% if task.is_other_priority_due_soon %}
+      <div style="color: rgb(6, 208, 40);">
+          <i class="fas fa-bell"></i>  automated reminder! - Due on {{ task.due_date }}
+      </div>
+  {% endif %}
     </div>
     {% if request.user in task.assigned_to.all %}
       <div class="card-footer">

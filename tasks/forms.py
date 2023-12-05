@@ -161,26 +161,44 @@ class CreateTeamForm(forms.ModelForm):
 """Maybe need a form of this type eventually"""    
 #But this form isn't the actual form we will use
 class EditTaskForm(forms.ModelForm):
+
     class Meta:
         """Form options."""
-
         model = Task
-        fields = ['title', 'description', 'due_date', 'priority']
+        fields = ['title', 'description', 'due_date', 'priority', 'reminder_days']
         exclude = ['created_by', 'task_completed']
         widgets = {'title': forms.TextInput(attrs={'class': 'form-control','id':'task_title'}),
                 'description': forms.Textarea(attrs={'class': 'form-control','id':'task_description'}),
                 'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today}),
-                'priority': forms.Select(attrs={'class': 'form-control'})}
+                'priority': forms.Select(attrs={'class': 'form-control'}),
+                'reminder_days': forms.NumberInput(attrs={'class': 'form-control', 'min': 1})}
+        labels = {
+            'reminder_days': 'Remind me of this task(days before)',
+        }
 
     def is_valid(self):
         original_valid =  super().is_valid()
         return original_valid and self.cleaned_data['due_date']>(date.today() - timedelta(1)) #ensure due date is later or equal to today
+        
+    def clean(self):
+        cleaned_data = super().clean()
+        due_date = cleaned_data.get('due_date')
+        reminder_days = cleaned_data.get('reminder_days')
 
+        if due_date and reminder_days is not None:
+            today = date.today()
+            max_allowed_days = (due_date - today).days - 1
+
+            if reminder_days > max_allowed_days:
+                self.add_error('reminder_days', f"Reminder days cannot be more than {max_allowed_days} days before the due date.")
+
+        return cleaned_data
     def save(self, old_task):
         task = super().save(commit=False)
         task.id = old_task.id
         task.created_by = old_task.created_by
         task.task_completed = old_task.task_completed
+
         task.save()
         return task
 

@@ -60,6 +60,7 @@ class Task(models.Model):
         ('medium', 'Medium'),
         ('high', 'High'),
     ]
+    reminder_days = models.IntegerField(default=None, null=True, blank=True)
     title = models.CharField(max_length=30, blank=False)
     description = models.CharField(max_length=300, blank=True)
     due_date = models.DateField(blank=False, default=date.today)
@@ -69,8 +70,15 @@ class Task(models.Model):
     task_completed = models.BooleanField(default=False)
     def is_high_priority_due_soon(self):
         today = date.today()
+        due_remind_date= today + timedelta(days=self.reminder_days or 0)
         due_tomorrow = today + timedelta(days=1)
-        return self.priority == "high" and self.due_date >= today and self.due_date <= due_tomorrow
+        return self.reminder_days != None and self.priority == "high" and self.due_date >= today and (self.due_date <= due_tomorrow or self.due_date <= due_remind_date)
+
+    def is_other_priority_due_soon(self):
+        today = date.today()
+        due_remind_date= today + timedelta(days=self.reminder_days or 0)
+        due_tomorrow = today + timedelta(days=1)
+        return self.reminder_days != None and (self.priority == "low" or self.priority == "medium") and self.due_date >= today and self.due_date <= due_remind_date
         
 
 class Team(models.Model):

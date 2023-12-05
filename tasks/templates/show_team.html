@@ -94,7 +94,7 @@
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
             <form class="d-flex" method="POST" action="{% url 'show_team' team_id=team.id  %}">
                 {% csrf_token %}
-                <input class="form-control me-2" type="search" id="query" name="q" placeholder="Search..." style="margin-top:10px">
+                <input class="form-control me-2" type="search" id="query" name="q" placeholder="User Search" style="margin-top:10px">
                 <button class="btn btn-outline-secondary" style="margin-top:10px">Search</button>
             </form>
             <!--Use code from finding all the users, and filter and find only those who are not in the same team as the current user-->

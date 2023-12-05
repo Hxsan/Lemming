@@ -12,7 +12,6 @@ def get_requested_user():
     for frame_record in inspect.stack():
         #find where we last got a get request
         if frame_record[3] == 'get_response':
-            print(frame_record)
             request = frame_record[0].f_locals['request'] #get the request variable out of the frame
             return request.user
     else:
@@ -75,6 +74,9 @@ def user_save(sender, **kwargs):
 @receiver(pre_save, sender=Task)
 def task_save(sender, **kwargs):
     user = get_requested_user()
+    #This line is for tests, as get_requested_user() doesn't work in tests because we aren't doing real requests
+    if user is None:
+        user = getattr(kwargs['instance'], '_user',None)
     if user!=None:
         task = kwargs['instance']
         #created = kwargs['created'] #if we have created a new record
@@ -107,7 +109,9 @@ def task_save(sender, **kwargs):
 #eam Model
 @receiver(pre_save, sender=Team)
 def team_save(sender, **kwargs):
-    user = get_requested_user()
+    #We only use this to log creating teams, so the user has to be the admini
+    team = kwargs['instance']
+    user = team.admin_user 
     if user!=None:
         team = kwargs['instance']
         activity_log = get_activity_log(user)
@@ -123,6 +127,9 @@ def team_save(sender, **kwargs):
 @receiver(m2m_changed, sender=Team.members.through)
 def team_members_changed(sender, **kwargs):
     user = get_requested_user()
+    #This line is for tests, as get_requested_user() doesn't work in tests because we aren't doing real requests
+    if user is None:
+        user = getattr(kwargs['instance'], '_user',None)
     if user!=None:
         activity_log = get_activity_log(user)
         team = kwargs['instance']
@@ -147,6 +154,9 @@ def team_members_changed(sender, **kwargs):
 @receiver(m2m_changed, sender=Task.assigned_to.through)
 def task_assigned_to_changed(sender, **kwargs):
     user = get_requested_user()
+    #This line is for tests, as get_requested_user() doesn't work in tests because we aren't doing real requests
+    if user is None:
+        user = getattr(kwargs['instance'], '_user',None)
     if user!=None:
         activity_log = get_activity_log(user)
         task = kwargs['instance']
@@ -175,6 +185,9 @@ def task_assigned_to_changed(sender, **kwargs):
 @receiver(pre_delete, sender=Task)
 def task_deleted(sender, **kwargs):
     user = get_requested_user()
+    #This line is for tests, as get_requested_user() doesn't work in tests because we aren't doing real requests
+    if user is None:
+        user = getattr(kwargs['instance'], '_user',None)
     if user!=None:
         activity_log = get_activity_log(user)
         task = kwargs['instance']
@@ -186,6 +199,9 @@ def task_deleted(sender, **kwargs):
 @receiver(pre_delete, sender=Team)
 def team_deleted(sender, **kwargs):
     user = get_requested_user()
+    #This line is for tests, as get_requested_user() doesn't work in tests because we aren't doing real requests
+    if user is None:
+        user = getattr(kwargs['instance'], '_user',None)
     if user!=None:
         activity_log = get_activity_log(user)
         team = kwargs['instance']

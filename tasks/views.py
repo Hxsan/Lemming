@@ -13,6 +13,8 @@ from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team, Activity_Log
+import inspect
+
 
 @login_required
 def search_users(request):
@@ -139,6 +141,7 @@ def remove_task(request,task_id):
 
 @login_required
 def view_task(request, team_id=1, task_id=1):
+    print("in view task")
     team = Team.objects.get(pk=team_id)
     task = Task.objects.get(pk=task_id)
     user =  get_user(request)

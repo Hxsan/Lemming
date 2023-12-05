@@ -8,10 +8,12 @@ from tasks.signals import *
 from django.db.models.signals import m2m_changed
 from django.db.models.signals import pre_save, post_save, pre_delete
 from django.contrib.auth.signals import user_logged_in, user_logged_out
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.http import HttpRequest
 import inspect
-
+from django.test import RequestFactory
+from tasks.views import view_task
+import time
 
 #test the generation of each signal and what activity log stuff is there
 
@@ -28,21 +30,27 @@ class SignalsTestCase(TestCase):
         self.member_without_log = User.objects.get(username='@petrapickles') #no log for this user
         #Create team and add members to the team
         self.team = Team.objects.create(team_name='Team 1',admin_user=self.user)
-        self.task = Task.objects.create(title="Task1", description="This is a task", due_date=datetime.today())
+        self.task = Task.objects.create(title="Task1", description="This is a task", due_date=datetime.now())
+        self.task.task_completed = "False"
         self.form_input = {
             'title': 'Task1',
             'description': 'This is a task',
-            'due_date': datetime.today(),
+            'due_date': datetime.now(),
             'edit_submit': 'Save', #these two values to simulate the request information sent
             'task_completed': False,
         }
         self.task.created_by = self.team 
-        self.url = reverse("view_task", args=[self.team.id, self.task.id]) #a random url to use for testing
+        self.task._user = self.user #custom attr for testing because can't get user from signals in tests
+        self.team._user = self.user
+        self.url = reverse('view_task', kwargs={'team_id': self.team.id, 'task_id':self.task.id}) #a random url to use for testing
         self.team.members.set([self.user, self.member_with_log])
         self.user.teams.set([self.team])
         self.member_with_log.teams.set([self.team])
         self.activity_log = Activity_Log.objects.get(user=self.user)
+        self.format = "%d/%m/%Y, %H:%M:%S" 
         self.disconnect_signals()
+        self.activity_log.log = []
+        self.activity_log.save()
     
     def disconnect_signals(self):
         #Disconnect all signals for now
@@ -59,14 +67,6 @@ class SignalsTestCase(TestCase):
 
     #test for each signal and function
 
-    def test_get_requested_user(self):
-        self.client.login(username=self.user.username, password='Password123')
-        response = self.client.get(reverse('dashboard'))#(self.url, self.form_input, follow=True)
-        self.assertEqual(response.status_code, 200)
-        for frame in inspect.stack():
-            print(frame)
-        self.assertEqual(get_requested_user(), self.user)
-
     #Return the activity log for the user, or create a new one if they don't have one yet
     def test_get_activity_log_function(self):
         #test it gets correct activity log
@@ -77,86 +77,163 @@ class SignalsTestCase(TestCase):
         get_activity_log(new_user)
         self.assertEqual(Activity_Log.objects.get(user=new_user), get_activity_log(new_user)) #now it does
 
-    """
-
     def test_user_log_in_signal(self):
         user_logged_in.connect(user_has_logged_in)
         self.client.login(username=self.user.username, password='Password123')
         self.activity_log.refresh_from_db()
-        current_time = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+        current_time = datetime.now()
         #check activity log includes the new entry
-        self.assertEqual(self.activity_log.log[0], [f'{self.user.username} has logged in', current_time])
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} has logged in')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
 
     def test_user_log_out_signal(self):
         user_logged_out.connect(user_has_logged_out)
         self.client.login(username=self.user.username, password='Password123')
         self.client.logout()
         self.activity_log.refresh_from_db()
-        current_time = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+        current_time = datetime.now()
         #check activity log includes the new entry
-        self.assertEqual(self.activity_log.log[1], [f'{self.user.username} has logged out', current_time])
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} has logged out')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
 
     #User Model
-    def test_user_save_signal(self):
+    def test_user_sign_up_signal(self):
         post_save.connect(user_save, sender=User)
-        current_time = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+        current_time = datetime.now()
+        new_user = User.objects.create(username='@newuser', first_name='New', last_name='user', email='newuser@org.uk', password="Password123")
+        activity_log = Activity_Log.objects.get(user=new_user)
+        #check activity log includes the new entry
+        self.assertEqual(activity_log.log[0][0], f'{new_user.username} signed up')
+        self.assertEqual(datetime.strptime(activity_log.log[0][1], self.format).date(), current_time.date())
+
+    def test_user_edit_signal(self):
+        post_save.connect(user_save, sender=User)
+        current_time = datetime.now()
         self.user.first_name = "Jon"
         self.user.save()
         self.activity_log.refresh_from_db()
         #check activity log includes the new entry
-        self.assertEqual(self.activity_log.log[1], [f'{self.user.username} edited their user details', current_time])
-        """
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} edited their user details')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
 
     #Task Model
-    def test_task_save_signal(self):
-        self.client.login(username=self.user.username, password='Password123')
-        pre_save.connect(task_save, sender=Task)
-        current_time = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+    def test_task_create_signal(self):
+        pre_save.connect(task_save, sender=Task) 
+        current_time = datetime.now()
+        #create a new task
+        task = Task.objects.create(title="Task1", description="This is a task", due_date=datetime.now())
+        task._user = self.user
+        Task.objects.filter(pk=task.id).delete() #delete it so we can redo the create signal with _user attached
+        task.save()
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} created a new task with title \'{task.title}\'')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
+    
+    def test_task_save_signal_title_change(self):
+        pre_save.connect(task_save, sender=Task) 
+        current_time = datetime.now()
+        #Test title change
         old_title = self.task.title
         self.task.title = "NewTitle"
         self.task.save()
         self.activity_log.refresh_from_db()
-        #check for each possibility of task
-        #self.assertEqual(self.activity_log.log[1], [f'{self.user.username} changed task \'{old_title}\'s title to {self.task.title}', current_time])
-        """
-        if old_task.title!=task.title:
-            #changed title
-            activity_log.log.append((f'{user.username} changed task \'{old_task.title}\'s title to {task.title}', current_time))
-        if old_task.description!=task.description:
-            #changed description
-            activity_log.log.append((f'{user.username} changed task \'{old_task.title}\'s description to {task.description}', current_time))
-        if old_task.due_date!=task.due_date:
-            #changed due date
-            activity_log.log.append((f'{user.username} updated task \'{old_task.title}\'s due date to {task.due_date}', current_time))
-        #have to use eval here because models.BooleanField is stored as a string, but it comes out as a boolean
-        if old_task.task_completed!=eval(task.task_completed):
-            #changed completion
-            completion = 'Complete' if eval(task.task_completed) else 'Incomplete'
-            activity_log.log.append((f'{user.username} marked \'{old_task.title}\' as {completion}', current_time))
-        """
-        
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} changed task \'{old_title}\'s title to {self.task.title}')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
+    
+    def test_task_save_signal_change_change_description(self):
+        pre_save.connect(task_save, sender=Task) 
+        current_time = datetime.now()
+        self.task.description = "NewDescription"
+        self.task.save()
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} changed task \'{self.task.title}\'s description to {self.task.description}')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
 
-    def test_team_save_signal(sender, **kwargs):
+    def test_task_save_signal_change_due_date(self):
+        pre_save.connect(task_save, sender=Task) 
+        current_time = datetime.now()
+        self.task.due_date = datetime.now() + timedelta(1)
+        self.task.save()
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} updated task \'{self.task.title}\'s due date to {self.task.due_date}')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
+
+    def test_task_save_signal_change_completion(self):
+        pre_save.connect(task_save, sender=Task) 
+        current_time = datetime.now()
+        self.task.task_completed= "True"
+        self.task.save()
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[1][0], f'{self.user.username} marked \'{self.task.title}\' as Complete')
+        self.assertEqual(datetime.strptime(self.activity_log.log[1][1], self.format).date(), current_time.date())
+
+
+    def test_team_save_signal(self):
         pre_save.connect(team_save, sender=Team)
-        pass
+        #create a new team
+        current_time = datetime.now()
+        self.team = Team.objects.create(team_name='Team 2',admin_user=self.user)
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} created a new team \'{self.team.team_name}\'')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
+
 
     #Team model members m2m field
-    def team_members_changed_signal(sender, **kwargs):
+    def test_team_members_added_signal(self):
         m2m_changed.connect(team_members_changed, sender=Team.members.through)
-        pass
+        current_time = datetime.now()
+        self.team.members.add(self.member_without_log)
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} added {self.member_without_log.username} to \'{self.team.team_name}\'')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
+
+    def test_team_members_removed_signal(self):
+        m2m_changed.connect(team_members_changed, sender=Team.members.through)
+        current_time = datetime.now()
+        self.team.members.remove(self.member_with_log)
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} removed {self.member_with_log.username} from \'{self.team.team_name}\'')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
 
     #Task model assigned to m2m field
-    def task_assigned_to_changed_signal(sender, **kwargs):
+    def test_assign_to_task_signal(self):
         m2m_changed.connect(task_assigned_to_changed, sender=Task.assigned_to.through)
-        pass
+        current_time = datetime.now()
+        self.task.assigned_to.add(self.member_with_log)
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} assigned {self.member_with_log.username} to the task \'{self.task.title}\'')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
+
+    def test_remove_from_task_signal(self):
+        m2m_changed.connect(task_assigned_to_changed, sender=Task.assigned_to.through)
+        current_time = datetime.now()
+        #add and remove
+        self.task.assigned_to.add(self.member_with_log)
+        self.task.assigned_to.remove(self.member_with_log)
+        self.activity_log.refresh_from_db()
+        #check for add and remove
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} assigned {self.member_with_log.username} to the task \'{self.task.title}\'')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
+        self.assertEqual(self.activity_log.log[1][0], f'{self.user.username} removed {self.member_with_log.username} from the task \'{self.task.title}\'')
+        self.assertEqual(datetime.strptime(self.activity_log.log[1][1], self.format).date(), current_time.date())
 
     #Delete Task
-    def task_deleted_signal(sender, **kwargs):
+    def task_deleted_signal(self):
         pre_delete.connect(task_deleted, sender=Task)
-        pass
+        current_time = datetime.now()
+        old_title = self.task.title
+        Task.objects.filter(pk=self.task.id).delete()
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} deleted task {old_title}')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())
+
 
     #Delete Team
-    def team_deleted_signal(sender, **kwargs):
+    def team_deleted_signal(self):
         pre_delete.connect(team_deleted, sender=Team)
-        pass
-
+        current_time = datetime.now()
+        old_team_name = self.team.team_name
+        Team.objects.filter(pk=self.team.id).delete()
+        self.activity_log.refresh_from_db()
+        self.assertEqual(self.activity_log.log[0][0], f'{self.user.username} deleted team {old_team_name}')
+        self.assertEqual(datetime.strptime(self.activity_log.log[0][1], self.format).date(), current_time.date())

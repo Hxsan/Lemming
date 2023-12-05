@@ -12,6 +12,7 @@ def get_requested_user():
     for frame_record in inspect.stack():
         #find where we last got a get request
         if frame_record[3] == 'get_response':
+            print(frame_record)
             request = frame_record[0].f_locals['request'] #get the request variable out of the frame
             return request.user
     else:

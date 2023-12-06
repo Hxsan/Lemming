@@ -124,6 +124,10 @@ body{
   background-color: #1B2A41;
 }
 
+.highlight{
+  color: #000;
+}
+
 .homeButtons{
   background-color: #0C1821;
 }

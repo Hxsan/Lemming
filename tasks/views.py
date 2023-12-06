@@ -8,13 +8,11 @@ from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
-from django.views.generic.list import ListView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team, Activity_Log
-import inspect
-
+from datetime import datetime, timedelta
 
 @login_required
 def search_users(request):
@@ -93,13 +91,17 @@ def show_team(request, team_id):
     team = Team.objects.get(pk=team_id)
     is_admin = user == team.admin_user
     team_members = team.members.all()
+    #Paginate the team members
+    paginator = Paginator(team.members.all(), 5) 
     if request.method == "POST":
+        page_number = request.POST.get("page")
+        page_obj = paginator.get_page(page_number)
         if request.POST.get("userToAdd"):
             userToAddString = request.POST['userToAdd']
             userToAdd = User.objects.get(username = userToAddString)
             team.members.add(userToAdd)
             userToAdd.teams.add(team)
-            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
+            return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin})
         else:
             # User has searched for something on the search bar
             q = request.POST["q"]
@@ -109,11 +111,15 @@ def show_team(request, team_id):
             else:
                 queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
             if(queried_users.count() > 0):
-                return render(request, "show_team.html",{"q":q, "users":queried_users, "team": team, "team_id" : team_id, 'team_members':team_members, 'is_admin':is_admin})
+                page_number = request.POST.get("page")
+                page_obj = paginator.get_page(page_number)
+                return render(request, "show_team.html",{"q":q, "users":queried_users, "team": team, "team_id" : team_id, 'team_members': team_members, "page_obj": page_obj, 'is_admin':is_admin})
 
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name
-    return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'show_team.html', {'team' : team, 'team_members': team_members, "page_obj": page_obj, 'is_admin':is_admin})
 
 @login_required
 def remove_member(request, team_id, member_username):
@@ -141,7 +147,6 @@ def remove_task(request,task_id):
 
 @login_required
 def view_task(request, team_id=1, task_id=1):
-    print("in view task")
     team = Team.objects.get(pk=team_id)
     task = Task.objects.get(pk=task_id)
     user =  get_user(request)
@@ -157,6 +162,8 @@ def view_task(request, team_id=1, task_id=1):
                 task.task_completed = True #we clicked on mark as done, so it is now done
         elif 'edit_submit' in request.POST:
             form = EditTaskForm(request.POST)
+            if datetime.now().date() > task.due_date:
+                form.fields['due_date'].disabled = True
             #otherwise, we have submitted the whole form, so save it
             #get the value of the complete button 
             if form.is_valid():
@@ -176,6 +183,11 @@ def view_task(request, team_id=1, task_id=1):
 
     #fill the form with the values from the task itself to begin with
     form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date})
+    #check if due date has passed, if it has, make due_date not editable
+    if datetime.now().date() > task.due_date:
+        form.fields['due_date'].disabled = True
+        #form.add_prefix('due_date', 'This task is overdue')
+        #form.fields['due_date'].help_text = "This task is overdue"
     form2 = AssignTaskForm(specific_team=team, specific_task=task)
 
 
@@ -211,9 +223,8 @@ def user_activity_log(request, team_id, user_id):
     user = User.objects.get(pk=user_id)
     if Activity_Log.objects.filter(user=user).exists():
         log = Activity_Log.objects.get(user=user)
-        #contact_list = Contact.objects.all()
         log.log.reverse() #reverse to have it in order of most recent
-        paginator = Paginator(log.log, 10)  # Show 25 contacts per page.
+        paginator = Paginator(log.log, 10)  # Show 10 logs per page
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
         return render(request, "activity_log.html", {"page_obj": page_obj})

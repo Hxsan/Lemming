@@ -172,8 +172,8 @@ class EditTaskForm(forms.ModelForm):
                    'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today})}
 
     def is_valid(self):
-        original_valid =  super().is_valid()
-        return original_valid and self.cleaned_data['due_date']>(date.today() - timedelta(1)) #ensure due date is later or equal to today
+        original_valid = super().is_valid()
+        return original_valid and (self.fields['due_date'].disabled or self.cleaned_data['due_date']>(date.today() - timedelta(1))) #ensure due date is later or equal to today
 
     def save(self, old_task):
         task = super().save(commit=False)

@@ -73,3 +73,9 @@ class Team(models.Model):
 
     def __str__(self):
         return self.team_name
+
+class UserTimeSpent(models.Model):
+    """Model used to store time each user spends on each task"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    time_spent = models.BigIntegerField(default=0, null=True)

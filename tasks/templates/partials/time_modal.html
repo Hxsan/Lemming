@@ -13,11 +13,7 @@
                 </h3>
                 <form method="post" action="{% url 'submit_time' team_id=team.id task_id=task.id %}">
                     {% csrf_token %} 
-                    <p> Enter how much 
-                    <span data-toggle="tooltip" title="Time submitted accumulates">
-                        <b> more </b> 
-                    </span> 
-                        time you've spent on this task. </p>
+                    <p> Enter how much time you've spent on this task. </p>
                     <div class="row">
                         <div class="col-4">
                             <input class="form-control" type="number" min="0" name="hours" placeholder="Hours">
@@ -30,9 +26,16 @@
                         </div>
                     </div>
             </div>
-            <div class="modal-footer">
-                <a href="{% url 'reset_time' team_id=team.id task_id=task.id %}" class="btn btn-secondary">Reset</a>
-                <input type="submit" class="btn btn-primary" value="Add Time">
+            <div class="modal-footer d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'reset_time' team_id=team.id task_id=task.id %}?action=total" class="btn btn-sm btn-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Total Reset
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'reset_time' team_id=team.id task_id=task.id %}?action=user" class="btn btn-sm btn-secondary">Your Reset</a>
+                    <input type="submit" class="btn btn-sm btn-primary" value="Add Time">
+                </div>
                 </form>
             </div>
         </div>

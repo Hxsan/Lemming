@@ -10,7 +10,7 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm, SubmitTimeForm
 from tasks.helpers import login_prohibited
-from tasks.models import User, Task, Team
+from tasks.models import User, Task, Team, UserTimeSpent
 
 @login_required
 def search_users(request):
@@ -229,17 +229,40 @@ def summary_report(request):
 @login_required
 def submit_time(request, team_id, task_id): 
     task = Task.objects.get(pk=task_id)
+    user = request.user
     if request.method == 'POST':
         form = SubmitTimeForm(request.POST)
         if form.is_valid():
-            form.save(task)
+            form.save(user, task)
     return redirect('view_task', team_id=team_id, task_id=task_id)
 
 @login_required
 def reset_time(request, team_id, task_id):
+    action = request.GET.get('action')
     task = Task.objects.get(pk=task_id)
-    task.time_spent = 0
-    task.save()
+    user = request.user
+
+    # Reset ALL time spent
+    if action == 'total':
+        all_user_time_spent = UserTimeSpent.objects.filter(task=task)
+        for user_time_spent in all_user_time_spent:
+            user_time_spent.time_spent = 0
+            user_time_spent.save()
+        task.time_spent = 0
+        task.save()
+
+    # Reset only the user's time spent
+    elif action == 'user':
+        user_time_spent = get_object_or_404(
+            UserTimeSpent,
+            user=user,
+            task=task,
+        )
+        task.time_spent -= user_time_spent.time_spent
+        user_time_spent.time_spent = 0
+        user_time_spent.save()
+        task.save()
+
     return redirect('view_task', team_id=team_id, task_id=task_id) 
     
 @login_prohibited

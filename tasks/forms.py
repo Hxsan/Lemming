@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Task, Team
+from .models import User, Task, Team, UserTimeSpent
 from datetime import date, timedelta
 
 class LogInForm(forms.Form):
@@ -231,9 +231,22 @@ class SubmitTimeForm(forms.Form):
         self.cleaned_seconds = seconds if seconds is not None else 0
 
 
-    def save(self, task):
+    def save(self, user, task):
         total_seconds = self.cleaned_hours * 3600 + self.cleaned_minutes * 60 + self.cleaned_seconds
+        
+        # Get or create time spent instance of user on a task
+        user_time_spent, created = UserTimeSpent.objects.get_or_create(
+            user=user,
+            task=task,
+            defaults={'time_spent': total_seconds}
+        )
 
+        # Update instance if found in database
+        if not created:
+            user_time_spent.time_spent = total_seconds
+            user_time_spent.save()
+
+        # Accumulate total time spent on task
         task.time_spent += total_seconds
 
         task.save()

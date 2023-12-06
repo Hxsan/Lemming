@@ -114,7 +114,7 @@ def show_team(request, team_id):
             team.members.add(userToAdd)
             userToAdd.teams.add(team)
             return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
-        else:
+        elif request.POST.get("q"):
             # User has searched for something on the search bar
             q = request.POST["q"]
             results = q.split()

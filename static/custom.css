@@ -132,9 +132,18 @@ body{
   background-color: #0C1821;
 }
 
-.form-control, .form-control:focus {
+.form-control, .form-control:focus {    
   background: transparent;
   color: #fff;
+}
+
+.taskCreationCard {
+  max-width: 18rem; 
+  background-color: #ccc9dc;
+}
+
+.existingTaskCard {
+  max-width: 18rem; 
 }
 
 #search-users-items{
@@ -155,6 +164,10 @@ body{
 }
 
 #teamSidebar{
+  background-color: #0C1821;
+}
+
+#viewTeamSidebar{
   background-color: #0C1821;
 }
 

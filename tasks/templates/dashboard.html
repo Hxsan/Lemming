@@ -4,7 +4,7 @@
   <!-- Height is calculated by the height of the page minus the nav-menu height --> 
   <div class="row row-cols-3 bg-gradient" style="height: calc(100vh - 55.99px)"> 
 	<!-- Sidebar Left -->
-	<div class="col-2 bg-dark">
+	<div id="teamSidebar" class="col-2">
 		{% include 'partials/sidebar.html' %}
 	</div>
 	<!-- Main Content Section -->
@@ -42,7 +42,7 @@
 		</div>
 	</div>
 	<!-- Sidebar right -->
-	<div class="col-2 flex-column bg-gradient bg-success">
+	<div class="col-2 flex-column" style="background-color:#0C1821">
 		<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
 			<div class="card-body">
 				<h5 class="card-title">View Team</h5>

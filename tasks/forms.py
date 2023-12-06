@@ -243,8 +243,9 @@ class SubmitTimeForm(forms.Form):
 
         # Update instance if found in database
         if not created:
-            user_time_spent.time_spent = total_seconds
-            user_time_spent.save()
+            user_time_spent.time_spent += total_seconds
+        
+        user_time_spent.save()
 
         # Accumulate total time spent on task
         task.time_spent += total_seconds

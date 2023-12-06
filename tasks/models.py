@@ -2,7 +2,7 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import datetime
-from datetime import date
+from datetime import date, datetime
 from libgravatar import Gravatar
 
 class User(AbstractUser):
@@ -79,3 +79,8 @@ class UserTimeSpent(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     time_spent = models.BigIntegerField(default=0, null=True)
+    timestamp = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.timestamp = datetime.now()
+        super(UserTimeSpent, self).save(*args, **kwargs)

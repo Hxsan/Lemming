@@ -30,7 +30,9 @@
                         </div>
                         <div class="move-row">
                             <li>
-                                <a class="nav-link" href="{% url 'create_team' %}"> Create +</a>
+                                {% if request.resolver_match.view_name == 'dashboard' %}
+                                    <a class="nav-link" href="{% url 'create_team' %}"> Create +</a>
+                                {% endif %}
                             </li> 
                         {% for team in teams %}
                             <li class="nav-object my-1">

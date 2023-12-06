@@ -224,7 +224,17 @@ def view_task(request, team_id=1, task_id=1):
 
 @login_required
 def summary_report(request):
-    return render(request, 'summary_report.html')
+    user = request.user
+    teams = user.teams.all()
+    user_times = UserTimeSpent.objects.filter(
+        user=user,
+    )
+    context = {
+        'user_times': user_times,
+        'teams': teams,
+    }
+
+    return render(request, 'summary_report.html', context)
 
 @login_required
 def submit_time(request, team_id, task_id): 

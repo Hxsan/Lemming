@@ -132,6 +132,12 @@ body{
   background-color: #0C1821;
 }
 
+.authenticationForm{
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+}
+
 .form-control, .form-control:focus {    
   background: transparent;
   color: #fff;

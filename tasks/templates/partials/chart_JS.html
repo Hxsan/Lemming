@@ -1,4 +1,7 @@
 <script>
+
+     // BAR CHART
+
     var data = [];
     var labels = [];
 
@@ -62,39 +65,83 @@
         }
     });
 
+
+
+
+    
+
+    // LINE CHART
+
+
+    var lineData = [];
+
+    // Create data based on time logs
+    {% for time_log in time_logs %}
+        var timestamp = '{{ time_log.timestamp|date:"Y-m-d" }}';
+        var loggedTime = {{ time_log.logged_time }};
+
+        var day = lineData.findIndex(entry => entry.x == timestamp);
+
+        // If new day, make new entry in lineData, else accumulate in existing day
+        if (day == -1) {
+            lineData.push({ x: timestamp, y: loggedTime });
+        } else {
+            lineData[day].y += loggedTime;
+        }
+    {% endfor %}
+
+    // Variables used for formatting line data
+    max = Math.max(...lineData.map(entry => entry.y));
+    var formattedLineData = []; 
+
+    // Change scale to minutes if max time is less than an hour
+    if (max < 3600) { 
+        formattedLineData = lineData.map(entry => ({ x: entry.x, y: entry.y / 60 }));
+        yLabel = 'Time (mins)';
+    } else { // Change scale to hours if max time is more than an hour
+        formattedLineData = lineData.map(entry => ({ x: entry.x, y: entry.y / 3600 }));
+        yLabel = 'Time (hours)';
+    }
+
     // Create line chart based on data
     var lineCanvas = document.getElementById('lineChart').getContext('2d');
     var lineChart = new Chart(lineCanvas, {
         type: 'line',
+
         data: {
-            
+            datasets: [{
+                label: 'Logged Time',
+                data: formattedLineData,
+            }]
         },
+
         options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: yLabel
+                    }
+                }
+            },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Time spent on tasks over different periods'
+                    text: 'Daily time spent on all tasks'
                 },
                 legend: {
                     display: false
                 }
-            },
-            scales: {
-                x: {
-                    type: 'category', // Assuming you're using categories for week/month/year labels
-                    title: {
-                        display: true,
-                        text: 'Time Period'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: yLabel,
-                    }
-                }
             }
         }
+
     });
 
 </script>

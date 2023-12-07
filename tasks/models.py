@@ -63,7 +63,7 @@ class Task(models.Model):
     created_by = models.ForeignKey('Team', on_delete=models.CASCADE, null=True)
     assigned_to = models.ManyToManyField(User)
     task_completed = models.BooleanField(default=False)
-    time_spent = models.BigIntegerField(default=0, null=True) # Stores as total number of seconds
+    time_spent = models.BigIntegerField(default=0, null=True) # Total time spent on task
 
 class Team(models.Model):
     """Model used to represent a team"""
@@ -75,12 +75,14 @@ class Team(models.Model):
         return self.team_name
 
 class UserTimeSpent(models.Model):
-    """Model used to store time each user spends on each task"""
+    """Model used to store total time each user spends on each task"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    time_spent = models.BigIntegerField(default=0, null=True)
-    timestamp = models.DateTimeField(auto_now=True)
+    time_spent = models.BigIntegerField(default=0, null=True) # Specific time spent for each user
 
-    def save(self, *args, **kwargs):
-        self.timestamp = datetime.now()
-        super(UserTimeSpent, self).save(*args, **kwargs)
+class TimeLog(models.Model):
+    """Model used to log time spent on tasks after every update"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    logged_time = models.BigIntegerField(default=0, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)

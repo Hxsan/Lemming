@@ -10,7 +10,7 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm, SubmitTimeForm
 from tasks.helpers import login_prohibited
-from tasks.models import User, Task, Team, UserTimeSpent
+from tasks.models import User, Task, Team, UserTimeSpent, TimeLog
 
 @login_required
 def search_users(request):
@@ -217,7 +217,8 @@ def view_task(request, team_id=1, task_id=1):
         'new_users': selected_users[0],
         'removed_users': selected_users[1],
         'is_admin' : team.admin_user==user,
-        'can_mark_as_complete': task.assigned_to.contains(user) or team.admin_user==user
+        'can_mark_as_complete': task.assigned_to.contains(user) or team.admin_user==user,
+        'is_assigned':  task.assigned_to.contains(user)
     }
 
     return render(request, 'task_information.html', context)
@@ -226,11 +227,18 @@ def view_task(request, team_id=1, task_id=1):
 def summary_report(request):
     user = request.user
     teams = user.teams.all()
+
     user_times = UserTimeSpent.objects.filter(
         user=user,
     )
+
+    time_logs = TimeLog.objects.filter(
+        user=user,
+    ).order_by('timestamp')
+
     context = {
         'user_times': user_times,
+        'time_logs': time_logs,
         'teams': teams,
     }
 
@@ -259,6 +267,8 @@ def reset_time(request, team_id, task_id):
             user_time_spent.time_spent = 0
             user_time_spent.save()
         task.time_spent = 0
+        # Delete all time logs associated with the task
+        TimeLog.objects.filter(task=task).delete() 
         task.save()
 
     # Reset only the user's time spent
@@ -271,6 +281,8 @@ def reset_time(request, team_id, task_id):
         task.time_spent -= user_time_spent.time_spent
         user_time_spent.time_spent = 0
         user_time_spent.save()
+        # Delete all time logs associated with the user on the task
+        TimeLog.objects.filter(user=user, task=task).delete()
         task.save()
 
     return redirect('view_task', team_id=team_id, task_id=task_id) 

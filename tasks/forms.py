@@ -2,8 +2,8 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Task, Team, UserTimeSpent
-from datetime import date, timedelta
+from .models import User, Task, Team, UserTimeSpent, TimeLog
+from datetime import date, timedelta, datetime
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -246,6 +246,14 @@ class SubmitTimeForm(forms.Form):
             user_time_spent.time_spent += total_seconds
         
         user_time_spent.save()
+
+        # Log the entry with a specific timestamp
+        TimeLog.objects.create(
+            user=user,
+            task=task,
+            logged_time=total_seconds,
+            timestamp=datetime.now()
+        )
 
         # Accumulate total time spent on task
         task.time_spent += total_seconds

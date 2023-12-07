@@ -63,7 +63,6 @@ class Task(models.Model):
     created_by = models.ForeignKey('Team', on_delete=models.CASCADE, null=True)
     assigned_to = models.ManyToManyField(User)
     task_completed = models.BooleanField(default=False)
-    time_spent = models.BigIntegerField(default=0, null=True) # Total time spent on task
 
 class Team(models.Model):
     """Model used to represent a team"""

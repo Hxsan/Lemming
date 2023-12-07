@@ -205,7 +205,9 @@ def view_task(request, team_id=1, task_id=1):
     if not form2.get_assigned_users(task):
         alert_message = "This task has no assigned users." 
 
-    
+    # Calculate total time spent on a task
+    time_spent_queryset = UserTimeSpent.objects.filter(task=task)
+    total_time_spent = sum(instance.time_spent for instance in time_spent_queryset)
 
     context = {
         'team': team,
@@ -218,7 +220,8 @@ def view_task(request, team_id=1, task_id=1):
         'removed_users': selected_users[1],
         'is_admin' : team.admin_user==user,
         'can_mark_as_complete': task.assigned_to.contains(user) or team.admin_user==user,
-        'is_assigned':  task.assigned_to.contains(user)
+        'is_assigned':  task.assigned_to.contains(user),
+        'total_time_spent': total_time_spent
     }
 
     return render(request, 'task_information.html', context)
@@ -266,10 +269,8 @@ def reset_time(request, team_id, task_id):
         for user_time_spent in all_user_time_spent:
             user_time_spent.time_spent = 0
             user_time_spent.save()
-        task.time_spent = 0
         # Delete all time logs associated with the task
         TimeLog.objects.filter(task=task).delete() 
-        task.save()
 
     # Reset only the user's time spent
     elif action == 'user':
@@ -278,12 +279,10 @@ def reset_time(request, team_id, task_id):
             user=user,
             task=task,
         )
-        task.time_spent -= user_time_spent.time_spent
         user_time_spent.time_spent = 0
         user_time_spent.save()
         # Delete all time logs associated with the user on the task
         TimeLog.objects.filter(user=user, task=task).delete()
-        task.save()
 
     return redirect('view_task', team_id=team_id, task_id=task_id) 
     

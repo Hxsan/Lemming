@@ -255,9 +255,4 @@ class SubmitTimeForm(forms.Form):
             timestamp=datetime.now()
         )
 
-        # Accumulate total time spent on task
-        task.time_spent += total_seconds
-
-        task.save()
-
         return task

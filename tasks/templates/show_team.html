@@ -44,7 +44,7 @@
         <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7" id="show-team-table">
             <h1 id="show-team-header">Team {{team.team_name}}</h1>
             <!--Show the team members in the team as a list-->
-            <table>
+            <table class="table table-dark table-bordered">
                 <thead>
                     <tr>
                         <th>Username</th>
@@ -56,13 +56,13 @@
                 <tbody>
                     {% for member in team_members %}
                         <tr>
-                            <td>
-                                {% if member == team.admin_user %}
-                                    {{ member.username }} (Admin)
-                                {% else %}
-                                    {{ member.username }}
+                            
+                            {% if member == team.admin_user %}
+                                <td colspan="2">{{ member.username }} (Admin)</td>
+                            {% else %}
+                                <td>{{ member.username }}</td>
                             {% endif %}
-                            </td>
+                           
                             {% if is_admin %}
                                 {% if member != team.admin_user %}
                                     <td>

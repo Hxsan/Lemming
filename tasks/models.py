@@ -21,7 +21,6 @@ class User(AbstractUser):
     teams = models.ManyToManyField(
         "Team"
     )
-
     """ForeignKey(
         "Team",
         on_delete=models.CASCADE,
@@ -71,3 +70,9 @@ class Team(models.Model):
 
     def __str__(self):
         return self.team_name
+    
+class Activity_Log(models.Model):
+    """Model used to store an activity log"""
+    log = models.JSONField('log', null=False, default=list)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null = True)
+

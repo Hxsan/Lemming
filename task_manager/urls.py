@@ -24,6 +24,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/create_team', views.create_team, name = "create_team"),
     path('dashboard/show_team/<int:team_id>/', views.show_team, name = "show_team"),
+    path('dashboard/show_team/<int:team_id>/user_activity_log/<int:user_id>', views.user_activity_log, name = "activity_log"),
     path('dashboard/view-task/<int:team_id>/<int:task_id>/', views.view_task, name='view_task'),
     path('log_in/', views.LogInView.as_view(), name='log_in'),
     path('log_out/', views.log_out, name='log_out'),

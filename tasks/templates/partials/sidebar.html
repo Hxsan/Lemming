@@ -56,6 +56,28 @@
 <script>
     $(document).ready(function() {
 
+        // Activates content of nav-items based on URL input
+        function setActivefromURL() {
+            var url = window.location.href;
+            var splitURL = url.split('#');
+                var id = splitURL[1];
+                var activeTab = $('#' + id);
+                if (activeTab.length > 0) {
+                    $('.nav-link').removeClass('active');
+                    $('.tab-pane').removeClass('active');
+
+                    // Activate the tab corresponding to the URL ID
+                    activeTab.addClass('active');
+                    $('a[href="#' + id + '"]').addClass('active');
+                }
+            }
+        setActivefromURL();
+
+        // Changes active tab directly from the dashboard
+        window.onhashchange = function() {
+            setActivefromURL();
+        }
+
         // Activates content of nav-items on click
 
         $('.nav-object').on('click', function(e) {

@@ -20,11 +20,35 @@ class SearchTeamViewTestCase(TestCase):
         self.user = User.objects.get(username='@johndoe')
         self.team = self.user.teams.all()[0]
     
+    def test_no_users_appear_on_empty_search(self):
+        q = ""
+        userToReturn = User.objects.get(username = "@janedoe")
+        response = self.client.post(self.url, {"q":q, "users":userToReturn, "team": self.team, "team_id" : 1, 'team_members': self.team.members.all(), 'is_admin': True}, follow=True)
+        self.assertNotContains(response, "Jane Doe")
+
     def test_user_appears_in_search_when_correct_spelling(self):
         q = "Jane"
         userToReturn = User.objects.get(username = "@janedoe")
         response = self.client.post(self.url, {"q":q, "users":userToReturn, "team": self.team, "team_id" : 1, 'team_members': self.team.members.all(), 'is_admin': True}, follow=True)
         self.assertContains(response, "Jane Doe")
+
+    def test_user_appears_in_search_with_username(self):
+        q = "@jan"
+        userToReturn = User.objects.get(username = "@janedoe")
+        response = self.client.post(self.url, {"q":q, "users":userToReturn, "team": self.team, "team_id" : 1, 'team_members': self.team.members.all(), 'is_admin': True}, follow=True)
+        self.assertContains(response, "Jane Doe")
+
+    def test_user_does_not_appear_when_inputting_space_between_search(self):
+        q = "@jan e"
+        userToReturn = User.objects.get(username = "@janedoe")
+        response = self.client.post(self.url, {"q":q, "users":userToReturn, "team": self.team, "team_id" : 1, 'team_members': self.team.members.all(), 'is_admin': True}, follow=True)
+        self.assertNotContains(response, "Jane Doe")
+
+    def test_no_results_when_only_atsymbol_inputted(self):
+        q = "@"
+        userToReturn = User.objects.get(username = "@janedoe")
+        response = self.client.post(self.url, {"q":q, "users":userToReturn, "team": self.team, "team_id" : 1, 'team_members': self.team.members.all(), 'is_admin': True}, follow=True)
+        self.assertNotContains(response, "Jane Doe")
 
     def test_user_does_not_appear_in_search_when_incorrect_spelling(self):
         q = "jan"

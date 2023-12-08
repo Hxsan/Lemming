@@ -21,11 +21,17 @@
 <div class="container">
     <div class="row">
         <div class="col-7">
+            {%if form.fields.due_date.disabled%}
+            <div class="alert alert-danger" role="alert">
+                    This task is overdue
+            </div>
+            {%endif%}
             <h2>Task Details</h2>
             <form action="{% url 'view_task' team_id=team.id task_id=task.id %}"method = "post">
                 {% csrf_token %}
                 <!--The below part with dont show feedback is is so that we don't show the validation mesages when the form is opened with the values-->
                 {% include 'partials/bootstrap_form.html' with form=form dont_show_feedback=True%} 
+                <div class="d-flex" style="gap: 5px;">
                 {%if can_mark_as_complete %} <!--So either team admin or assigned to this task-->
                     {%if task.task_completed %}
                         <input type="Submit" class="btn btn-success" name="task_completion_value" value="Completed"><!--</a>-->
@@ -34,9 +40,9 @@
                     {%endif%}
                 {%endif%}
                 <!--This below hidden input is to store the value of task_completed as it changes-->
-            <div class="d-inline-block">
                 <input type="text" hidden="True" name="task_completed" value={{task.task_completed}}>
                 <input type="Submit" name="edit_submit" value = "Save" class="btn btn-primary">
+            </div>
             </form>
             <!-- ADD PROPER ADMIN CHECK-->
             {% if is_admin %}
@@ -44,11 +50,11 @@
                     {% csrf_token %}
                     <button class="btn btn-danger" type="submit">Remove Task</button>
                 </form>
-            </div>
             {% endif %}
+            </div>
         </div>
         <div class="col-auto">
-            <div class="mt-5" style="border-left: 2px dashed black; height: 81%"></div>
+            <div class="mt-5" style="border-left: 2px dashed white; height: 81%"></div>
         </div>
         <div class="col-4">
             <h2>Assigned To</h2>

@@ -1,7 +1,7 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div class="container">
-  <div class="row">
+  <div class="row creationForm">
     <div class="col-12">
       <h1>Sign up</h1>
       <form action="{% url 'sign_up' %}" method="post">
@@ -9,6 +9,7 @@
         {% include 'partials/bootstrap_form.html' with form=form %}
         <input type="submit" value="Sign up" class="btn btn-primary">
       </form>
+      <p style="margin-top:10px;">Returning user? <a href={% url 'log_in' %}>Log in</a></p>
     </div>
   </div>
 </div>

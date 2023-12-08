@@ -98,7 +98,12 @@ class Team(models.Model):
     def __str__(self):
         return self.team_name
     
-
 class Notification(models.Model):
     user_notified = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
     message = models.CharField(max_length=255)
+
+class Activity_Log(models.Model):
+    """Model used to store an activity log"""
+    log = models.JSONField('log', null=False, default=list)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null = True)
+

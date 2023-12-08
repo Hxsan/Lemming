@@ -142,14 +142,15 @@ def show_team(request, team_id):
     if request.method == "POST":
         page_number = request.POST.get("page")
         page_obj = paginator.get_page(page_number)
+        # User has added someone to the team
         if request.POST.get("userToAdd"):
             userToAddString = request.POST['userToAdd']
             userToAdd = User.objects.get(username = userToAddString)
             team.members.add(userToAdd)
             userToAdd.teams.add(team)
-            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin, "page_obj": page_obj})
+            return redirect('show_team', team_id=team_id)
+        # User has searched for something on the search bar
         elif request.POST.get("q"):
-            # User has searched for something on the search bar
             q = request.POST["q"]
             results = q.split()
             if q.startswith("@") and len(results) == 1 and len(q.strip()) > 1:
@@ -164,13 +165,11 @@ def show_team(request, team_id):
                 page_obj = paginator.get_page(page_number)
                 return render(request, "show_team.html",{"q":q, "users":queried_users, "team": team, "team_id" : team_id, 'team_members': team_members, "page_obj": page_obj, 'is_admin':is_admin})
         else:
-            return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin})
-
-    #get a list of the users in the team, and pass it in
-    #also pass in the team itself to get the name
+            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin, "page_obj": page_obj})
+            
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    return render(request, 'show_team.html', {'team' : team, 'team_members': team_members, "page_obj": page_obj, 'is_admin':is_admin})
+    return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin})
 
 @login_required
 def remove_member(request, team_id, member_username):

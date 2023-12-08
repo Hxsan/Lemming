@@ -2,7 +2,7 @@
 {% block content %}
 
 <style>
-
+    /*
     table{
         width: 100%;
         border-collapse: collapse;
@@ -23,7 +23,7 @@
         border-bottom: 2px solid rgb(209, 209, 209);
         background-color: rgb(46, 46, 44);
     }
-
+    */
     .remove-member-button {
         background-color: #cb0808; /* Red background color */
         color: #fff; /* White text color */
@@ -47,14 +47,14 @@
             <table class="table table-dark table-bordered">
                 <thead>
                     <tr>
-                        <th>Username</th>
+                        <th scope="col">Username</th>
                         {% if is_admin %}
-                            <th>Action</th>
+                            <th scope="col">Action</th>
                         {% endif %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for member in team_members %}
+                    {%for member in page_obj%}
                         <tr>
                             
                             {% if member == team.admin_user %}
@@ -70,33 +70,44 @@
                                         {% csrf_token %}
                                         <button class="remove-member-button" type="submit">Remove Member</button>
                                         </form>
+                                        <a href="{%url 'activity_log' team_id=team.id user_id=member.id%}" class="btn btn-secondary btn-sm">View Activity Log</a>
                                     </td>
                                     {% endif %}
                             {% endif %}
                         </tr>
-                    {% endfor %}
+                    {%endfor%}
                 </tbody>
             </table>
-
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+                {%else%}
+                <li class="page-item disabled"><a class="page-link" href="#">&laquo; First</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#">Prev</a></li>
+                {% endif %}
+                        
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                {%else%}
+                    <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#">Last &raquo;</a></li>
+                {% endif %}
+            </ul>
+            <span class="current">
+                <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</p>
+            </span>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
             {% if is_admin %}
-                <form method="post" action="{% url 'delete_team' team_id=team.id %}" class="d-inline">
+            <form class="d-flex" method="POST" action="{% url 'show_team' team_id=team.id%}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger float-end" style="margin-top:20px">Delete Team</button>
-                </form>
-            {% endif %}
-        </div>
-
-        <div class="col-auto">
-            <div class="mt-5" style="border-left: 2px dashed white; height: 100%"></div>
-        </div>
-
-        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-            <form class="d-flex" method="POST" action="{% url 'show_team' team_id=team.id  %}">
-                {% csrf_token %}
-                <input class="form-control me-2" type="search" id="query" name="q" placeholder="User Search" style="margin-top:10px">
-                <button class="btn btn-outline-secondary" style="margin-top:10px">Search</button>
+                <input type = "hidden" name="page" value="{{page_obj.number}}"/>
+                <input class="form-control me-2" type="search" id="query" name="q" placeholder="Search...">
+                <button class="btn btn-outline-secondary">Search</button>
             </form>
-            <!--Use code from finding all the users, and filter and find only those who are not in the same team as the current user-->
+            {%endif%}
             {% if q %}
 
                 <h2 style="margin-top: 10px;">Users: {{q}}</h2>
@@ -109,6 +120,7 @@
                                     {% csrf_token %}
                                     {% if is_admin %}
                                         <input type = "hidden" name="userToAdd" value="{{user}}"/>
+                                        <input type = "hidden" name="page" value="{{page_obj.number}}"/>
                                         <input type="submit" class="btn btn-outline-success" value="Add to Team"/>
                                     {% endif %}
                                 </form>
@@ -116,11 +128,15 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-            
-            {% endif %}
-
-        </div> 
+            {% endif%}
+        </div>        
     </div>
 </div>
+{% if is_admin %}
+<form method="post" action="{% url 'delete_team' team_id=team.id%}" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger float-end">Delete Team</button>
+</form>
+{% endif %}
     
 {% endblock %}  

@@ -24,13 +24,12 @@ class LogInForm(forms.Form):
 
 class UserForm(forms.ModelForm):
     """Form to update user profiles."""
-
     class Meta:
         """Form options."""
 
         model = User
         fields = ['first_name', 'last_name', 'username', 'email']
-
+    
 class NewPasswordMixin(forms.Form):
     """Form mixing for new_password and password_confirmation fields."""
 
@@ -155,6 +154,8 @@ class CreateTeamForm(forms.ModelForm):
             team_name=self.cleaned_data.get('team_name'), 
             admin_user=user,
         )
+        user.teams.add(team)
+        team.members.add(user)
         return team
 
 """Maybe need a form of this type eventually"""    
@@ -171,8 +172,8 @@ class EditTaskForm(forms.ModelForm):
                    'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today})}
 
     def is_valid(self):
-        original_valid =  super().is_valid()
-        return original_valid and self.cleaned_data['due_date']>(date.today() - timedelta(1)) #ensure due date is later or equal to today
+        original_valid = super().is_valid()
+        return original_valid and (self.fields['due_date'].disabled or self.cleaned_data['due_date']>(date.today() - timedelta(1))) #ensure due date is later or equal to today
 
     def save(self, old_task):
         task = super().save(commit=False)
@@ -202,12 +203,17 @@ class AssignTaskForm(forms.Form):
 
     def save(self, task):
         original_users = set(task.assigned_to.all())
-
-        task.assigned_to.clear()
+        #task.assigned_to.clear()
         selected_users = self.cleaned_data['usernames']
-        task.assigned_to.add(*selected_users)
+        #task.assigned_to.add(*selected_users)
+
+        #remove users not in the final assignment
+        for user in task.assigned_to.all():
+            if user not in selected_users:
+                task.assigned_to.remove(user)
 
         new_users = set(selected_users) - original_users
         removed_users = original_users - set(selected_users)
+        task.assigned_to.add(*new_users) #add the new users
 
         return (list(new_users), list(removed_users))

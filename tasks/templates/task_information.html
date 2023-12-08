@@ -21,6 +21,11 @@
 <div class="container">
     <div class="row">
         <div class="col-7">
+            {%if form.fields.due_date.disabled%}
+            <div class="alert alert-danger" role="alert">
+                    This task is overdue
+            </div>
+            {%endif%}
             <h2>Task Details</h2>
             <form action="{% url 'view_task' team_id=team.id task_id=task.id %}"method = "post">
                 {% csrf_token %}
@@ -37,6 +42,7 @@
                 <!--This below hidden input is to store the value of task_completed as it changes-->
                 <input type="text" hidden="True" name="task_completed" value={{task.task_completed}}>
                 <input type="Submit" name="edit_submit" value = "Save" class="btn btn-primary">
+            </div>
             </form>
             <!-- ADD PROPER ADMIN CHECK-->
             {% if is_admin %}

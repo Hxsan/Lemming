@@ -83,6 +83,14 @@ class ViewTaskViewTestCase(TestCase):
         self.task.refresh_from_db()
         self.assertEqual(self.task.title, old_title) #make sure the task is still the same
 
+    def test_overdue_task(self):
+        self.task.due_date = date.today() - timedelta(1) #make it yesterday
+        self.task.save()
+        response = self.client.get(self.url, follow=True)
+        form = response.context['form']
+        self.assertTrue(form.fields['due_date'].disabled)
+        self.assertContains(response, 'This task is overdue', html=True)
+
     def test_mark_as_complete_shows_when_user_is_allowed(self):
         #basically check if mark_as_complete is true and that we are the admin
         response = self.client.get(self.url, follow=True)

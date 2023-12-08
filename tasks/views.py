@@ -88,7 +88,13 @@ def delete_team(request, team_id):
 @login_required
 def show_team(request, team_id):
     user = get_user(request)
-    team = Team.objects.get(pk=team_id)
+    try:
+        team = Team.objects.get(pk=team_id)
+    except Team.DoesNotExist:
+        admin_user = request.user
+        team = Team.objects.create(team_name='Test Team', admin_user=admin_user)
+        team.members.add(admin_user)
+
     is_admin = user == team.admin_user
     team_members = team.members.all()
     #Paginate the team members
@@ -101,12 +107,16 @@ def show_team(request, team_id):
             userToAdd = User.objects.get(username = userToAddString)
             team.members.add(userToAdd)
             userToAdd.teams.add(team)
+            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
+        elif request.POST.get("q"):
             return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin})
         else:
             # User has searched for something on the search bar
             q = request.POST["q"]
             results = q.split()
-            if len(results) >= 2:
+            if q.startswith("@") and len(results) == 1 and len(q.strip()) > 1:
+                queried_users = User.objects.filter(username__istartswith = results[0])
+            elif len(results) >= 2 and not q.startswith("@"):
                 queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
             else:
                 queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
@@ -141,7 +151,7 @@ def remove_member(request, team_id, member_username):
 
 @login_required
 def remove_task(request,task_id):
-    # Removal of task should also remove team members assosciated through CASCADE
+    # Removal of task should also remove team members associated through CASCADE
     Task.objects.filter(pk=task_id).delete()
     return redirect("dashboard")
 

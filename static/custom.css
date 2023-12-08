@@ -37,7 +37,8 @@ p.cover-text {
 }
 
 .cover-card {
-  background-color: rgba(245, 245, 245, 0.6);
+  color:#000;
+  background-color: #CCC9DC;
   max-width: 30rem;
   padding-top: 30px;
   padding-left: 50px;
@@ -48,7 +49,6 @@ p.cover-text {
 .cover-card-block {
   opacity: 1
 }
-
 
 /*
  * forms
@@ -112,4 +112,75 @@ h3.profile-title {
 .content a:hover {
   text-decoration: underline;
   color: #0d6efd;
+}
+
+/*
+ * Custom changes
+ */
+
+
+body{
+  color:#fff;
+  background-color: #1B2A41;
+}
+
+.highlight{
+  color: #000;
+}
+
+.homeButtons{
+  background-color: #0C1821;
+}
+
+.creationForm{
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+}
+
+.form-control, .form-control:focus {    
+  background: transparent;
+  color: #fff;
+}
+
+.taskCreationCard {
+  max-width: 18rem; 
+  background-color: #ccc9dc;
+}
+
+.existingTaskCard {
+  max-width: 18rem; 
+}
+
+#search-users-items{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #CCC9DC;
+}
+
+#query{
+  margin-bottom: auto;
+}
+
+#show-team-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#teamSidebar{
+  background-color: #0C1821;
+}
+
+#viewTeamSidebar{
+  background-color: #0C1821;
+}
+
+#navbarTop{
+  background: #04080B;
+}
+
+#userDropDownMenu{
+  background-color: #CCC9DC;;
 }

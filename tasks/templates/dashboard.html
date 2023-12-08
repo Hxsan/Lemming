@@ -2,16 +2,16 @@
 {% block content %}
 <div class="container-fluid">
   <!-- Height is calculated by the height of the page minus the nav-menu height --> 
-  <div class="row row-cols-3 bg-gradient" style="height: calc(100vh - 55.99px)"> 
+  <div class="row row-cols-3 " style="height: calc(100vh - 55.99px)"> 
 	<!-- Sidebar Left -->
-	<div class="col-2 bg-dark">
+	<div id="teamSidebar" class="col-2">
 		{% include 'partials/sidebar.html' %}
 	</div>
 	<!-- Main Content Section -->
-	<div class="border col-8 align-items-center">
+	<div class="col-8 align-items-center">
 		<div class="container-fluid">
 		<!-- Main content Header -->
-		  <div class="row m-1 border text-center bg-success bg-gradient">
+		  <div class="row m-1 text-center">
 			 <h1>Welcome to your dashboard {{ user.username }}</h1>
 		  </div>
 		  <div class="row">
@@ -19,14 +19,14 @@
 					{% for team, tasks in team_tasks %}
 						<div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
 							{% ifchanged team.team_name %}
-							<div class="row m-1 border text-center bg-danger bg-gradient">
+							<div class="row m-1 text-center">
 								<h3>Current Team : {{ team.team_name }}</h3>
 							</div>
 							<div class="row m-1">
 								{% for task in tasks %}
 									{% include 'partials/task_card.html' with task_id=task.id %}
 								{% endfor %}
-								<div class="card text-center border-dark m-1" style="max-width: 18rem;">
+								<div class="card text-center text-black border-white m-1 taskCreationCard">
 									<div class="card-body">
 										<h5 class="card-title">Create A Task</h5>
 										<p class="card-text"> + </p>
@@ -42,7 +42,7 @@
 		</div>
 	</div>
 	<!-- Sidebar right -->
-	<div class="col-2 flex-column bg-gradient bg-success">
+	<div class="col-2 flex-column" id="viewTeamSidebar">
 		<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
 			<div class="card-body">
 				<h5 class="card-title">View Team</h5>

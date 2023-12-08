@@ -41,10 +41,10 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12"><!-- class="col-lg-8 col-md-8 col-sm-12 col-xs-12" id="show-team-table">-->
-            <h1>Team {{team.team_name}}</h1>
+        <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7" id="show-team-table">
+            <h1 id="show-team-header">Team {{team.team_name}}</h1>
             <!--Show the team members in the team as a list-->
-            <table class="table table-bordered">
+            <table class="table table-dark table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">Username</th>
@@ -56,13 +56,13 @@
                 <tbody>
                     {%for member in page_obj%}
                         <tr>
-                            <td>
-                                {% if member == team.admin_user %}
-                                    {{ member.username }} (Admin)
-                                {% else %}
-                                    {{ member.username }}
-                                {% endif %}
-                            </td>
+                            
+                            {% if member == team.admin_user %}
+                                <td colspan="2">{{ member.username }} (Admin)</td>
+                            {% else %}
+                                <td>{{ member.username }}</td>
+                            {% endif %}
+                           
                             {% if is_admin %}
                                 {% if member != team.admin_user %}
                                     <td>
@@ -110,12 +110,12 @@
             {%endif%}
             {% if q %}
 
-                <h2>Users: {{q}}</h2>
+                <h2 style="margin-top: 10px;">Users: {{q}}</h2>
                 <br/>
                 <div class="list-group">
                     {% for user in users %}
                         {% if not user in team_members %}
-                            <li class="list-group-item">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
+                            <li class="list-group-item" id="search-users-items">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
                                 <form method="POST" action="">
                                     {% csrf_token %}
                                     {% if is_admin %}

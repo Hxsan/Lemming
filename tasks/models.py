@@ -21,6 +21,7 @@ class User(AbstractUser):
     teams = models.ManyToManyField(
         "Team"
     )
+    unread_notifications = models.IntegerField(default=1)
 
     """ForeignKey(
         "Team",
@@ -60,7 +61,7 @@ class Task(models.Model):
         ('medium', 'Medium'),
         ('high', 'High'),
     ]
-    reminder_days = models.IntegerField(default=None, null=True, blank=True)
+    reminder_days = models.IntegerField(default=1, null=True, blank=True)
     title = models.CharField(max_length=30, blank=False)
     description = models.CharField(max_length=300, blank=True)
     due_date = models.DateField(blank=False, default=date.today)
@@ -68,17 +69,24 @@ class Task(models.Model):
     assigned_to = models.ManyToManyField(User)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     task_completed = models.BooleanField(default=False)
+
+
     def is_high_priority_due_soon(self):
         today = date.today()
-        due_remind_date= today + timedelta(days=self.reminder_days or 0)
+        reminder_days = int(self.reminder_days or 0)
+        due_remind_date = today + timedelta(days=reminder_days)
         due_tomorrow = today + timedelta(days=1)
-        return self.reminder_days != None and self.priority == "high" and self.due_date >= today and (self.due_date <= due_tomorrow or self.due_date <= due_remind_date)
+        return (self.reminder_days is not None and self.priority == "high" and self.due_date >= today and self.due_date <= due_remind_date
+    )
 
     def is_other_priority_due_soon(self):
         today = date.today()
-        due_remind_date= today + timedelta(days=self.reminder_days or 0)
+        reminder_days = int(self.reminder_days or 0)
+        due_remind_date = today + timedelta(days=reminder_days)
         due_tomorrow = today + timedelta(days=1)
-        return self.reminder_days != None and (self.priority == "low" or self.priority == "medium") and self.due_date >= today and self.due_date <= due_remind_date
+        return (self.reminder_days is not None and (self.priority == "medium" or self.priority == "low") and self.due_date >= today and self.due_date <= due_remind_date
+    )
+
         
 
 class Team(models.Model):
@@ -89,3 +97,8 @@ class Team(models.Model):
 
     def __str__(self):
         return self.team_name
+    
+
+class Notification(models.Model):
+    user_notified = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)

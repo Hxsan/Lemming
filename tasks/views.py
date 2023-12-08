@@ -10,7 +10,7 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
-from tasks.models import User, Task, Team
+from tasks.models import User, Task, Team, Notification
 
 @login_required
 def search_users(request):
@@ -60,6 +60,38 @@ def dashboard(request):
 
 
     return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks})
+
+@login_required
+def notification_hub(request):
+    current_user = request.user
+    teams = current_user.teams.all()
+    team_tasks = []
+    notifications  = []
+    for team in teams:
+        tasks_for_each_team = Task.objects.filter(created_by=team)
+        for task in tasks_for_each_team:
+            team_tasks.append(task)
+
+    for task in team_tasks:
+        if task.is_high_priority_due_soon():
+            message = f"High priority task '{task.title}' is due on '{task.due_date}'."
+            notifications.append(message)
+            Notification.objects.create(user_notified=current_user, message=message)
+            current_user.unread_notifications +=1
+            current_user.save()
+        elif task.is_other_priority_due_soon():
+            message = f"{task.priority.capitalize()} priority task '{task.title}' is due on '{task.due_date}'."
+            notifications.append(message)
+            Notification.objects.create(user_notified=current_user, message=message)
+            current_user.unread_notifications +=1
+            current_user.save()
+        
+    context = {
+        'notifications': notifications,
+        'current_user': current_user
+    }
+
+    return render(request, 'notification_hub.html', context)
 
 
 @login_required
@@ -156,6 +188,14 @@ def remove_task(request,task_id):
     Task.objects.filter(pk=task_id).delete()
     return redirect("dashboard")
 
+def mark_as_seen_view(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+
+    if notification.user_notified == request.user:
+        notification.delete()
+
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
+
 @login_required
 def view_task(request, team_id=1, task_id=1):
     team = Team.objects.get(pk=team_id)
@@ -179,6 +219,7 @@ def view_task(request, team_id=1, task_id=1):
                 task.task_completed = request.POST['task_completed']
                 form.save(task)
                 task.priority = request.POST.get('priority')
+                task.reminder_days = request.POST.get('reminder_days')
                 task.save()
                 form.fields['priority'].initial = request.POST.get('priority')
                 form.save(task)

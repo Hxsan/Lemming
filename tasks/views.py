@@ -11,7 +11,7 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
-from tasks.models import User, Task, Team, Activity_Log
+from tasks.models import User, Task, Team, Notification, Activity_Log
 from datetime import datetime, timedelta
 
 @login_required
@@ -49,19 +49,59 @@ def dashboard(request):
         team_id = teams[0].id
     else:
         # If the user is not associated with any teams, set team id to 1
-        team_id = 1
+        team_id = 1 
 
     tasks = Task.objects.all()
 
 
     # List of pairs matching each team with their created tasks
     team_tasks = []
+    notifications_from_dashboard =[]
     for team in teams:
         tasks_for_each_team = Task.objects.filter(created_by=team)
+        for task in tasks_for_each_team:
+            if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
+                current_user.unread_notifications += 1
+                notifications_from_dashboard.append(task)
+            
+
         team_tasks.append((team, tasks_for_each_team))
 
 
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks})
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_from_dashboard': notifications_from_dashboard})
+
+@login_required
+def notification_hub(request):
+    current_user = request.user
+    teams = current_user.teams.all()
+    team_tasks = []
+    notifications  = []
+    for team in teams:
+        tasks_for_each_team = Task.objects.filter(created_by=team)
+        for task in tasks_for_each_team:
+            team_tasks.append(task)
+
+    for task in team_tasks:
+        if task.is_high_priority_due_soon():
+            message = f"High priority task '{task.title}' is due on '{task.due_date}'."
+            notifications.append(message)
+            Notification.objects.create(user_notified=current_user, message=message)
+            current_user.unread_notifications +=1
+            current_user.save()
+        elif task.is_other_priority_due_soon():
+            message = f"{task.priority.capitalize()} priority task '{task.title}' is due on '{task.due_date}'."
+            notifications.append(message)
+            Notification.objects.create(user_notified=current_user, message=message)
+            current_user.unread_notifications +=1
+            current_user.save()
+        
+    context = {
+        'notifications': notifications,
+        'current_user': current_user,
+        'current_tasks': team_tasks
+    }
+
+    return render(request, 'notification_hub.html', context)
 
 
 @login_required
@@ -155,6 +195,14 @@ def remove_task(request,task_id):
     Task.objects.filter(pk=task_id).delete()
     return redirect("dashboard")
 
+def mark_as_seen_view(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+
+    if notification.user_notified == request.user:
+        notification.delete()
+
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
+
 @login_required
 def view_task(request, team_id=1, task_id=1):
     team = Team.objects.get(pk=team_id)
@@ -176,9 +224,15 @@ def view_task(request, team_id=1, task_id=1):
                 form.fields['due_date'].disabled = True
             #otherwise, we have submitted the whole form, so save it
             #get the value of the complete button 
-            if form.is_valid():
+            if form.is_valid():        
                 task.task_completed = request.POST['task_completed']
                 form.save(task)
+                task.priority = request.POST.get('priority')
+                task.reminder_days = request.POST.get('reminder_days')
+                task.save()
+                form.fields['priority'].initial = request.POST.get('priority')
+                form.save(task)
+
                 return redirect('dashboard')
         elif 'assign_submit' in request.POST:
             form2 = AssignTaskForm(specific_team=team, specific_task=task, data=request.POST)
@@ -192,7 +246,7 @@ def view_task(request, team_id=1, task_id=1):
                     remove_message = f"Successfully removed:<br>{removed_users_list}<br>from this task."
 
     #fill the form with the values from the task itself to begin with
-    form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date})
+    form = EditTaskForm({'title':task.title, 'description':task.description, 'due_date': task.due_date, 'priority': task.priority, 'reminder_days': task.reminder_days})
     #check if due date has passed, if it has, make due_date not editable
     if datetime.now().date() > task.due_date:
         form.fields['due_date'].disabled = True
@@ -210,8 +264,6 @@ def view_task(request, team_id=1, task_id=1):
     # Checking if no users have been assigned to a task
     if not form2.get_assigned_users(task):
         alert_message = "This task has no assigned users." 
-
-    
 
     context = {
         'team': team,

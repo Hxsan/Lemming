@@ -3,6 +3,11 @@
     <div class="card-body">
       <h5 class="card-title">{{ task.due_date }}</h5>
       <p class="card-text">{{ task.description }}</p>
+      {% if task.is_high_priority_due_soon %}
+          <div style="color: red;">
+              <i class="fas fa-bell"></i> HIGH PRIORITY! - Due on {{ task.due_date }}
+          </div>
+      {% endif %}
     </div>
     {% if request.user in task.assigned_to.all %}
       <div class="card-footer">

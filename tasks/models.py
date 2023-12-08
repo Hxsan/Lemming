@@ -1,7 +1,7 @@
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from datetime import date
+from datetime import date, timedelta
 from libgravatar import Gravatar
 
 class User(AbstractUser):
@@ -21,6 +21,8 @@ class User(AbstractUser):
     teams = models.ManyToManyField(
         "Team"
     )
+    unread_notifications = models.IntegerField(default=1)
+
     """ForeignKey(
         "Team",
         on_delete=models.CASCADE,
@@ -54,13 +56,38 @@ class User(AbstractUser):
 
 class Task(models.Model):
     """Model used for task creation, and assignment on team members"""
-
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
+    reminder_days = models.IntegerField(default=1, null=True, blank=True)
     title = models.CharField(max_length=30, blank=False)
     description = models.CharField(max_length=300, blank=True)
     due_date = models.DateField(blank=False, default=date.today)
     created_by = models.ForeignKey('Team', on_delete=models.CASCADE, null=True)
     assigned_to = models.ManyToManyField(User)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     task_completed = models.BooleanField(default=False)
+
+
+    def is_high_priority_due_soon(self):
+        today = date.today()
+        reminder_days = int(self.reminder_days or 0)
+        due_remind_date = today + timedelta(days=reminder_days)
+        due_tomorrow = today + timedelta(days=1)
+        return (self.reminder_days is not None and self.priority == "high" and self.due_date >= today and self.due_date <= due_remind_date and self.task_completed==False
+    )
+
+    def is_other_priority_due_soon(self):
+        today = date.today()
+        reminder_days = int(self.reminder_days or 0)
+        due_remind_date = today + timedelta(days=reminder_days)
+        due_tomorrow = today + timedelta(days=1)
+        return (self.reminder_days is not None and (self.priority == "medium" or self.priority == "low") and self.due_date >= today and self.due_date <= due_remind_date  and self.task_completed==False
+    )
+
+        
 
 class Team(models.Model):
     """Model used to represent a team"""
@@ -71,6 +98,10 @@ class Team(models.Model):
     def __str__(self):
         return self.team_name
     
+class Notification(models.Model):
+    user_notified = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+
 class Activity_Log(models.Model):
     """Model used to store an activity log"""
     log = models.JSONField('log', null=False, default=list)

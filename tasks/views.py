@@ -47,19 +47,26 @@ def dashboard(request):
         team_id = teams[0].id
     else:
         # If the user is not associated with any teams, set team id to 1
-        team_id = 1
+        team_id = 1 
 
     tasks = Task.objects.all()
 
 
     # List of pairs matching each team with their created tasks
     team_tasks = []
+    notifications_from_dashboard =[]
     for team in teams:
         tasks_for_each_team = Task.objects.filter(created_by=team)
+        for task in tasks_for_each_team:
+            if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
+                current_user.unread_notifications += 1
+                notifications_from_dashboard.append(task)
+            
+
         team_tasks.append((team, tasks_for_each_team))
 
 
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks})
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_from_dashboard': notifications_from_dashboard})
 
 @login_required
 def notification_hub(request):
@@ -88,7 +95,8 @@ def notification_hub(request):
         
     context = {
         'notifications': notifications,
-        'current_user': current_user
+        'current_user': current_user,
+        'current_tasks': team_tasks
     }
 
     return render(request, 'notification_hub.html', context)

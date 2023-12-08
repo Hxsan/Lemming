@@ -5,8 +5,18 @@
                 <div class="position-relative">
                     <button class="btn btn-link" type="button">
                         <span class="bi bi-bell-fill"></span>
-                        <span class="position-absolute top-3 end-2 translate-middle badge rounded-pill bg-danger" style="font-size: 8px; padding: 3px 3px;">
-                        </span>
+                        {% if notifications_from_dashboard|length > 0 %}
+                            <span class="position-absolute top-3 end-2 translate-middle badge rounded-pill bg-danger" style="font-size: 8px; padding: 3px 3px;">
+                                {{notifications_from_dashboard|length}}
+                            </span>
+
+                        {% elif notifications|length > 0%}
+                            <span class="position-absolute top-3 end-2 translate-middle badge rounded-pill bg-danger" style="font-size: 8px; padding: 3px 3px;">
+                                {{notifications|length}}
+                            </span>
+                        {% endif %}
+
+
                     </button>
                 </div>
             </a>

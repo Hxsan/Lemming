@@ -61,7 +61,7 @@ def dashboard(request):
         tasks_for_each_team = Task.objects.filter(created_by=team)
         for task in tasks_for_each_team:
             if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
-                current_user.unread_notifications += 1
+                #current_user.unread_notifications += 1
                 notifications_from_dashboard.append(task)
             
 
@@ -86,13 +86,13 @@ def notification_hub(request):
             message = f"High priority task '{task.title}' is due on '{task.due_date}'."
             notifications.append(message)
             Notification.objects.create(user_notified=current_user, message=message)
-            current_user.unread_notifications +=1
+            #current_user.unread_notifications +=1
             current_user.save()
         elif task.is_other_priority_due_soon():
             message = f"{task.priority.capitalize()} priority task '{task.title}' is due on '{task.due_date}'."
             notifications.append(message)
             Notification.objects.create(user_notified=current_user, message=message)
-            current_user.unread_notifications +=1
+            #current_user.unread_notifications +=1
             current_user.save()
         
     context = {
@@ -147,10 +147,8 @@ def show_team(request, team_id):
             userToAdd = User.objects.get(username = userToAddString)
             team.members.add(userToAdd)
             userToAdd.teams.add(team)
-            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin})
+            return render(request, 'show_team.html', {'team' : team, 'team_members':team_members, 'is_admin':is_admin, "page_obj": page_obj})
         elif request.POST.get("q"):
-            return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin})
-        else:
             # User has searched for something on the search bar
             q = request.POST["q"]
             results = q.split()
@@ -160,10 +158,13 @@ def show_team(request, team_id):
                 queried_users = User.objects.filter(first_name__iexact = results[0]).filter(last_name__iexact = results[1])
             else:
                 queried_users = User.objects.filter(first_name__iexact = q) | User.objects.filter(last_name__iexact = q)
+                
             if(queried_users.count() > 0):
                 page_number = request.POST.get("page")
                 page_obj = paginator.get_page(page_number)
                 return render(request, "show_team.html",{"q":q, "users":queried_users, "team": team, "team_id" : team_id, 'team_members': team_members, "page_obj": page_obj, 'is_admin':is_admin})
+        else:
+            return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin})
 
     #get a list of the users in the team, and pass it in
     #also pass in the team itself to get the name

@@ -21,7 +21,7 @@ class User(AbstractUser):
     teams = models.ManyToManyField(
         "Team"
     )
-    unread_notifications = models.IntegerField(default=1)
+    #unread_notifications = models.IntegerField(default=1)
 
     """ForeignKey(
         "Team",

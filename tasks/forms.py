@@ -177,7 +177,7 @@ class EditTaskForm(forms.ModelForm):
             'reminder_days': 'Remind me of this task(days before)',
         }
         
-     def clean(self):
+    def clean(self):
         cleaned_data = super().clean()
         due_date = cleaned_data.get('due_date')
         reminder_days = cleaned_data.get('reminder_days')

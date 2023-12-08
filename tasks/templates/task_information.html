@@ -42,7 +42,6 @@
                 <!--This below hidden input is to store the value of task_completed as it changes-->
                 <input type="text" hidden="True" name="task_completed" value={{task.task_completed}}>
                 <input type="Submit" name="edit_submit" value = "Save" class="btn btn-primary">
-            </div>
             </form>
             <!-- ADD PROPER ADMIN CHECK-->
             {% if is_admin %}
@@ -51,10 +50,10 @@
                     <button class="btn btn-danger" type="submit">Remove Task</button>
                 </form>
             {% endif %}
-            </div>
+                </div>
         </div>
         <div class="col-auto">
-            <div class="mt-5" style="border-left: 2px dashed white; height: 81%"></div>
+            <div class="mt-5" style="border-left: 2px dashed white; height: 100%"></div>
         </div>
         <div class="col-4">
             <h2>Assigned To</h2>

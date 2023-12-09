@@ -9,9 +9,9 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm, SubmitTimeForm
 from tasks.helpers import login_prohibited
-from tasks.models import User, Task, Team, Notification, Activity_Log
+from tasks.models import User, Task, Team, Notification, Activity_Log, TimeSpent, TimeLog
 from datetime import datetime, timedelta
 
 @login_required
@@ -265,6 +265,10 @@ def view_task(request, team_id=1, task_id=1):
     if not form2.get_assigned_users(task):
         alert_message = "This task has no assigned users." 
 
+    # Calculate total time spent on a task
+    time_spent_queryset = TimeSpent.objects.filter(task=task)
+    total_time_spent = sum(instance.time_spent for instance in time_spent_queryset)
+
     context = {
         'team': team,
         'task': task,
@@ -275,7 +279,9 @@ def view_task(request, team_id=1, task_id=1):
         'new_users': selected_users[0],
         'removed_users': selected_users[1],
         'is_admin' : team.admin_user==user,
-        'can_mark_as_complete': task.assigned_to.contains(user) or team.admin_user==user
+        'can_mark_as_complete': task.assigned_to.contains(user) or team.admin_user==user,
+        'is_assigned':  task.assigned_to.contains(user),
+        'total_time_spent': total_time_spent
     }
 
     return render(request, 'task_information.html', context)
@@ -293,6 +299,66 @@ def user_activity_log(request, team_id, user_id):
     #otherwise, redirect them back to show team
     return redirect('show_team', team_id=team_id)
 
+@login_required
+def summary_report(request):
+    user = request.user
+    teams = user.teams.all()
+
+    user_times = TimeSpent.objects.filter(
+        user=user,
+    )
+
+    time_logs = TimeLog.objects.filter(
+        user=user,
+    ).order_by('timestamp')
+
+    context = {
+        'user_times': user_times,
+        'time_logs': time_logs,
+        'teams': teams,
+    }
+
+    return render(request, 'summary_report.html', context)
+
+@login_required
+def submit_time(request, team_id, task_id): 
+    task = Task.objects.get(pk=task_id)
+    user = request.user
+    if request.method == 'POST':
+        form = SubmitTimeForm(request.POST)
+        if form.is_valid():
+            form.save(user, task)
+    return redirect('view_task', team_id=team_id, task_id=task_id)
+
+@login_required
+def reset_time(request, team_id, task_id):
+    action = request.GET.get('action')
+    task = Task.objects.get(pk=task_id)
+    user = request.user
+
+    # Reset ALL time spent
+    if action == 'total':
+        all_user_time_spent = TimeSpent.objects.filter(task=task)
+        for user_time_spent in all_user_time_spent:
+            user_time_spent.time_spent = 0
+            user_time_spent.save()
+        # Delete all time logs associated with the task
+        TimeLog.objects.filter(task=task).delete() 
+
+    # Reset only the user's time spent
+    elif action == 'user':
+        user_time_spent = get_object_or_404(
+            TimeSpent,
+            user=user,
+            task=task,
+        )
+        user_time_spent.time_spent = 0
+        user_time_spent.save()
+        # Delete all time logs associated with the user on the task
+        TimeLog.objects.filter(user=user, task=task).delete()
+
+    return redirect('view_task', team_id=team_id, task_id=task_id) 
+    
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""

@@ -1,0 +1,176 @@
+<script>
+
+     // BAR CHART
+
+    var data = [];
+    var labels = [];
+
+    // Create data and labels based on specific user / task
+    {% for team in teams %}
+        {% for user_time in user_times %}
+            {% if user_time.time_spent != 0 %}
+                data.push({{ user_time.time_spent }});
+                {% if user_time.task.created_by == team %}
+                    labels.push('[{{team.team_name}}]: {{ user_time.task.title }}');
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+
+    // Variables used for formatting data
+    var max = Math.max(...data);
+    var yLabel = '';
+    var formattedData = [];
+
+    // Change scale to minutes if max time is less than an hour
+    if (max < 3600) { 
+        formattedData = data.map(seconds => seconds / 60);
+        yLabel = 'Time (mins)';
+    } else { // Change scale to hours if max time is more than an hour
+        formattedData = data.map(seconds => seconds / 3600);
+        yLabel = 'Time (hours)';
+    }
+
+    // Create bar chart based on data
+    var barCanvas = document.getElementById('barChart').getContext('2d');
+    var barChart = new Chart(barCanvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: formattedData,
+                backgroundColor: [
+                    'dodgerblue',
+                ],
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    ticks: {
+                        color: 'white'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: yLabel,
+                        color: 'white'
+                    },
+                    ticks: {
+                        color: 'white'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Time spent on each task',
+                    color: 'white',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+
+
+
+    
+
+    // LINE CHART
+
+
+    var lineData = [];
+
+    // Create data based on time logs
+    {% for time_log in time_logs %}
+        var timestamp = '{{ time_log.timestamp|date:"Y-m-d" }}';
+        var loggedTime = {{ time_log.logged_time }};
+
+        var day = lineData.findIndex(entry => entry.x == timestamp);
+
+        // If new day, make new entry in lineData, else accumulate in existing day
+        if (day == -1) {
+            lineData.push({ x: timestamp, y: loggedTime });
+        } else {
+            lineData[day].y += loggedTime;
+        }
+    {% endfor %}
+
+    // Variables used for formatting line data
+    max = Math.max(...lineData.map(entry => entry.y));
+    var formattedLineData = []; 
+
+    // Change scale to minutes if max time is less than an hour
+    if (max < 3600) { 
+        formattedLineData = lineData.map(entry => ({ x: entry.x, y: entry.y / 60 }));
+        yLabel = 'Time (mins)';
+    } else { // Change scale to hours if max time is more than an hour
+        formattedLineData = lineData.map(entry => ({ x: entry.x, y: entry.y / 3600 }));
+        yLabel = 'Time (hours)';
+    }
+
+    // Create line chart based on data
+    var lineCanvas = document.getElementById('lineChart').getContext('2d');
+    var lineChart = new Chart(lineCanvas, {
+        type: 'line',
+
+        data: {
+            datasets: [{
+                label: 'Logged Time',
+                data: formattedLineData,
+                borderColor: 'teal',
+                pointBackgroundColor: 'teal',
+                pointBorderColor: 'white',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+            }]
+        },
+
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day'
+                    },
+                    ticks: {
+                        color: 'white'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: yLabel,
+                        color: 'white'
+                    },
+                    ticks: {
+                        color: 'white'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Daily time spent on all tasks',
+                    color: 'white',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            }
+        }
+
+    });
+
+</script>

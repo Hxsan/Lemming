@@ -10,7 +10,6 @@ class AssignTaskFormTestCase(TestCase):
     fixtures = [
         'tasks/tests/fixtures/default_user.json', 
         'tasks/tests/fixtures/other_users.json',
-        'tasks/tests/fixtures/default_team.json',
     ]
 
     def setUp(self):

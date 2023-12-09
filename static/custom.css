@@ -195,3 +195,15 @@ body{
 #userDropDownMenu{
   background-color: #CCC9DC;;
 }
+
+.modal-header{
+  background-color: #142134;
+}
+
+.modal-body{
+  background-color: #1B2A41;
+}
+
+.modal-footer{
+  background-color: #142134;
+}

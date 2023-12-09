@@ -8,6 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 
 class SidebarTestCase(LiveServerTestCase):
 
@@ -18,7 +19,9 @@ class SidebarTestCase(LiveServerTestCase):
 
     def setUp(self):
         self.user = User.objects.get(username='@johndoe')
-        self.driver = webdriver.Chrome()
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get(self.live_server_url)
         self.create_teams(self.user)
         login_button = self.driver.find_element(By.CSS_SELECTOR, "a[href*='/log_in/']")

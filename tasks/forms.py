@@ -2,8 +2,8 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Task, Team
-from datetime import date, timedelta
+from .models import User, Task, Team, TimeSpent, TimeLog
+from datetime import date, timedelta, datetime
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -238,3 +238,48 @@ class AssignTaskForm(forms.Form):
         task.assigned_to.add(*new_users) #add the new users
 
         return (list(new_users), list(removed_users))
+
+class SubmitTimeForm(forms.Form):
+    class Meta:
+        model = Task
+        fields = ['time_spent']
+
+    hours = forms.IntegerField(required=False, min_value=0)
+    minutes = forms.IntegerField(required=False, min_value=0)
+    seconds = forms.IntegerField(required=False, min_value=0)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        hours = cleaned_data.get('hours')
+        minutes = cleaned_data.get('minutes')
+        seconds = cleaned_data.get('seconds')
+        self.cleaned_hours = hours if hours is not None and hours else 0
+        self.cleaned_minutes = minutes if minutes is not None and minutes else 0
+        self.cleaned_seconds = seconds if seconds is not None and seconds else 0
+
+
+    def save(self, user, task):
+        total_seconds = self.cleaned_hours * 3600 + self.cleaned_minutes * 60 + self.cleaned_seconds
+        
+        # Get or create time spent instance of user on a task
+        user_time_spent, created = TimeSpent.objects.get_or_create(
+            user=user,
+            task=task,
+            defaults={'time_spent': total_seconds}
+        )
+
+        # Update instance if found in database
+        if not created:
+            user_time_spent.time_spent += total_seconds
+        
+        user_time_spent.save()
+
+        # Log the entry with a specific timestamp
+        TimeLog.objects.create(
+            user=user,
+            task=task,
+            logged_time=total_seconds,
+            timestamp=datetime.now()
+        )
+
+        return task

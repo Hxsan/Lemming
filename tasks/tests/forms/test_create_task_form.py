@@ -10,7 +10,6 @@ class CreateTaskFormTestCase(TestCase):
     fixtures = [
         'tasks/tests/fixtures/default_user.json', 
         'tasks/tests/fixtures/other_users.json',
-        'tasks/tests/fixtures/default_team.json',
     ]
 
     def setUp(self):
@@ -26,6 +25,7 @@ class CreateTaskFormTestCase(TestCase):
             'title' : 'Task 1',
             'description' : 'This is a task',
             'due_date' : '01/02/2024',
+            'priority': 'medium',
         }
     
     def test_valid_task_form(self):
@@ -83,6 +83,7 @@ class CreateTaskFormTestCase(TestCase):
             'title' : 'Task 2',
             'description' : 'This is a second task',
             'due_date' : '03/04/2024',
+            'priority': 'high',
         }
         self.client.post(self.url, self.form_input, follow=True)
         after_count = Task.objects.count()

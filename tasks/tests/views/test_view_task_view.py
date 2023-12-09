@@ -18,6 +18,7 @@ class ViewTaskViewTestCase(TestCase):
             'title': 'Task1',
             'description': 'This is a task',
             'due_date': date.today(),
+            'priority': 'medium',
             'edit_submit': 'Save', #these two values to simulate the request information sent
             'task_completed': False,
         }
@@ -89,7 +90,7 @@ class ViewTaskViewTestCase(TestCase):
         response = self.client.get(self.url, follow=True)
         form = response.context['form']
         self.assertTrue(form.fields['due_date'].disabled)
-        self.assertContains(response, 'This task is overdue', html=True)
+        self.assertContains(response, 'This task is overdue')
 
     def test_mark_as_complete_shows_when_user_is_allowed(self):
         #basically check if mark_as_complete is true and that we are the admin

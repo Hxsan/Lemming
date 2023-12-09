@@ -37,5 +37,8 @@ urlpatterns = [
     path('dashboard/view-task/<int:task_id>/remove_task/', views.remove_task, name='remove_task'),
     path('dashboard/show_team/<int:team_id>/remove_member/<str:member_username>/', views.remove_member, name='remove_member'),
     path('delete-team/<int:team_id>/', views.delete_team, name='delete_team'),
+    path('dashboard/view-task/submit_time/<int:team_id>/<int:task_id>/', views.submit_time, name='submit_time'),
+    path('dashboard/view-task/reset_time/<int:team_id>/<int:task_id>/', views.reset_time, name='reset_time'),
+    path('summary_report/', views.summary_report, name='summary_report'),
 ]
 

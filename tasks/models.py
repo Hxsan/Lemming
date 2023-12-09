@@ -1,7 +1,8 @@
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from datetime import date, timedelta
+import datetime
+from datetime import date, datetime, timedelta
 from libgravatar import Gravatar
 
 class User(AbstractUser):
@@ -107,3 +108,16 @@ class Activity_Log(models.Model):
     log = models.JSONField('log', null=False, default=list)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null = True)
 
+
+class TimeSpent(models.Model):
+    """Model used to store total time each user spends on each task"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    time_spent = models.BigIntegerField(default=0, null=True, validators=[MinValueValidator(0)]) # Specific time spent for each user
+
+class TimeLog(models.Model):
+    """Model used to log time spent on tasks after every update"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    logged_time = models.BigIntegerField(default=0, null=True, validators=[MinValueValidator(0)])
+    timestamp = models.DateTimeField(auto_now_add=True)

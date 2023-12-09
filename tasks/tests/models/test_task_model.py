@@ -54,6 +54,10 @@ class TaskModelTestCase(TestCase):
     def test_task_completion_must_be_True_or_False(self):
         self.task.task_completed = None
         self._assert_task_is_invalid()
+    
+    def test_priority_must_be_low_medium_or_high(self):
+        self.task.priority = None
+        self._assert_task_is_invalid()
 
     def _assert_task_is_valid(self):
         try:

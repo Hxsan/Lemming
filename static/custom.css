@@ -162,16 +162,20 @@ body{
   max-width: 18rem; 
 }
 
+.userSearch{
+  margin-bottom: auto;
+  margin-top: 10px;
+}
+
+.activityTable{
+  color: #fff;
+}
+
 #search-users-items{
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #CCC9DC;
-}
-
-.userSearch{
-  margin-bottom: auto;
-  margin-top: 10px;
 }
 
 #show-team-header{

@@ -14,6 +14,12 @@
 		  <div class="row m-1 text-center">
 			 <h1>Welcome to your dashboard {{ user.username }}</h1>
 		  </div>
+		  <!--Tell them to create a team if they have none-->
+		  {%if user.teams.count == 0%}
+		  <div class="alert alert-info" role="alert">
+			You have no Teams. Create a team to get started!
+		  </div>
+		  {%endif%}
 		  <div class="row">
 				<div class="tab-content w-100 align-items-center">
 					{% for team, tasks in team_tasks %}
@@ -43,12 +49,23 @@
 	</div>
 	<!-- Sidebar right -->
 	<div class="col-2 flex-column" id="viewTeamSidebar">
-		<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
-			<div class="card-body">
-				<h5 class="card-title">View Team</h5>
-				<a href="#" class="stretched-link view-team-button"></a>
+		<!--Disable View team button if the user has no team -->
+		{%if user.teams.count == 0%}
+			<div class="card text-white text-center bg-secondary m-1" style="max-width: 18rem;">
+				<div class="card-body">
+					<h5 class="card-title">View Team</h5>
+					<a href="#" class="stretched-link view-team-button"></a>
+				</div>
 			</div>
-		</div>
+		{%else%}
+			<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
+				<div class="card-body">
+					<h5 class="card-title">View Team</h5>
+					<a href="#" class="stretched-link view-team-button"></a>
+				</div>
+			</div>
+		{%endif%}
+
 		<div class="p-2 border align-self-start bg-info">
 			List of Due Dates Placeholder
 		</div>

@@ -211,7 +211,6 @@ def view_task(request, team_id=1, task_id=1):
     alert_message = remove_message = None
     selected_users = (None, None)
     if request.method == "POST":
-
         #If we clicked the complete button 
         if "task_completion_value" in request.POST: #so this is for submitting the actual form itself
             if request.POST['task_completion_value'] == "Completed":
@@ -219,18 +218,23 @@ def view_task(request, team_id=1, task_id=1):
             else:
                 task.task_completed = True #we clicked on mark as done, so it is now done
         elif 'edit_submit' in request.POST:
-            form = EditTaskForm(request.POST)
+            POST = request.POST.copy() #we do this so we can edit the dictionary
+            #add task.priority if it is not in (i.e. if we have disabled the field)
+            if 'priority' not in POST:
+                POST['priority'] = task.priority
+            form = EditTaskForm(POST)
             if datetime.now().date() > task.due_date:
                 form.fields['due_date'].disabled = True
+                form.fields['reminder_days'].disabled = True
             #otherwise, we have submitted the whole form, so save it
             #get the value of the complete button 
             if form.is_valid():        
-                task.task_completed = request.POST['task_completed']
+                task.task_completed = POST['task_completed']
                 form.save(task)
-                task.priority = request.POST.get('priority')
-                task.reminder_days = request.POST.get('reminder_days')
+                task.priority = POST.get('priority')
+                task.reminder_days = POST.get('reminder_days')
                 task.save()
-                form.fields['priority'].initial = request.POST.get('priority')
+                form.fields['priority'].initial = POST.get('priority')
                 form.save(task)
 
                 return redirect('dashboard')
@@ -250,8 +254,11 @@ def view_task(request, team_id=1, task_id=1):
     #check if due date has passed, if it has, make due_date not editable
     if datetime.now().date() > task.due_date:
         form.fields['due_date'].disabled = True
-        #form.add_prefix('due_date', 'This task is overdue')
-        #form.fields['due_date'].help_text = "This task is overdue"
+        #allow the due_date to be below today (because it's overdue)
+        form.fields['due_date'].min = task.due_date
+        form.fields['due_date'].initial = task.due_date
+        form.fields['priority'].disabled = True
+        form.fields['reminder_days'].disabled = True
     form2 = AssignTaskForm(specific_team=team, specific_task=task)
 
 

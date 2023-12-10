@@ -119,10 +119,14 @@ h3.profile-title {
  * Custom changes
  */
 
-
 body{
   color:#fff;
   background-color: #1B2A41;
+}
+
+select option {
+  background: #1B2A41;
+  color: #fff;
 }
 
 .highlight{

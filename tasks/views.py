@@ -5,11 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from django.db.models import Q
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team, Notification, Activity_Log
@@ -61,64 +61,46 @@ def dashboard(request):
 
     # Checks and retrieves due dates
     due_dates = []
-    
+
     for team in teams:
         tasks_for_each_team = Task.objects.filter(created_by=team)
 
-        for task in tasks_for_each_team:
-            if task.due_date:
-                due_dates.append(task)
-
-        # Check and add notifications for tasks due soon
-        for task in tasks_for_each_team:
-            if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
-                notifications_from_dashboard.append(task)
-        
+        # Due dates and notifications
+        due_dates.extend(task for task in tasks_for_each_team if task.due_date)
+        notifications_from_dashboard.extend(task for task in tasks_for_each_team if task.is_high_priority_due_soon() or task.is_other_priority_due_soon())
 
         # Apply sorting based on sort_type and order_type
         if search_query:
             tasks_for_each_team = tasks_for_each_team.filter(
                 Q(title__icontains=search_query) | Q(description__icontains=search_query)
             )
-
         elif order_type != 'default':
             tasks_for_each_team = tasks_for_each_team.order_by(order_type)
+        elif sort_type in ['ascending', 'descending']:
+            order_prefix = '' if sort_type == 'ascending' else '-'
+            tasks_for_each_team = tasks_for_each_team.order_by(order_prefix + 'due_date')
 
-        elif sort_type == 'ascending':
-            if order_type != 'default':
-                tasks_for_each_team = tasks_for_each_team.order_by(order_type)
-            else:
-                tasks_for_each_team = tasks_for_each_team.order_by("due_date")
-        elif sort_type == 'descending':
-            if order_type != 'default':
-                tasks_for_each_team = tasks_for_each_team.order_by('-' + order_type)
-            else:
-                tasks_for_each_team = tasks_for_each_team.order_by('-due_date')
+        # Filter conditions
+        filter_conditions = {}
 
-        elif filter_type == 'priorityLow':
-            tasks_for_each_team = Task.objects.filter(created_by=team, priority='low')
-        elif filter_type == 'priorityMedium':
-            tasks_for_each_team = Task.objects.filter(created_by=team, priority='medium')
-        elif filter_type == 'priorityHigh':
-            tasks_for_each_team = Task.objects.filter(created_by=team, priority='high')
+        if filter_type in ['priorityLow', 'priorityMedium', 'priorityHigh']:
+            filter_conditions['priority'] = filter_type.replace('priority', '').lower()
+        elif filter_type in ['CompletedTrue', 'CompletedFalse']:
+            filter_conditions['task_completed'] = (filter_type == 'CompletedTrue')
 
-        elif filter_type == 'CompletedTrue':
-            tasks_for_each_team = Task.objects.filter(created_by=team, task_completed=True)
-        elif filter_type == 'CompletedFalse':
-            tasks_for_each_team = Task.objects.filter(created_by=team, task_completed=False)
-        else:
-            tasks_for_each_team = Task.objects.filter(created_by=team)
+        if filter_conditions:
+            tasks_for_each_team = tasks_for_each_team.filter(**filter_conditions)
 
         # Append tasks for the current team to the team_tasks list
         team_tasks.append((team, tasks_for_each_team))
 
     return render(request, 'dashboard.html', {'user': current_user,
                                                'teams': teams,
-                                                'task_fields': task_fields,
-                                                'team_tasks': team_tasks,
-                                                'notifications_from_dashboard': notifications_from_dashboard,
-                                                'due_dates':due_dates
-                                                })
+                                               'task_fields': task_fields,
+                                               'team_tasks': team_tasks,
+                                               'notifications_from_dashboard': notifications_from_dashboard,
+                                               'due_dates': due_dates
+                                               })
 
 @login_required
 def notification_hub(request):

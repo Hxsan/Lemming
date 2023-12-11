@@ -75,7 +75,7 @@
 						{% endif %}
 						{% for team, tasks in team_tasks %}
 						<div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
-							{% ifchanged team.team_name %}
+							{% ifchanged team.id %}
 							<div class="row m-1 p-1 text-center border border-white rounded-pill">
 								<h3>Current Team : {{ team.team_name }}</h3>
 							</div>

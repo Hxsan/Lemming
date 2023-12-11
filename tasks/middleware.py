@@ -23,10 +23,13 @@ class TaskNotificationMiddleware:
             tasks_for_each_team = Task.objects.filter(created_by=team)
             for task in tasks_for_each_team:
                 if not task.seen and task.is_high_priority_due_soon():
-                    message = f"REMINDER: <span style='color: red;'>High</span> priority task '{task.title}' is due on {task.due_date}."
+                    message = f"<strong>REMINDER:</strong> <span style='color: red;'>High</span> priority task '{task.title}' is due on {task.due_date}."
                     notifications.append((message, task.id))
                 elif not task.seen and task.is_other_priority_due_soon():
-                    message = f"REMINDER: {task.priority.capitalize()} priority task '{task.title}' is due on {task.due_date}."
+                    if task.priority == "medium":
+                        message = f"<strong>REMINDER:</strong> <span style='color: green;'>Medium</span> priority task '{task.title}' is due on {task.due_date}."
+                    else:
+                        message = f"<strong>REMINDER:</strong> <span style='color: yellow;'>Low</span> priority task '{task.title}' is due on {task.due_date}."
                     notifications.append((message, task.id))
 
         notifications = sorted(notifications, key=self.key_for_sorting)

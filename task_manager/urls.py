@@ -27,7 +27,6 @@ urlpatterns = [
     path('dashboard/show_team/<int:team_id>/user_activity_log/<int:user_id>', views.user_activity_log, name = "activity_log"),
     path('dashboard/view-task/<int:team_id>/<int:task_id>/', views.view_task, name='view_task'),
     path('mark_as_seen/', views.mark_as_seen, name='mark_as_seen'),
-    path('notification_hub/', views.notification_hub, name='notification_hub'),
     path('log_in/', views.LogInView.as_view(), name='log_in'),
     path('log_out/', views.log_out, name='log_out'),
     path('password/', views.PasswordView.as_view(), name='password'),

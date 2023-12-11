@@ -67,50 +67,13 @@ def mark_as_seen(request):
     if task_id:
         task = Task.objects.get(pk=task_id)
 
-        # Add logic to mark the task as seen (e.g., set a field like task.seen = True)
+        
         task.seen = True
 
         task.save()
 
 
-        # Add a success message
-        messages.success(request, 'Task marked as seen successfully.')
-
     return redirect('dashboard')
-
-@login_required
-def notification_hub(request):
-    current_user = request.user
-    teams = current_user.teams.all()
-    team_tasks = []
-    notifications  = []
-    for team in teams:
-        tasks_for_each_team = Task.objects.filter(created_by=team)
-        for task in tasks_for_each_team:
-            team_tasks.append(task)
-
-    for task in team_tasks:
-        if task.is_high_priority_due_soon():
-            message = f"High priority task '{task.title}' is due on '{task.due_date}'."
-            notifications.append(message)
-            Notification.objects.create(user_notified=current_user, message=message)
-            #current_user.unread_notifications +=1
-            current_user.save()
-        elif task.is_other_priority_due_soon():
-            message = f"{task.priority.capitalize()} priority task '{task.title}' is due on '{task.due_date}'."
-            notifications.append(message)
-            Notification.objects.create(user_notified=current_user, message=message)
-            #current_user.unread_notifications +=1
-            current_user.save()
-        
-    context = {
-        'notifications': notifications,
-        'current_user': current_user,
-        'current_tasks': team_tasks
-    }
-
-    return render(request, 'notification_hub.html', context)
-
 
 @login_required
 def create_team(request):
@@ -212,13 +175,6 @@ def remove_task(request,task_id):
         Task.objects.filter(pk=task_id).delete()
         return redirect("dashboard")
 
-def mark_as_seen_view(request, notification_id):
-    notification = get_object_or_404(Notification, id=notification_id)
-
-    if notification.user_notified == request.user:
-        notification.delete()
-    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
-
 @login_required
 def view_task(request, team_id=1, task_id=1):
     #Make sure this team and task have not been deleted
@@ -256,6 +212,7 @@ def view_task(request, team_id=1, task_id=1):
                     form.save(task)
 
                     return redirect('dashboard')
+                
             elif 'assign_submit' in request.POST:
                 form2 = AssignTaskForm(specific_team=team, specific_task=task, data=request.POST)
                 if form2.is_valid():
@@ -289,6 +246,8 @@ def view_task(request, team_id=1, task_id=1):
         # Checking if no users have been assigned to a task
         if not form2.get_assigned_users(task):
             alert_message = "This task has no assigned users." 
+
+        
 
         # Calculate total time spent on a task
         time_spent_queryset = TimeSpent.objects.filter(task=task)

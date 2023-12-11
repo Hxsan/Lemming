@@ -10,14 +10,14 @@
         {% endif %}
     </button>
 
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notification-dropdown" style="background-color: #0d5fdb; font-size: 12px; min-width: 200px;" onmouseover="this.style.backgroundColor='#0d6efd';" onmouseout="this.style.backgroundColor='#0d5fdb';">
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notification-dropdown" style="background-color: #0d5fdb; font-size: 12px; min-width: 200px;">
         {% if notifications_from_dashboard %}
             {% for notification, task_id in notifications_from_dashboard %}
-                <li class="dropdown-item" style=" color: black;">
+                <li class="dropdown-item" style=" color: black; "onmouseover="this.style.backgroundColor='#0d5fdb';" onmouseout="this.style.backgroundColor='#0d5fdb';">
                     {{ notification }}
                     
                 </li>
-                <li class="dropdown-item" style="display: flex; justify-content: space-between; align-items: center; {% if not forloop.last %} border-bottom: 1px solid rgb(54, 51, 51); {% endif %}">
+                <li class="dropdown-item" style="display: flex; justify-content: space-between; align-items: center; {% if not forloop.last %} border-bottom: 1px solid rgb(54, 51, 51); {% endif %}" onmouseover="this.style.backgroundColor='#0d5fdb';" onmouseout="this.style.backgroundColor='#0d5fdb';" >
                     <a class="btn btn-primary btn-sm" style="background-color: #1B2A41;  color: green; font-size: 10px; padding: 3px 6px;  margin-left: auto;" href="{% url 'mark_as_seen' %}?task_id={{ task_id }}">Mark as Seen</a>
                 </li>
             {% endfor %}

@@ -191,7 +191,7 @@ class EditTaskForm(forms.ModelForm):
             today = date.today()
             max_allowed_days = (due_date - today).days 
 
-            if reminder_days > max_allowed_days + 1: #add 1 because the task could be today
+            if reminder_days >= max_allowed_days + 1: #add 1 because the task could be today
                 self.add_error('reminder_days', f"Reminder days cannot be more than {max_allowed_days} days before the due date.")
         return cleaned_data
     

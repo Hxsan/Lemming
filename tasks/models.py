@@ -90,15 +90,6 @@ class Task(models.Model):
         return (self.reminder_days is not None and (self.priority == "medium" or self.priority == "low") and self.due_date >= today and self.due_date <= due_remind_date  and self.task_completed==False
     )
 
-    def save(self, *args, **kwargs):
-        if self.pk is not None:
-            old_task = Task.objects.get(pk=self.pk)
-            if old_task.priority != self.priority:
-                self.seen = False
-
-        super(Task, self).save(*args, **kwargs)
-
-        
 
 class Team(models.Model):
     """Model used to represent a team"""

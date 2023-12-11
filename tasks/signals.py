@@ -100,7 +100,7 @@ def task_save(sender, **kwargs):
                 #changed due date
                 activity_log.log.append((f'{user.username} updated task \'{old_task.title}\'s due date to {task.due_date}', current_time))
             #have to use eval here because models.BooleanField is stored as a string, but it comes out as a boolean
-            if old_task.task_completed!=eval(task.task_completed):
+            if old_task.task_completed!= task.task_completed:
                 #changed completion
                 completion = 'Complete' if eval(task.task_completed) else 'Incomplete'
                 activity_log.log.append((f'{user.username} marked \'{old_task.title}\' as {completion}', current_time))

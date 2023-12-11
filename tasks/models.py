@@ -63,6 +63,7 @@ class Task(models.Model):
         ('high', 'High'),
     ]
     reminder_days = models.IntegerField(default=1, null=True, blank=True)
+    
     title = models.CharField(max_length=30, blank=False)
     description = models.CharField(max_length=300, blank=True)
     due_date = models.DateField(blank=False, default=date.today)
@@ -70,6 +71,7 @@ class Task(models.Model):
     assigned_to = models.ManyToManyField(User)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     task_completed = models.BooleanField(default=False)
+    seen = models.BooleanField(default=False)
 
 
     def is_high_priority_due_soon(self):
@@ -87,6 +89,14 @@ class Task(models.Model):
         due_tomorrow = today + timedelta(days=1)
         return (self.reminder_days is not None and (self.priority == "medium" or self.priority == "low") and self.due_date >= today and self.due_date <= due_remind_date  and self.task_completed==False
     )
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            old_task = Task.objects.get(pk=self.pk)
+            if old_task.priority != self.priority:
+                self.seen = False
+
+        super(Task, self).save(*args, **kwargs)
 
         
 

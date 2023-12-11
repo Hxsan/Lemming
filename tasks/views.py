@@ -13,6 +13,8 @@ from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTas
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team, Notification, Activity_Log, TimeSpent, TimeLog
 from datetime import datetime, timedelta
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 
 
 def dashboard(request):
@@ -40,17 +42,41 @@ def dashboard(request):
     # List of pairs matching each team with their created tasks
     team_tasks = []
     notifications_from_dashboard =[]
+    message = ""
     for team in teams:
         tasks_for_each_team = Task.objects.filter(created_by=team)
         for task in tasks_for_each_team:
-            if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
+            if task.seen == False and task.is_high_priority_due_soon():
                 #current_user.unread_notifications += 1
-                notifications_from_dashboard.append(task)
+                message = f"Reminder: High priority task '{task.title}' is due on {task.due_date}."
+                notifications_from_dashboard.append((message, task.id))
+            
+            elif task.seen == False and task.is_other_priority_due_soon():
+                message = f"Reminder: {task.priority.capitalize()} priority task '{task.title}' is due on {task.due_date}."
+                notifications_from_dashboard.append((message, task.id))
             
 
         team_tasks.append((team, tasks_for_each_team))
 
     return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_from_dashboard': notifications_from_dashboard})
+
+@login_required
+def mark_as_seen(request):
+    task_id = request.GET.get('task_id')
+    
+    if task_id:
+        task = Task.objects.get(pk=task_id)
+
+        # Add logic to mark the task as seen (e.g., set a field like task.seen = True)
+        task.seen = True
+
+        task.save()
+
+
+        # Add a success message
+        messages.success(request, 'Task marked as seen successfully.')
+
+    return redirect('dashboard')
 
 @login_required
 def notification_hub(request):

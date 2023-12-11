@@ -36,39 +36,70 @@ def dashboard(request):
     """Display the current user's dashboard."""
     current_user = request.user
 
-
     if not current_user.is_authenticated:
-
         return render(request, 'home.html', {'user': current_user})
 
     teams = current_user.teams.all()
 
     # Check if the user is associated with any teams
-    if teams:
-        # If the user is associated with teams, use the ID of the first team
-        team_id = teams[0].id
-    else:
-        # If the user is not associated with any teams, set team id to 1
-        team_id = 1 
+    if not teams.exists():
+        # If the user is not associated with any teams
+        return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': 1, 'team_tasks': None})
 
-    tasks = Task.objects.all()
+    # Get the sorting method and order field from the request
+    sort_type = request.GET.get('sort', 'default')
+    order_type = request.GET.get('order', 'default')
+    filter_type = request.GET.get('filter', None)
 
-
-    # List of pairs matching each team with their created tasks
     team_tasks = []
-    notifications_from_dashboard =[]
+    task_fields = [field for field in Task._meta.get_fields() if not field.name.startswith('_')]
+
+    # List to store notifications for all teams
+    notifications_from_dashboard = []
+
     for team in teams:
         tasks_for_each_team = Task.objects.filter(created_by=team)
-        for task in tasks_for_each_team:
-            if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
-                #current_user.unread_notifications += 1
-                notifications_from_dashboard.append(task)
-            
 
+        # Apply sorting based on sort_type and order_type
+        if order_type != 'default':
+            tasks_for_each_team = tasks_for_each_team.order_by(order_type)
+
+        elif sort_type == 'ascending':
+            if order_type != 'default':
+                tasks_for_each_team = tasks_for_each_team.order_by(order_type)
+            else:
+                tasks_for_each_team = tasks_for_each_team.order_by("due_date")
+        elif sort_type == 'descending':
+            if order_type != 'default':
+                tasks_for_each_team = tasks_for_each_team.order_by('-' + order_type)
+            else:
+                tasks_for_each_team = tasks_for_each_team.order_by('-due_date')
+
+        elif filter_type == 'priority=priorityLow':
+            tasks_for_each_team = Task.objects.filter(created_by=team, priority='low')
+        elif filter_type == 'priority=priorityMedium':
+            tasks_for_each_team = Task.objects.filter(created_by=team, priority='medium')
+        elif filter_type == 'priority=priorityHigh':
+            tasks_for_each_team = Task.objects.filter(created_by=team, priority='high')
+
+        elif filter_type == 'Completed%True':
+            tasks_for_each_team = Task.objects.filter(created_by=team, task_completed=True)
+        elif filter_type == 'Completed%False':
+            tasks_for_each_team = Task.objects.filter(created_by=team, task_completed=False)
+        else:
+            tasks_for_each_team = Task.objects.filter(created_by=team)
+
+        
+
+        # Append tasks for the current team to the team_tasks list
         team_tasks.append((team, tasks_for_each_team))
 
+    # Check and add notifications for tasks due soon
+    for task in tasks_for_each_team:
+        if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
+            notifications_from_dashboard.append(task)
 
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_from_dashboard': notifications_from_dashboard})
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'task_fields': task_fields, 'team_tasks': team_tasks, 'notifications_from_dashboard': notifications_from_dashboard})
 
 @login_required
 def notification_hub(request):

@@ -9,6 +9,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
+from django.db.models import Q
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm
 from tasks.helpers import login_prohibited
 from tasks.models import User, Task, Team, Notification, Activity_Log
@@ -50,6 +51,7 @@ def dashboard(request):
     sort_type = request.GET.get('sort', 'default')
     order_type = request.GET.get('order', 'default')
     filter_type = request.GET.get('filter', None)
+    search_query = request.GET.get('search_query', '')
 
     team_tasks = []
     task_fields = [field for field in Task._meta.get_fields() if not field.name.startswith('_')]
@@ -61,7 +63,12 @@ def dashboard(request):
         tasks_for_each_team = Task.objects.filter(created_by=team)
 
         # Apply sorting based on sort_type and order_type
-        if order_type != 'default':
+        if search_query:
+            tasks_for_each_team = tasks_for_each_team.filter(
+                Q(title__icontains=search_query) | Q(description__icontains=search_query)
+            )
+
+        elif order_type != 'default':
             tasks_for_each_team = tasks_for_each_team.order_by(order_type)
 
         elif sort_type == 'ascending':

@@ -14,7 +14,7 @@
         {% if notifications_list %}
             {% for notification, task_id in notifications_list %}
                 <li class="dropdown-item" style=" color: rgb(255, 255, 255); "onmouseover="this.style.backgroundColor='#083881';" onmouseout="this.style.backgroundColor='#083881';">
-                    {{ notification }}
+                    {{ notification|safe}}
                     
                 </li>
                 <li class="dropdown-item" style="display: flex; justify-content: space-between; align-items: center; {% if not forloop.last %} border-bottom: 3px solid #327dee; {% endif %}" onmouseover="this.style.backgroundColor='#083881';" onmouseout="this.style.backgroundColor='#083881';" >

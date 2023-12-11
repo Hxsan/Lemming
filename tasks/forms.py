@@ -184,20 +184,14 @@ class EditTaskForm(forms.ModelForm):
         due_date = cleaned_data.get('due_date')
         
         today = date.today()
-        max_allowed_days = (due_date - today).days
+        max_allowed_days = (due_date - today).days -1
 
         self.fields['reminder_days'].widget.attrs['max'] = max(1, max_allowed_days)
 
         return cleaned_data
     def is_valid(self):
         original_valid = super().is_valid()
-        cleaned_data = super().clean()
-        due_date = cleaned_data.get('due_date')
-        reminder_days = cleaned_data.get('reminder_days')
-        #Only check if task not overdue        
-        today = date.today()
-        max_allowed_days = (due_date - today).days 
-        return original_valid and reminder_days < max_allowed_days+1 and (self.fields['due_date'].disabled or self.cleaned_data['due_date']>(date.today() - timedelta(1))) #ensure due date is later or equal to today
+        return original_valid and (self.fields['due_date'].disabled or self.cleaned_data['due_date']>(date.today() - timedelta(1))) #ensure due date is later or equal to today
     
     def save(self, old_task):
         task = super().save(commit=False)

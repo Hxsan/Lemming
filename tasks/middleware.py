@@ -6,7 +6,6 @@ class TaskNotificationMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        print("TaskNotificationMiddleware is called for this request.")
         request.notifications_list = self.get_notifications(request.user)
         response = self.get_response(request)
         return response
@@ -24,7 +23,7 @@ class TaskNotificationMiddleware:
             tasks_for_each_team = Task.objects.filter(created_by=team)
             for task in tasks_for_each_team:
                 if not task.seen and task.is_high_priority_due_soon():
-                    message = f"REMINDER: High priority task '{task.title}' is due on {task.due_date}."
+                    message = f"REMINDER: <span style='color: red;'>High</span> priority task '{task.title}' is due on {task.due_date}."
                     notifications.append((message, task.id))
                 elif not task.seen and task.is_other_priority_due_soon():
                     message = f"REMINDER: {task.priority.capitalize()} priority task '{task.title}' is due on {task.due_date}."

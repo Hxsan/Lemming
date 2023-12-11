@@ -183,5 +183,9 @@ body{
 }
 
 #userDropDownMenu{
-  background-color: #CCC9DC;;
+  background-color: #CCC9DC;
+}
+
+#dueDateCards{
+  background-color: darkblue;
 }

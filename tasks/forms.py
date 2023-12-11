@@ -165,7 +165,7 @@ class EditTaskForm(forms.ModelForm):
 
     class Meta:
         """Form options."""
-        max_allowed_days = 7
+
         model = Task
         fields = ['title', 'description', 'due_date', 'priority', 'reminder_days']
         exclude = ['created_by', 'task_completed']
@@ -173,13 +173,22 @@ class EditTaskForm(forms.ModelForm):
                 'description': forms.Textarea(attrs={'class': 'form-control','id':'task_description'}),
                 'due_date': forms.DateInput(attrs={'class': 'form-control', 'type':'date', 'min': date.today}),
                 'priority': forms.Select(attrs={'class': 'form-control'}),
-                'reminder_days': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': max_allowed_days})}
+                'reminder_days': forms.NumberInput(attrs={'class': 'form-control', 'min': 1})}
         labels = {
             'reminder_days': 'Remind me of this task(days before)',
         }
         
     
-    
+    def clean(self):
+        cleaned_data = super().clean()
+        due_date = cleaned_data.get('due_date')
+        
+        today = date.today()
+        max_allowed_days = (due_date - today).days
+
+        self.fields['reminder_days'].widget.attrs['max'] = max(1, max_allowed_days)
+
+        return cleaned_data
     def is_valid(self):
         original_valid = super().is_valid()
         cleaned_data = super().clean()

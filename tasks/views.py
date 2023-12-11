@@ -95,11 +95,11 @@ def dashboard(request):
             else:
                 tasks_for_each_team = tasks_for_each_team.order_by('-due_date')
 
-        elif filter_type == 'priority=priorityLow':
+        elif filter_type == 'priorityLow':
             tasks_for_each_team = Task.objects.filter(created_by=team, priority='low')
-        elif filter_type == 'priority=priorityMedium':
+        elif filter_type == 'priorityMedium':
             tasks_for_each_team = Task.objects.filter(created_by=team, priority='medium')
-        elif filter_type == 'priority=priorityHigh':
+        elif filter_type == 'priorityHigh':
             tasks_for_each_team = Task.objects.filter(created_by=team, priority='high')
 
         elif filter_type == 'CompletedTrue':
@@ -108,8 +108,6 @@ def dashboard(request):
             tasks_for_each_team = Task.objects.filter(created_by=team, task_completed=False)
         else:
             tasks_for_each_team = Task.objects.filter(created_by=team)
-
-        
 
         # Append tasks for the current team to the team_tasks list
         team_tasks.append((team, tasks_for_each_team))

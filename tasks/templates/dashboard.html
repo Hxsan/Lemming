@@ -23,7 +23,7 @@
 		  <div class="row">
 				<div class="tab-content w-100 align-items-center">
 					{% for team, tasks in team_tasks %}
-						<div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
+						<div class="tab-pane" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
 							{% ifchanged team.team_name %}
 							<div class="row m-1 text-center">
 								<h3>Current Team : {{ team.team_name }}</h3>

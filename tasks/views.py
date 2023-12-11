@@ -46,7 +46,7 @@ def dashboard(request):
 
         team_tasks.append((team, tasks_for_each_team))
 
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_from_dashboard': request.notifications_from_dashboard})
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_list': request.notifications_list})
 
 @login_required
 def mark_as_seen(request):
@@ -75,7 +75,7 @@ def create_team(request):
             return redirect('show_team', team_id=team.id)
     else:
         form = CreateTeamForm()
-    return render(request, 'create_team.html', {'form' : form, 'notifications_from_dashboard': request.notifications_from_dashboard})
+    return render(request, 'create_team.html', {'form' : form, 'notifications_list': request.notifications_list})
 
 @login_required
 def delete_team(request, team_id):
@@ -128,7 +128,7 @@ def show_team(request, team_id):
                 
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
-        return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin, 'notifications_from_dashboard': request.notifications_from_dashboard })
+        return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin, 'notifications_list': request.notifications_list })
     else:
         #no team
         messages.add_message(request, messages.ERROR, "This team was deleted")
@@ -254,7 +254,7 @@ def view_task(request, team_id=1, task_id=1):
             'can_mark_as_complete': task.assigned_to.contains(user) or team.admin_user==user,
             'is_assigned':  task.assigned_to.contains(user),
             'total_time_spent': total_time_spent,
-            'notifications_from_dashboard': request.notifications_from_dashboard
+            'notifications_list': request.notifications_list
         }
         return render(request, 'task_information.html', context)
     else:
@@ -292,7 +292,7 @@ def summary_report(request):
         'user_times': user_times,
         'time_logs': time_logs,
         'teams': teams,
-        'notifications_from_dashboard': request.notifications_from_dashboard
+        'notifications_list': request.notifications_list
     }
 
     return render(request, 'summary_report.html', context)

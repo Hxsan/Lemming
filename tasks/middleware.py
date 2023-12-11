@@ -7,9 +7,14 @@ class TaskNotificationMiddleware:
 
     def __call__(self, request):
         print("TaskNotificationMiddleware is called for this request.")
-        request.notifications_from_dashboard = self.get_notifications(request.user)
+        request.notifications_list = self.get_notifications(request.user)
         response = self.get_response(request)
         return response
+
+    def key_for_sorting(self, notification_and_task):
+        priority_map = {'high': 1, 'medium': 2, 'low': 3}
+        task_id = notification_and_task[1]
+        return priority_map[Task.objects.get(pk=task_id).priority]
 
     def get_notifications(self, user):
         notifications = []
@@ -19,10 +24,12 @@ class TaskNotificationMiddleware:
             tasks_for_each_team = Task.objects.filter(created_by=team)
             for task in tasks_for_each_team:
                 if not task.seen and task.is_high_priority_due_soon():
-                    message = f"Reminder: High priority task '{task.title}' is due on {task.due_date}."
+                    message = f"REMINDER: High priority task '{task.title}' is due on {task.due_date}."
                     notifications.append((message, task.id))
                 elif not task.seen and task.is_other_priority_due_soon():
-                    message = f"Reminder: {task.priority.capitalize()} priority task '{task.title}' is due on {task.due_date}."
+                    message = f"REMINDER: {task.priority.capitalize()} priority task '{task.title}' is due on {task.due_date}."
                     notifications.append((message, task.id))
+
+        notifications = sorted(notifications, key=self.key_for_sorting)
 
         return notifications

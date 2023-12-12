@@ -11,8 +11,10 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, CreateTaskForm, CreateTeamForm, EditTaskForm, AssignTaskForm, SubmitTimeForm
 from tasks.helpers import login_prohibited
-from tasks.models import User, Task, Team, Notification, Activity_Log, TimeSpent, TimeLog
+from tasks.models import User, Task, Team, Activity_Log, TimeSpent, TimeLog
 from datetime import datetime, timedelta
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 
 
 def dashboard(request):
@@ -39,52 +41,27 @@ def dashboard(request):
 
     # List of pairs matching each team with their created tasks
     team_tasks = []
-    notifications_from_dashboard =[]
     for team in teams:
         tasks_for_each_team = Task.objects.filter(created_by=team)
-        for task in tasks_for_each_team:
-            if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
-                #current_user.unread_notifications += 1
-                notifications_from_dashboard.append(task)
-            
 
         team_tasks.append((team, tasks_for_each_team))
 
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_from_dashboard': notifications_from_dashboard})
+    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_list': request.notifications_list})
 
 @login_required
-def notification_hub(request):
-    current_user = request.user
-    teams = current_user.teams.all()
-    team_tasks = []
-    notifications  = []
-    for team in teams:
-        tasks_for_each_team = Task.objects.filter(created_by=team)
-        for task in tasks_for_each_team:
-            team_tasks.append(task)
+def mark_as_seen(request):
+    task_id = request.GET.get('task_id')
+    
+    if task_id:
+        task = Task.objects.get(pk=task_id)
 
-    for task in team_tasks:
-        if task.is_high_priority_due_soon():
-            message = f"High priority task '{task.title}' is due on '{task.due_date}'."
-            notifications.append(message)
-            Notification.objects.create(user_notified=current_user, message=message)
-            #current_user.unread_notifications +=1
-            current_user.save()
-        elif task.is_other_priority_due_soon():
-            message = f"{task.priority.capitalize()} priority task '{task.title}' is due on '{task.due_date}'."
-            notifications.append(message)
-            Notification.objects.create(user_notified=current_user, message=message)
-            #current_user.unread_notifications +=1
-            current_user.save()
         
-    context = {
-        'notifications': notifications,
-        'current_user': current_user,
-        'current_tasks': team_tasks
-    }
+        task.seen = True
 
-    return render(request, 'notification_hub.html', context)
+        task.save()
 
+
+    return redirect('dashboard')
 
 @login_required
 def create_team(request):
@@ -98,7 +75,7 @@ def create_team(request):
             return redirect('show_team', team_id=team.id)
     else:
         form = CreateTeamForm()
-    return render(request, 'create_team.html', {'form' : form})
+    return render(request, 'create_team.html', {'form' : form, 'notifications_list': request.notifications_list})
 
 @login_required
 def delete_team(request, team_id):
@@ -151,7 +128,7 @@ def show_team(request, team_id):
                 
         page_number = request.GET.get("page")
         page_obj = paginator.get_page(page_number)
-        return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin})
+        return render(request, 'show_team.html', {'team' : team, "page_obj": page_obj, 'team_members': team_members, 'is_admin':is_admin, 'notifications_list': request.notifications_list })
     else:
         #no team
         messages.add_message(request, messages.ERROR, "This team was deleted")
@@ -185,13 +162,6 @@ def remove_task(request,task_id):
         # Removal of task should also remove team members associated through CASCADE
         Task.objects.filter(pk=task_id).delete()
         return redirect("dashboard")
-
-def mark_as_seen_view(request, notification_id):
-    notification = get_object_or_404(Notification, id=notification_id)
-
-    if notification.user_notified == request.user:
-        notification.delete()
-    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
 
 @login_required
 def view_task(request, team_id=1, task_id=1):
@@ -230,6 +200,7 @@ def view_task(request, team_id=1, task_id=1):
                     form.save(task)
 
                     return redirect('dashboard')
+                    
             elif 'assign_submit' in request.POST:
                 form2 = AssignTaskForm(specific_team=team, specific_task=task, data=request.POST)
                 if form2.is_valid():
@@ -264,6 +235,8 @@ def view_task(request, team_id=1, task_id=1):
         if not form2.get_assigned_users(task):
             alert_message = "This task has no assigned users." 
 
+        
+
         # Calculate total time spent on a task
         time_spent_queryset = TimeSpent.objects.filter(task=task)
         total_time_spent = sum(instance.time_spent for instance in time_spent_queryset)
@@ -280,7 +253,8 @@ def view_task(request, team_id=1, task_id=1):
             'is_admin' : team.admin_user==user,
             'can_mark_as_complete': task.assigned_to.contains(user) or team.admin_user==user,
             'is_assigned':  task.assigned_to.contains(user),
-            'total_time_spent': total_time_spent
+            'total_time_spent': total_time_spent,
+            'notifications_list': request.notifications_list
         }
         return render(request, 'task_information.html', context)
     else:
@@ -318,6 +292,7 @@ def summary_report(request):
         'user_times': user_times,
         'time_logs': time_logs,
         'teams': teams,
+        'notifications_list': request.notifications_list
     }
 
     return render(request, 'summary_report.html', context)

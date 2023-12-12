@@ -166,6 +166,10 @@ select option {
   max-width: 18rem; 
 }
 
+.dropdown-item:hover{
+  background-color: #121415;  
+}
+
 .userSearch{
   margin-bottom: auto;
   margin-top: 10px;

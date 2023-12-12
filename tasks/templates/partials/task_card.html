@@ -4,7 +4,7 @@
       <h5 class="card-title">{{ task.due_date }}</h5>
       <p class="card-text">{{ task.description }}</p>
       {% if task.is_high_priority_due_soon %}
-      <div class="notification-container" style="background-color: rgb(188, 14, 14); border-radius: 10px; font-size: 10px;">
+      <div class="notification-container" style="background-color: rgb(156, 14, 14); border-radius: 10px; font-size: 10px;">
         <div class="notification-content" style="color: white">
             <i class="fas fa-bell"></i> &#128276; <strong>High priority - Due on {{ task.due_date }}</strong>
         </div>

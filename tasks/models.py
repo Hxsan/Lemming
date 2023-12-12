@@ -84,7 +84,7 @@ class Task(models.Model):
 
     def is_other_priority_due_soon(self):
         today = date.today()
-        reminder_days = int(self.reminder_days or 0)
+        reminder_days = int(self.reminder_days+1 or 0)
         due_remind_date = today + timedelta(days=reminder_days)
         due_tomorrow = today + timedelta(days=1)
         return (self.reminder_days is not None and (self.priority == "medium" or self.priority == "low") and self.due_date >= today and self.due_date <= due_remind_date  and self.task_completed==False

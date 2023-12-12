@@ -108,7 +108,8 @@ class RemoveTaskViewTestCase(TestCase):
         self.form_input = {
             'title' : 'test',
             'description' : 'test task',
-            'due_date' : '02/02/2024'
+            'due_date' : '02/02/2024',
+            'priority': 'medium',
         }
 
     def test_task_removes_successfully(self):

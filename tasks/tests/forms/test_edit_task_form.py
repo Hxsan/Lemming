@@ -11,7 +11,12 @@ class EditTaskFormTestCase(TestCase):
     fixtures = ['tasks/tests/fixtures/default_user.json']
 
     def setUp(self):
-        self.form_input = {'title': 'Task1', 'description': 'This is a task', 'due_date': date.today()}
+        self.form_input = {
+            'title': 'Task1', 
+            'description': 'This is a task', 
+            'due_date': date.today(),
+            'priority': 'medium',
+        }
         self.task = Task.objects.create(title="Task1", description="This is a task", due_date=date.today())
 
     #test for widgets as well
@@ -20,6 +25,8 @@ class EditTaskFormTestCase(TestCase):
         self.assertIn('title', form.fields)
         self.assertIn('description', form.fields)
         self.assertIn('due_date', form.fields)
+        self.assertIn('priority', form.fields)
+        self.assertIn('reminder_days', form.fields)
         description_field = form.fields['description']
         due_date_field = form.fields['due_date']
         self.assertTrue(isinstance(description_field.widget,forms.Textarea))
@@ -53,6 +60,23 @@ class EditTaskFormTestCase(TestCase):
 
     def test_due_date_field_cannot_be_yesterday_or_less(self):
         self.form_input['due_date'] = date.today() - timedelta(1)
+        form = EditTaskForm(data=self.form_input)
+        self.assertFalse(form.is_valid())
+    
+    def test_priority_has_to_be_low_medium_or_high(self):
+        self.form_input['priority'] = 'INVALID'
+        form = EditTaskForm(data=self.form_input)
+        self.assertFalse(form.is_valid())
+    
+    def test_reminder_can_be_before_the_due_date(self):
+        self.form_input['due_date'] = date.today() + timedelta(7)
+        self.form_input['reminder_days'] = 6
+        form = EditTaskForm(data=self.form_input)
+        self.assertTrue(form.is_valid())
+    
+    def test_reminder_cannot_be_after_the_due_date(self):
+        self.form_input['due_date'] = date.today() + timedelta(7)
+        self.form_input['reminder_days'] = 9
         form = EditTaskForm(data=self.form_input)
         self.assertFalse(form.is_valid())
 

@@ -1,18 +1,18 @@
-# Team *enter team name here* Small Group project
+# Team Lemming Small Group project
 
 ## Team members
 The members of the team are:
-- *enter full name 1 here*
-- *enter full name 2 here*
-- *enter full name 3 here*
-- *enter full name 4 here*
-- *enter full name 5 here*
+- Vincent Ha
+- Benjamin Morka
+- Issa Abdi
+- Nithursan Muraleetharan
+- Mohammed Ahmed
 
 ## Project structure
 The project is called `task_manager`.  It currently consists of a single app `tasks`.
 
 ## Deployed version of the application
-The deployed version of the application can be found at [*enter url here*](*enter_url_here*).
+The deployed version of the application can be found at [*teamlemming.pythonanywhere.com*](*teamlemming.pythonanywhere.com*).
 
 ## Installation instructions
 To install the software and use it in your local development environment, you must first set up and activate a local development environment.  From the root of the project:
@@ -46,6 +46,10 @@ $ python3 manage.py test
 ```
 
 *The above instructions should work in your version of the application.  If there are deviations, declare those here in bold.  Otherwise, remove this line.*
+
+**If installing on WSL, please download Chrome for Linux**
+
+
 
 ## Sources
 The packages used by this application are specified in `requirements.txt`

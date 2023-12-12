@@ -8,6 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 
 class SidebarTestCase(LiveServerTestCase):
 
@@ -18,7 +19,9 @@ class SidebarTestCase(LiveServerTestCase):
 
     def setUp(self):
         self.user = User.objects.get(username='@johndoe')
-        self.driver = webdriver.Chrome()
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get(self.live_server_url)
         self.create_teams(self.user)
         login_button = self.driver.find_element(By.CSS_SELECTOR, "a[href*='/log_in/']")
@@ -116,3 +119,56 @@ class SidebarTestCase(LiveServerTestCase):
         # Checks if URL changes accordingly
         url3 = self.driver.current_url
         self.assertIn(f'#{self.teams[2].id}', url3)
+    
+    def test_active_team_stays_active_on_dashboard_redirect(self):
+        tabs = self.driver.find_elements(By.CSS_SELECTOR, '[role="tab"]')
+
+        # Clicks the 2nd team
+        tabs[1].click()
+
+        view_team_button = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, '//a[contains(@class, "view-team-button")]/ancestor::div[@class="card-body"]'))
+        )
+
+        # Clicks the view team button
+        view_team_button.click()
+
+        brand_name = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, '[class="navbar-brand"]'))
+        )
+
+        # Clicks the top right title (brand name)
+        brand_name.click()
+
+        tabs = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, '[role="tab"]'))
+        )
+
+        # Find the active tab
+        for tab in tabs:
+            classes = tab.get_attribute('class')
+            if 'active' in classes:
+                active_tab = tab
+                break
+
+        # Active tab must be the 2nd team
+        self.assertEqual(active_tab.text, 'Test Team 2')
+    
+    def test_adding_team_ID_to_URL_changes_active_team(self):
+
+        # Change URL by adding the 2nd team's team ID
+        self.driver.get(self.driver.current_url + f'#{self.teams[1].id}')
+
+        tabs1 = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, '[role="tab"]'))
+        )
+
+        # Find the active tab
+        for tab in tabs1:
+            classes = tab.get_attribute('class')
+            if 'active' in classes:
+                active_tab1 = tab
+                break
+        
+        # Active tab must be the 2nd team
+        self.assertEqual(active_tab1.text, 'Test Team 2')

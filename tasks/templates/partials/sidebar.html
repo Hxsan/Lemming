@@ -14,7 +14,7 @@
                             </li> 
                             {% for team in teams %}
                                 <li class="nav-object">
-                                    <a class="dropdown-item nav-link {% if forloop.first %} active {% endif %}" href="#{{ team.id }}">
+                                    <a class="dropdown-item nav-link" href="#{{ team.id }}">
                                         {{ team.team_name }}
                                     </a>
                                 </li>
@@ -30,12 +30,14 @@
                         </div>
                         <div class="move-row">
                             <li>
-                                <a class="nav-link" href="{% url 'create_team' %}"> Create +</a>
+                                {% if request.resolver_match.view_name == 'dashboard' %}
+                                    <a class="nav-link" href="{% url 'create_team' %}"> Create +</a>
+                                {% endif %}
                             </li> 
                         {% for team in teams %}
                             <li class="nav-object my-1">
                                 <div class="text-start border border-primary rounded">
-                                    <a class="nav-link {% if forloop.first %} active {% endif %} text-white" id="{{ team.id }}-tab" data-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
+                                    <a class="nav-link text-white" id="{{ team.id }}-tab" data-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="false">
                                         {{ team.team_name }}
                                     </a>
                                 </div>
@@ -54,23 +56,41 @@
 
 <!-- Specific jQuery to this partial -->
 <script>
+
+    // Activates content of nav-times based on previous active team
+    function setActiveTeamOnRedirect() {
+        var activeTeam = localStorage.getItem('active');
+        if (activeTeam) {
+            var tab = $('#' + activeTeam + '-tab');
+            tab.addClass('active');
+            $(tab.attr('href')).addClass('active');
+        } else { // No team is found, make first team active
+            var firstTab = $('.nav-link[data-toggle="pill"]').first();
+            firstTab.addClass('active');
+            $(firstTab.attr('href')).addClass('active');
+        }
+    }
+
+    // Activates content of nav-items based on URL input
+    function setActivefromURL() {
+        var url = window.location.href;
+        var splitURL = url.split('#');
+            var id = splitURL[1];
+            var activeTab = $('#' + id);
+            if (activeTab.length > 0) {
+                $('.nav-link').removeClass('active');
+                $('.tab-pane').removeClass('active');
+
+                // Activate the tab corresponding to the URL ID
+                activeTab.addClass('active');
+                $('a[href="#' + id + '"]').addClass('active');
+            }
+        }
+
     $(document).ready(function() {
 
-        // Activates content of nav-items based on URL input
-        function setActivefromURL() {
-            var url = window.location.href;
-            var splitURL = url.split('#');
-                var id = splitURL[1];
-                var activeTab = $('#' + id);
-                if (activeTab.length > 0) {
-                    $('.nav-link').removeClass('active');
-                    $('.tab-pane').removeClass('active');
+        setActiveTeamOnRedirect();
 
-                    // Activate the tab corresponding to the URL ID
-                    activeTab.addClass('active');
-                    $('a[href="#' + id + '"]').addClass('active');
-                }
-            }
         setActivefromURL();
 
         // Changes active tab directly from the dashboard
@@ -91,29 +111,8 @@
             $(tag.attr('href')).addClass('active');
 
             window.location.href = tag.attr('href');
-        });
-        
-        // Moves nav-items offscreen / onscreen
-        
-        $('.move').on('click', function(e) {
-            e.preventDefault();
-            var sidebar = $('.sidebar');
-            var arrowOut = $('.arrow-out');
-
-            if (sidebar.hasClass('slide-off')) {
-                arrowOut.animate({ left: '-=50px'}, 'fast')
-
-                sidebar.removeClass('slide-off');
-                sidebar.addClass('slide-on');
-                // Slide arrow-out offscreen THEN menu onscreen
-            } else {
-                sidebar.removeClass('slide-on');
-                sidebar.addClass('slide-off');
-
-                arrowOut.animate({ left: '+=50px'}, 'slow')
-                // Slide menu offscreen THEN arrow-out onscreen
-            }
-
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            localStorage.setItem('active', teamId);
         });
 
         // Redirects to correct pages based on which team was clicked on sidebar

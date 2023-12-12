@@ -2,22 +2,28 @@
 
 {% block content %}
 <div class="container-fluid">
-	<!-- Height is calculated by the height of the page minus the nav-menu height --> 
-	<div class="row row-cols-3" style="height: calc(100vh - 55.99px)"> 
-		<!-- Sidebar Left -->
-		<div id="teamSidebar" class="col-2">
-			{% include 'partials/sidebar.html' %}
-		</div>
-		<!-- Main Content Section -->
-		<div class="col-8 align-items-center">
-			<div class="container-fluid">
-				<!-- Main content Header -->
-				<div class="row m-1 text-center">
-					<h1>Welcome to your dashboard {{ user.username }}</h1>
-				</div>
-				<div class="row">
-					<div class="tab-content w-100 align-items-center">
-						{% if team_tasks %}
+  <!-- Height is calculated by the height of the page minus the nav-menu height --> 
+  <div class="row row-cols-3 " style="height: calc(100vh - 55.99px)"> 
+	<!-- Sidebar Left -->
+	<div id="teamSidebar" class="col-2">
+		{% include 'partials/sidebar.html' %}
+	</div>
+	<!-- Main Content Section -->
+	<div class="col-8 align-items-center">
+		<div class="container-fluid">
+		<!-- Main content Header -->
+		  <div class="row m-1 text-center">
+			 <h1>Welcome to your dashboard {{ user.username }}</h1>
+		  </div>
+		  <!--Tell them to create a team if they have none-->
+		  {%if user.teams.count == 0%}
+		  <div class="alert alert-info" role="alert">
+			You have no Teams. Create a team to get started!
+		  </div>
+		  {%endif%}
+		  <div class="row">
+				<div class="tab-content w-100 align-items-center">
+          	{% if team_tasks %}
 						<div class="dropdown btn-group">
 							<button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 								Order By
@@ -73,8 +79,8 @@
 							</ul>
 						</div>
 						{% endif %}
-						{% for team, tasks in team_tasks %}
-						<div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
+					{% for team, tasks in team_tasks %}
+						<div class="tab-pane" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
 							{% ifchanged team.id %}
 							<div class="row m-1 p-1 text-center border border-white rounded-pill">
 								<h3>Current Team : {{ team.team_name }}</h3>
@@ -104,16 +110,27 @@
 						{% endfor %}
 					</div>
 				</div>
-			</div>
+		  	</div>
 		</div>
-		<!-- Sidebar right -->
-		<div class="col-2 flex-column" id="viewTeamSidebar">
+	</div>
+	<!-- Sidebar right -->
+	<div class="col-2 flex-column" id="viewTeamSidebar">
+		<!--Disable View team button if the user has no team -->
+		{%if user.teams.count == 0%}
+			<div class="card text-white text-center bg-secondary m-1" style="max-width: 18rem;">
+				<div class="card-body">
+					<h5 class="card-title">View Team</h5>
+					<a href="#" class="stretched-link view-team-button"></a>
+				</div>
+			</div>
+		{%else%}
 			<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
 				<div class="card-body">
 					<h5 class="card-title">View Team</h5>
 					<a href="#" class="stretched-link view-team-button"></a>
 				</div>
 			</div>
+		{%endif%}
 			<div class="p-2 border align-self-start bg-dark">
 				<h5 class="text-center">Due Dates</h5>
 				{% if due_dates %}
@@ -135,6 +152,9 @@
 					<p class="text-center">No due dates available.</p>
 				{% endif %}
 			</div>
+		<hr>
+		<div class="text-center">
+			<a href="{% url 'summary_report' %}" class="btn btn-outline-light rounded-pill">Summary Report</a>
 		</div>
 	</div>
 </div>

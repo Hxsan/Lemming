@@ -119,10 +119,14 @@ h3.profile-title {
  * Custom changes
  */
 
-
 body{
   color:#fff;
   background-color: #1B2A41;
+}
+
+select option {
+  background: #1B2A41;
+  color: #fff;
 }
 
 .highlight{
@@ -144,6 +148,15 @@ body{
   color: #fff;
 }
 
+.activityLogButton{
+  margin-left: 5px;
+}
+
+.actionTableSection{
+  align-items: center;
+  justify-content: center;
+}
+
 .taskCreationCard {
   max-width: 18rem; 
   background-color: #ccc9dc;
@@ -153,15 +166,20 @@ body{
   max-width: 18rem; 
 }
 
+.userSearch{
+  margin-bottom: auto;
+  margin-top: 10px;
+}
+
+.activityTable{
+  color: #fff;
+}
+
 #search-users-items{
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #CCC9DC;
-}
-
-#query{
-  margin-bottom: auto;
 }
 
 #show-team-header{
@@ -188,4 +206,15 @@ body{
 
 #dueDateCards{
   background-color: darkblue;
+}
+.modal-header{
+  background-color: #142134;
+}
+
+.modal-body{
+  background-color: #1B2A41;
+}
+
+.modal-footer{
+  background-color: #142134;
 }

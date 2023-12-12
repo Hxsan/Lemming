@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
@@ -21,32 +22,70 @@ def dashboard(request):
     """Display the current user's dashboard."""
     current_user = request.user
 
-
     if not current_user.is_authenticated:
-
         return render(request, 'home.html', {'user': current_user})
 
     teams = current_user.teams.all()
 
     # Check if the user is associated with any teams
-    if teams:
-        # If the user is associated with teams, use the ID of the first team
-        team_id = teams[0].id
-    else:
-        # If the user is not associated with any teams, set team id to 1
-        team_id = 1 
+    if not teams.exists():
+        # If the user is not associated with any teams
+        return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': 1, 'team_tasks': None})
 
-    tasks = Task.objects.all()
+    # Get the sorting method and order field from the request
+    sort_type = request.GET.get('sort', 'default')
+    order_type = request.GET.get('order', 'default')
+    filter_type = request.GET.get('filter', None)
+    search_query = request.GET.get('search_query', '')
 
-
-    # List of pairs matching each team with their created tasks
     team_tasks = []
+    task_fields = [field for field in Task._meta.get_fields() if not field.name.startswith('_')]
+
+    # List to store notifications for all teams
+    notifications_from_dashboard = []
+
+    # Checks and retrieves due dates
+    due_dates = []
+
     for team in teams:
         tasks_for_each_team = Task.objects.filter(created_by=team)
 
+        # Due dates and notifications
+        due_dates.extend(task for task in tasks_for_each_team if task.due_date)
+        notifications_from_dashboard.extend(task for task in tasks_for_each_team if task.is_high_priority_due_soon() or task.is_other_priority_due_soon())
+
+        # Apply sorting based on sort_type and order_type
+        if search_query:
+            tasks_for_each_team = tasks_for_each_team.filter(
+                Q(title__icontains=search_query) | Q(description__icontains=search_query)
+            )
+        elif order_type != 'default':
+            tasks_for_each_team = tasks_for_each_team.order_by(order_type)
+        elif sort_type in ['ascending', 'descending']:
+            order_prefix = '' if sort_type == 'ascending' else '-'
+            tasks_for_each_team = tasks_for_each_team.order_by(order_prefix + 'due_date')
+
+        # Filter conditions
+        filter_conditions = {}
+
+        if filter_type in ['priorityLow', 'priorityMedium', 'priorityHigh']:
+            filter_conditions['priority'] = filter_type.replace('priority', '').lower()
+        elif filter_type in ['CompletedTrue', 'CompletedFalse']:
+            filter_conditions['task_completed'] = (filter_type == 'CompletedTrue')
+
+        if filter_conditions:
+            tasks_for_each_team = tasks_for_each_team.filter(**filter_conditions)
+
+        # Append tasks for the current team to the team_tasks list
         team_tasks.append((team, tasks_for_each_team))
 
-    return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': team_id, 'team_tasks' : team_tasks, 'notifications_list': request.notifications_list})
+    return render(request, 'dashboard.html', {'user': current_user,
+                                               'teams': teams,
+                                               'task_fields': task_fields,
+                                               'team_tasks': team_tasks,
+                                               'notifications_from_dashboard': notifications_from_dashboard,
+                                               'due_dates': due_dates
+                                               })
 
 @login_required
 def mark_as_seen(request):

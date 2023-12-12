@@ -2,7 +2,13 @@
     <div class="card-header">{{task.title}}</div>
     <div class="card-body">
       <h5 class="card-title">{{ task.due_date }}</h5>
-      <p class="card-text">{{ task.description }}</p>
+      <p class="card-text">
+        {% if task.description|length > 80 %}
+            {{ task.description|slice:":80" }} ...
+        {% else %}
+            {{ task.description }}
+        {% endif %}
+      </p>
       {% if task.is_high_priority_due_soon %}
       <div class="notification-container" style="background-color: rgb(156, 14, 14); border-radius: 10px; font-size: 10px;">
         <div class="notification-content" style="color: white">

@@ -201,9 +201,12 @@ select option {
 }
 
 #userDropDownMenu{
-  background-color: #CCC9DC;;
+  background-color: #CCC9DC;
 }
 
+#dueDateCards{
+  background-color: darkblue;
+}
 .modal-header{
   background-color: #142134;
 }

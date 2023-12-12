@@ -46,6 +46,7 @@ $ python3 manage.py test
 ```
 
 *The above instructions should work in your version of the application.  If there are deviations, declare those here in bold.  Otherwise, remove this line.*
+```
 **If installing on WSL, please download Chrome for Linux**
 
 

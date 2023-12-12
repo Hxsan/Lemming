@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from tasks.models import User, Team
+from tasks.models import User, Team, Task
 
 import pytz
 from faker import Faker
@@ -33,7 +33,16 @@ class Command(BaseCommand):
 
     def generate_user_fixtures(self):
         for data in user_fixtures:
-            self.try_create_user(data)
+            if data['username'] == '@johndoe':
+                User.objects.create_superuser(
+                    username=data['username'],
+                    email=data['email'],
+                    password=Command.DEFAULT_PASSWORD,
+                    first_name=data['first_name'],
+                    last_name=data['last_name'],
+                )
+            else:
+                self.try_create_user(data)
         self.setup_required_team()
     
     def setup_required_team(self):
@@ -51,7 +60,7 @@ class Command(BaseCommand):
         jane.teams.add(testTeam)
         john.teams.add(testTeam)
         charlie.teams.add(testTeam)
-
+        
 
     def generate_random_users(self):
         user_count = User.objects.count()

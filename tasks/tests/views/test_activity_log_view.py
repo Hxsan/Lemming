@@ -17,7 +17,7 @@ class ActivityLogViewTestCase(TestCase):
         self.member_with_log = User.objects.get(username='@janedoe') #we will be getting this user's activity log
         self.member_without_log = User.objects.get(username='@petrapickles') #no log for this user
         #Create team and add members to the team
-        self.team = Team.objects.create(team_name='Team 1',admin_user=self.user)
+        self.team = Team.objects.create(team_name='TestTeam',admin_user=self.user)
         self.url = reverse("activity_log", args=[self.team.id, self.member_with_log.id])
         self.team.members.set([self.user, self.member_with_log])
         self.user.teams.set([self.team])
@@ -53,4 +53,12 @@ class ActivityLogViewTestCase(TestCase):
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
         self.assertTemplateUsed(response, 'show_team.html')
     
+    def test_redirect_when_this_team_is_deleted_elsewhere(self):
+        self.client.login(username=self.user.username, password='Password123')
+        self.team.delete()
+        response = self.client.get(self.url, follow=True)
+        response_url = reverse('dashboard')
+        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'dashboard.html') #check redirect back to dashboard
+        self.assertContains(response, 'This team was deleted')
 

@@ -109,4 +109,14 @@ class TimeModalViewTestCase(TestCase):
         response = self.client.get(self.url)
         total_time_spent = response.context['total_time_spent']
         self.assertEqual(total_time_spent, 0)
+    
+    """
+    def test_redirect_when_this_task_is_deleted_elsewhere(self):
+        self.task.delete()
+        response = self.client.get(self.url, follow=True)
+        response_url = reverse('dashboard')
+        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'dashboard.html') #check redirect back to dashboard
+        self.assertContains(response, 'This task was deleted')
+    """
 

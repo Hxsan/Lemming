@@ -57,5 +57,13 @@ class ShowTeamViewTestCase(TestCase):
         self.assertIn('@janedoe', [member.username for member in team_members])
 
         self.assertEqual(len(team_members), 2)
+    
+    def test_redirect_when_this_team_is_deleted_elsewhere(self):
+        self.team.delete()
+        response = self.client.get(self.url, follow=True)
+        response_url = reverse('dashboard')
+        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'dashboard.html') #check redirect back to dashboard
+        self.assertContains(response, 'This team was deleted')
 
 

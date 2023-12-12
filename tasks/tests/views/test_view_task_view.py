@@ -19,6 +19,7 @@ class ViewTaskViewTestCase(TestCase):
             'description': 'This is a task',
             'due_date': date.today(),
             'priority': 'medium',
+            'reminder_days': 1, 
             'edit_submit': 'Save', #these two values to simulate the request information sent
             'task_completed': False,
         }
@@ -124,13 +125,9 @@ class ViewTaskViewTestCase(TestCase):
     def test_successful_mark_as_complete(self):
          #test that we cannot post with mark as complete if the form is invalid
         self.form_input['task_completed'] = True
-        self.client.post(self.url, self.form_input, follow=True)
+        response = self.client.post(self.url, self.form_input, follow=True)
         self.task.refresh_from_db()
         self.assertTrue(self.task.task_completed) #make sure the task still is not marked as completed
-
-    """
-    Tests should be here for delete task
-    """
 
     def test_due_date_field_can_be_today(self):
         self.form_input['due_date'] = date.today()
@@ -161,6 +158,10 @@ class ViewTaskViewTestCase(TestCase):
         self.task.refresh_from_db()
         self.assertEqual(self.task.title, old_title)#didn't change
 
-    """
-    Tests here for assigning tasks to users
-    """
+    def test_redirect_when_this_task_is_deleted_elsewhere(self):
+        self.task.delete()
+        response = self.client.get(self.url, follow=True)
+        response_url = reverse('dashboard')
+        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
+        self.assertTemplateUsed(response, 'dashboard.html') #check redirect back to dashboard
+        self.assertContains(response, 'This task was deleted')

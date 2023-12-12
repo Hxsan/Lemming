@@ -1,5 +1,6 @@
 """Forms for the tasks app."""
 from django import forms
+from django.contrib import messages
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User, Task, Team, TimeSpent, TimeLog
@@ -184,11 +185,15 @@ class EditTaskForm(forms.ModelForm):
         due_date = cleaned_data.get('due_date')
         
         today = date.today()
-        max_allowed_days = (due_date - today).days -1
 
-        self.fields['reminder_days'].widget.attrs['max'] = max(1, max_allowed_days)
-
+        reminder_days = cleaned_data.get('reminder_days')
+        #self.fields['reminder_days'].widget.attrs['max'] = max(1, max_allowed_days)
+        if due_date and reminder_days is not None:
+            max_allowed_days = (due_date - today).days + 1
+            if reminder_days > max_allowed_days: #add 1 because the task could be today
+                self.add_error('reminder_days', f"Reminder days cannot be more than {max_allowed_days} days before the due date.")
         return cleaned_data
+    
     def is_valid(self):
         original_valid = super().is_valid()
         return original_valid and (self.fields['due_date'].disabled or self.cleaned_data['due_date']>(date.today() - timedelta(1))) #ensure due date is later or equal to today

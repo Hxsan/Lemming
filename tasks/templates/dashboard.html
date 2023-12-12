@@ -1,4 +1,4 @@
-{% extends 'base_content.html' %}
+{% extends 'base_content_for_dashboard.html' %}
 
 {% block content %}
 <div class="container-fluid">
@@ -15,6 +15,7 @@
 		  <div class="row m-1 text-center">
 			 <h1>Welcome to your dashboard {{ user.username }}</h1>
 		  </div>
+		  {% include 'partials/messages.html' %}
 		  <!--Tell them to create a team if they have none-->
 		  {%if user.teams.count == 0%}
 		  <div class="alert alert-info" role="alert">
@@ -119,7 +120,6 @@
 			<div class="card text-white text-center bg-secondary m-1" style="max-width: 18rem;">
 				<div class="card-body">
 					<h5 class="card-title">View Team</h5>
-					<a href="#" class="stretched-link view-team-button"></a>
 				</div>
 			</div>
 		{%else%}

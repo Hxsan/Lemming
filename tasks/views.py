@@ -195,7 +195,7 @@ def remove_member(request, team_id, member_username):
                         task.assigned_to.remove(member_to_remove)
         return redirect('show_team', team_id=team_id)
     else:
-        messages.add_message(request, messages.ERROR, "This team was already deleted")
+        messages.add_message(request, messages.ERROR, "This team was deleted")
         return redirect('dashboard')
 
 @login_required
@@ -230,6 +230,8 @@ def view_task(request, team_id=1, task_id=1):
                 if datetime.now().date() > task.due_date:
                     form.fields['due_date'].disabled = True
                     form.fields['reminder_days'].disabled = True
+                elif 'reminder_days' in form.errors:
+                    messages.add_message(request, messages.ERROR, form.errors['reminder_days'])
                 #otherwise, we have submitted the whole form, so save it
                 #get the value of the complete button 
                 if form.is_valid():        
@@ -306,7 +308,14 @@ def view_task(request, team_id=1, task_id=1):
 
 @login_required
 def user_activity_log(request, team_id, user_id):
+    #check if team exists
     user = User.objects.get(pk=user_id)
+    #print(Team.objects.get(pk=team_id).team_name)
+    #print("Team in acticity log exists is ", Team.objects.filter(pk=team_id).exists())
+    if not Team.objects.filter(pk=team_id).exists():
+        messages.add_message(request, messages.ERROR, "This team was deleted")
+        return redirect('dashboard')
+    
     if Activity_Log.objects.filter(user=user).exists():
         log = Activity_Log.objects.get(user=user)
         log.log.reverse() #reverse to have it in order of most recent

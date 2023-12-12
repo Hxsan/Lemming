@@ -23,7 +23,7 @@
 		  {%endif%}
 		  <div class="row">
 				<div class="tab-content w-100 align-items-center">
-          	{% if team_tasks %}
+          			{% if team_tasks %}
 						<div class="dropdown btn-group">
 							<button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 								Order By
@@ -79,7 +79,7 @@
 							</ul>
 						</div>
 						{% endif %}
-					{% for team, tasks in team_tasks %}
+						{% for team, tasks in team_tasks %}
 						<div class="tab-pane" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
 							{% ifchanged team.id %}
 							<div class="row m-1 p-1 text-center border border-white rounded-pill">
@@ -111,7 +111,6 @@
 					</div>
 				</div>
 		  	</div>
-		</div>
 	</div>
 	<!-- Sidebar right -->
 	<div class="col-2 flex-column" id="viewTeamSidebar">

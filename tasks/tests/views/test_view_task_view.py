@@ -19,7 +19,7 @@ class ViewTaskViewTestCase(TestCase):
             'description': 'This is a task',
             'due_date': date.today(),
             'priority': 'medium',
-            'reminder_days': 1, 
+            'reminder_days': 0, 
             'edit_submit': 'Save', #these two values to simulate the request information sent
             'task_completed': False,
         }

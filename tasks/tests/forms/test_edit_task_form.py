@@ -76,7 +76,7 @@ class EditTaskFormTestCase(TestCase):
     
     def test_reminder_cannot_be_after_the_due_date(self):
         self.form_input['due_date'] = date.today() + timedelta(7)
-        self.form_input['reminder_days'] = 9
+        self.form_input['reminder_days'] = 8
         form = EditTaskForm(data=self.form_input)
         self.assertFalse(form.is_valid())
 

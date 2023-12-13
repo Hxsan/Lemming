@@ -143,9 +143,14 @@ select option {
   padding: 10px;
 }
 
-.form-control, .form-control:focus, .form-control:disabled {    
+.form-control, .form-control:focus{    
   background: transparent;
   color: #fff;
+}
+
+.form-control:disabled{
+  color: #9f9f9f;
+  background: transparent;
 }
 
 .activityLogButton{

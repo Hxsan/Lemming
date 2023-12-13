@@ -27,7 +27,7 @@
           			{% if team_tasks %}
 						<div class="dropdown btn-group">
 							<button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								Order By
+								Sort By
 							</button>
 							<ul class="dropdown-menu bg-dark" id="DropdownMenu">
 								<li><a class="dropdown-item" href="{% url 'dashboard' %}?sort=ascending">Ascending</a></li>
@@ -38,13 +38,17 @@
 					
 						<div class="dropdown btn-group">
 							<button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								Sort By
+								Order By
 							</button>
 							<ul class="dropdown-menu bg-dark">
 								{% if team_tasks %}
-									{% for field in task_fields %}
-										<li><a class="dropdown-item" href="{% url 'dashboard' %}?order={{ field.name }}">{{ field.verbose_name }}</a></li>
-									{% endfor %}
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=id">Task ID</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=title">Title</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=created_by">Created By</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=priority">Priority</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=task_completed">Task Completed</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=assigned_to">Assigned To</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=due_date">Due Date</a></li>
 									<li><a class="dropdown-item" href="{% url 'dashboard' %}">Clear Filter</a></li>
 								{% else %}
 									<li><a class="dropdown-item" href="#">No Task available</a></li>

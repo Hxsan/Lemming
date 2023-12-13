@@ -59,6 +59,7 @@ def dashboard(request):
             tasks_for_each_team = tasks_for_each_team.filter(
                 Q(title__icontains=search_query) | Q(description__icontains=search_query)
             )
+            
         elif order_type != 'default':
             tasks_for_each_team = tasks_for_each_team.order_by(order_type)
         elif sort_type in ['ascending', 'descending']:

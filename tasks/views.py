@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 
-
+@login_required
 def dashboard(request):
     """Display the current user's dashboard."""
     current_user = request.user
@@ -53,13 +53,16 @@ def dashboard(request):
         # Due dates and notifications
         due_dates.extend(task for task in tasks_for_each_team if task.due_date)
 
+        for task in tasks_for_each_team:
+            if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
+                notifications_from_dashboard.append(task)
         
         # Apply sorting based on sort_type and order_type
         if search_query:
             tasks_for_each_team = tasks_for_each_team.filter(
                 Q(title__icontains=search_query) | Q(description__icontains=search_query)
             )
-            
+
         elif order_type != 'default':
             tasks_for_each_team = tasks_for_each_team.order_by(order_type)
         elif sort_type in ['ascending', 'descending']:
@@ -74,9 +77,6 @@ def dashboard(request):
         elif filter_type in ['CompletedTrue', 'CompletedFalse']:
             filter_conditions['task_completed'] = (filter_type == 'CompletedTrue')
 
-        if filter_conditions:
-            tasks_for_each_team = tasks_for_each_team.filter(**filter_conditions)
-
         # Append tasks for the current team to the team_tasks list
         team_tasks.append((team, tasks_for_each_team))
 
@@ -84,8 +84,8 @@ def dashboard(request):
                                                'teams': teams,
                                                'task_fields': task_fields,
                                                'team_tasks': team_tasks,
-                                               'due_dates': due_dates,
-                                               'notifications_list':request.notifications_list
+                                               'notifications_from_dashboard': notifications_from_dashboard,
+                                               'due_dates': due_dates
                                                })
 
 @login_required
@@ -193,7 +193,7 @@ def remove_member(request, team_id, member_username):
                         task.assigned_to.remove(member_to_remove)
         return redirect('show_team', team_id=team_id)
     else:
-        messages.add_message(request, messages.ERROR, "This team was deleted")
+        messages.add_message(request, messages.ERROR, "This team was already deleted")
         return redirect('dashboard')
 
 @login_required
@@ -228,8 +228,6 @@ def view_task(request, team_id=1, task_id=1):
                 if datetime.now().date() > task.due_date:
                     form.fields['due_date'].disabled = True
                     form.fields['reminder_days'].disabled = True
-                elif 'reminder_days' in form.errors:
-                    messages.add_message(request, messages.ERROR, form.errors['reminder_days'])
                 #otherwise, we have submitted the whole form, so save it
                 #get the value of the complete button 
                 if form.is_valid():        
@@ -306,14 +304,7 @@ def view_task(request, team_id=1, task_id=1):
 
 @login_required
 def user_activity_log(request, team_id, user_id):
-    #check if team exists
     user = User.objects.get(pk=user_id)
-    #print(Team.objects.get(pk=team_id).team_name)
-    #print("Team in acticity log exists is ", Team.objects.filter(pk=team_id).exists())
-    if not Team.objects.filter(pk=team_id).exists():
-        messages.add_message(request, messages.ERROR, "This team was deleted")
-        return redirect('dashboard')
-    
     if Activity_Log.objects.filter(user=user).exists():
         log = Activity_Log.objects.get(user=user)
         log.log.reverse() #reverse to have it in order of most recent
@@ -378,10 +369,11 @@ def reset_time(request, team_id, task_id):
 
         # Reset only the user's time spent
         elif action == 'user':
-            try:
-                user_time_spent = TimeSpent.objects.get(user=user, task=task)
-            except TimeSpent.DoesNotExist:
-                return redirect('view_task', team_id=team_id, task_id=task_id) 
+            user_time_spent = get_object_or_404(
+                TimeSpent,
+                user=user,
+                task=task,
+            )
             user_time_spent.time_spent = 0
             user_time_spent.save()
             # Delete all time logs associated with the user on the task

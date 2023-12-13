@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from tasks.models import User, Task, Team
 from tasks.forms import SubmitTimeForm
+from tasks.templatetags.format_time import format
 from datetime import date, timedelta
 
 
@@ -109,6 +110,29 @@ class TimeModalViewTestCase(TestCase):
         response = self.client.get(self.url)
         total_time_spent = response.context['total_time_spent']
         self.assertEqual(total_time_spent, 0)
+
+class FormatTimeTestCase(TestCase):
+
+    def test_no_time_given_returns_message(self):
+        self.assertEqual(format(0), 'No time has been spent.')
+        self.assertEqual(format(None), 'No time has been spent.')
+    
+    def test_edge_case_for_a_minute(self):
+        self.assertEqual(format(59), '59s ')
+        self.assertEqual(format(60), '1m ')
+    
+    def test_edge_case_for_an_hour(self):
+        self.assertEqual(format(3599), '59m 59s ')
+        self.assertEqual(format(3600), '1h ')
+
+    def test_edge_case_for_a_day(self):
+        self.assertEqual(format(86399), '23h 59m 59s ')
+        self.assertEqual(format(86400), '1d ')
+    
+    def test_random_times_formatted_correctly(self):
+        self.assertEqual(format(76543), '21h 15m 43s ')
+        self.assertEqual(format(89217), '1d 46m 57s ')
+        self.assertEqual(format(67892), '18h 51m 32s ')
     
     """
     def test_redirect_when_this_task_is_deleted_elsewhere(self):

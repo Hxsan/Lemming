@@ -84,6 +84,7 @@
                 <button type="submit" class="btn btn-danger float-end">Delete Team</button>
             </form>
             {% endif %}
+            <!-- Display paginator for list of team members -->
             <ul class="pagination">
                 {% if page_obj.has_previous %}
                     <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
@@ -109,6 +110,7 @@
             <div class="mt-5" style="border-left: 2px dashed white; height: 81%"></div>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+            <!-- Show the search bar to search team members -->
             {% if is_admin %}
             <form class="d-flex userSearch" method="POST" action="{% url 'show_team' team_id=team.id%}">
                 {% csrf_token %}
@@ -137,6 +139,11 @@
                         {% endif %}
                     {% endfor %}
                 </div>
+            {% else %}
+                <div class="alert alert-info" style="margin-top: 10px"role="alert">
+                    Please search by username or full first/last name
+                </div>
+
             {% endif%}
         </div>        
     </div>

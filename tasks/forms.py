@@ -190,8 +190,11 @@ class EditTaskForm(forms.ModelForm):
         #self.fields['reminder_days'].widget.attrs['max'] = max(1, max_allowed_days)
         if due_date and reminder_days is not None:
             max_allowed_days = (due_date - today).days 
-            if reminder_days > max_allowed_days: #add 1 because the task could be today
-                self.add_error('reminder_days', f"Reminder days cannot be more than {max_allowed_days} days before the due date.")
+            if reminder_days > max_allowed_days: 
+                if due_date == today and reminder_days > 0:
+                    self.add_error('reminder_days', f"Reminder days cannot be more than 0, as this task is due today.")
+                else:
+                    self.add_error('reminder_days', f"Reminder days cannot be more than {max_allowed_days} days before the due date.")
         return cleaned_data
     
     def is_valid(self):

@@ -62,7 +62,7 @@ class Task(models.Model):
         ('medium', 'Medium'),
         ('high', 'High'),
     ]
-    reminder_days = models.IntegerField(default=1, null=True, blank=True)
+    reminder_days = models.IntegerField(default=0, null=True, blank=True)
     
     title = models.CharField(max_length=30, blank=False)
     description = models.CharField(max_length=300, blank=True)
@@ -78,7 +78,6 @@ class Task(models.Model):
         today = date.today()
         reminder_days = int(self.reminder_days+1 or 0)
         due_remind_date = today + timedelta(days=reminder_days)
-        due_tomorrow = today + timedelta(days=1)
         return (self.reminder_days is not None and self.priority == "high" and self.due_date >= today and self.due_date < due_remind_date and self.task_completed==False
     )
 
@@ -86,7 +85,6 @@ class Task(models.Model):
         today = date.today()
         reminder_days = int(self.reminder_days+1 or 0)
         due_remind_date = today + timedelta(days=reminder_days)
-        due_tomorrow = today + timedelta(days=1)
         return (self.reminder_days is not None and (self.priority == "medium" or self.priority == "low") and self.due_date >= today and self.due_date < due_remind_date  and self.task_completed==False
     )
 

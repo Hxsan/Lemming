@@ -30,9 +30,9 @@
 								Order By
 							</button>
 							<ul class="dropdown-menu bg-dark" id="DropdownMenu">
-								<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}?sort=ascending">Ascending</a></li>
-								<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}?sort=descending">Descending</a></li>
-								<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}">Clear Filter</a></li>
+								<li><a class="dropdown-item" href="{% url 'dashboard' %}?sort=ascending">Ascending</a></li>
+								<li><a class="dropdown-item" href="{% url 'dashboard' %}?sort=descending">Descending</a></li>
+								<li><a class="dropdown-item" href="{% url 'dashboard' %}">Clear Filter</a></li>
 							</ul>
 						</div>
 					
@@ -43,11 +43,11 @@
 							<ul class="dropdown-menu bg-dark">
 								{% if team_tasks %}
 									{% for field in task_fields %}
-										<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}?order={{ field.name }}">{{ field.verbose_name }}</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?order={{ field.name }}">{{ field.verbose_name }}</a></li>
 									{% endfor %}
-									<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}">Clear Filter</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}">Clear Filter</a></li>
 								{% else %}
-									<li><a class="dropdown-item text-white" href="#">No Task available</a></li>
+									<li><a class="dropdown-item" href="#">No Task available</a></li>
 								{% endif %}
 							</ul>
 						</div>
@@ -62,9 +62,9 @@
 										Priority
 									</a>
 									<ul class="submenu bg-dark">
-										<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}?filter=priorityLow">Low</a></li>
-										<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}?filter=priorityMedium">Medium</a></li>
-										<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}?filter=priorityHigh">High</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=priorityLow">Low</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=priorityMedium">Medium</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=priorityHigh">High</a></li>
 									</ul>
 								</li>
 								<li>
@@ -72,11 +72,11 @@
 										Completion
 									</a>
 									<ul class="submenu bg-dark">
-										<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}?filter=CompletedFalse">Not Completed</a></li>
-										<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}?filter=CompletedTrue">Completed</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=CompletedFalse">Not Completed</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=CompletedTrue">Completed</a></li>
 									</ul>
 								</li>
-								<li><a class="dropdown-item text-white" href="{% url 'dashboard' %}">Clear Filter</a></li>
+								<li><a class="dropdown-item" href="{% url 'dashboard' %}">Clear Filter</a></li>
 							</ul>
 						</div>
 						{% endif %}

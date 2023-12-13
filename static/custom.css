@@ -166,16 +166,16 @@ select option {
   max-width: 18rem; 
 }
 
-.dropdown-item:hover{
-  background-color: #121415;  
-}
-
 .userSearch{
   margin-bottom: auto;
   margin-top: 10px;
 }
 
 .activityTable{
+  color: #fff;
+}
+
+.dropdown-item{
   color: #fff;
 }
 
@@ -202,10 +202,6 @@ select option {
 
 #navbarTop{
   background: #04080B;
-}
-
-#userDropDownMenu{
-  background-color: #CCC9DC;
 }
 
 #dueDateCards{

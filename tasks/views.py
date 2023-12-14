@@ -50,10 +50,6 @@ def dashboard(request):
         # Due dates and notifications
         due_dates.extend(task for task in tasks_for_each_team if task.due_date)
 
-        for task in tasks_for_each_team:
-            if task.is_high_priority_due_soon() or task.is_other_priority_due_soon():
-                notifications_from_dashboard.append(task)
-        
         # Apply sorting based on sort_type and order_type
         if search_query:
             tasks_for_each_team = tasks_for_each_team.filter(

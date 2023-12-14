@@ -41,9 +41,6 @@ def dashboard(request):
     team_tasks = []
     task_fields = [field for field in Task._meta.get_fields() if not field.name.startswith('_')]
 
-    # List to store notifications for all teams
-    notifications_from_dashboard = []
-
     # Checks and retrieves due dates
     due_dates = []
 

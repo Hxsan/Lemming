@@ -33,7 +33,6 @@ def dashboard(request):
         return render(request, 'dashboard.html', {'user': current_user, 'teams': teams, 'team_id': 1, 'team_tasks': None})
 
     # Get the sorting method and order field from the request
-    sort_type = request.GET.get('sort', 'default')
     order_type = request.GET.get('order', 'default')
     filter_type = request.GET.get('filter', None)
     search_query = request.GET.get('search_query', '')
@@ -58,9 +57,6 @@ def dashboard(request):
 
         elif order_type != 'default':
             tasks_for_each_team = tasks_for_each_team.order_by(order_type)
-        elif sort_type in ['ascending', 'descending']:
-            order_prefix = '' if sort_type == 'ascending' else '-'
-            tasks_for_each_team = tasks_for_each_team.order_by(order_prefix + 'due_date')
 
         # Filter conditions
         filter_conditions = {}

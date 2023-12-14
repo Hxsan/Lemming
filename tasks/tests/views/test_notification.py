@@ -48,6 +48,7 @@ class NotificationsTestCase(TestCase):
 
         # 1 notification should still be present
         self.check_notifications(self.url, 1)
+        
 
     def test_notification_does_not_appear_when_reminder_does_not_match_due_date(self):
         # Assign @johndoe to task
@@ -108,7 +109,8 @@ class NotificationsTestCase(TestCase):
         # Assign @johndoe to task
         self.task.assigned_to.set([self.user])
         
-        # Check if notifs exist for each page
+        # Check if notifications exist for each page
+        self.check_notifications(reverse('dashboard'), 1)
         self.check_notifications(reverse('create_team'), 1)
         self.check_notifications(reverse('create_task', kwargs={'pk': self.team.id}), 1)
         self.check_notifications(reverse('show_team', kwargs={'team_id': self.team.id}), 1)

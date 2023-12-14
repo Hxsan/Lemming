@@ -193,7 +193,7 @@ def remove_member(request, team_id, member_username):
                         task.assigned_to.remove(member_to_remove)
         return redirect('show_team', team_id=team_id)
     else:
-        messages.add_message(request, messages.ERROR, "This team was already deleted")
+        messages.add_message(request, messages.ERROR, "This team was deleted")
         return redirect('dashboard')
 
 @login_required
@@ -228,6 +228,8 @@ def view_task(request, team_id=1, task_id=1):
                 if datetime.now().date() > task.due_date:
                     form.fields['due_date'].disabled = True
                     form.fields['reminder_days'].disabled = True
+                elif 'reminder_days' in form.errors:
+                    messages.add_message(request, messages.ERROR, form.errors['reminder_days'])
                 #otherwise, we have submitted the whole form, so save it
                 if form.is_valid():        
                     task.task_completed = POST['task_completed']

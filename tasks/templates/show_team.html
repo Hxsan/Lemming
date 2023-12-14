@@ -106,9 +106,11 @@
                 <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</p>
             </span>
         </div>
+        {%if is_admin %}
         <div class="col-auto">
             <div class="mt-5" style="border-left: 2px dashed white; height: 81%"></div>
         </div>
+        {%endif%}
         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
             <!-- Show the search bar to search team members -->
             {% if is_admin %}
@@ -119,32 +121,34 @@
                 <button class="btn btn-outline-secondary">Search</button>
             </form>
             {%endif%}
-            {% if q %}
+            {%if is_admin %}
 
-                <h2 style="margin-top: 10px;">Users: {{q}}</h2>
-                <br/>
-                <div class="list-group">
-                    {% for user in users %}
-                        {% if not user in team_members %}
-                            <li class="list-group-item" id="search-users-items">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
-                                <form method="POST" action="">
-                                    {% csrf_token %}
-                                    {% if is_admin %}
-                                        <input type = "hidden" name="userToAdd" value="{{user}}"/>
-                                        <input type = "hidden" name="page" value="{{page_obj.number}}"/>
-                                        <input type="submit" class="btn btn-outline-success" value="Add to Team"/>
-                                    {% endif %}
-                                </form>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="alert alert-info" style="margin-top: 10px"role="alert">
-                    Please search by username or full first/last name
-                </div>
+                {% if q %}
 
-            {% endif%}
+                    <h2 style="margin-top: 10px;">Users: {{q}}</h2>
+                    <br/>
+                    <div class="list-group">
+                        {% for user in users %}
+                            {% if not user in team_members %}
+                                <li class="list-group-item" id="search-users-items">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
+                                    <form method="POST" action="">
+                                        {% csrf_token %}
+                                        {% if is_admin %}
+                                            <input type = "hidden" name="userToAdd" value="{{user}}"/>
+                                            <input type = "hidden" name="page" value="{{page_obj.number}}"/>
+                                            <input type="submit" class="btn btn-outline-success" value="Add to Team"/>
+                                        {% endif %}
+                                    </form>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" style="margin-top: 10px"role="alert">
+                        Please search by username or full first/last name
+                    </div>
+                {% endif%}
+            {%endif%}
         </div>        
     </div>
 </div>

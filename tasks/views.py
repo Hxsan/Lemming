@@ -221,6 +221,7 @@ def view_task(request, team_id=1, task_id=1):
                     task.task_completed = True #we clicked on mark as done, so it is now done
             elif 'edit_submit' in request.POST:
                 POST = request.POST.copy() #we do this so we can edit the dictionary
+                print(POST)
                 #add task.priority if it is not in (i.e. if we have disabled the field)
                 if 'priority' not in POST:
                     POST['priority'] = task.priority
@@ -229,13 +230,10 @@ def view_task(request, team_id=1, task_id=1):
                     form.fields['due_date'].disabled = True
                     form.fields['reminder_days'].disabled = True
                 #otherwise, we have submitted the whole form, so save it
-                #get the value of the complete button 
                 if form.is_valid():        
                     task.task_completed = POST['task_completed']
-                    form.save(task)
                     task.priority = POST.get('priority')
                     task.reminder_days = POST.get('reminder_days')
-                    task.save()
                     form.fields['priority'].initial = POST.get('priority')
                     form.save(task)
 

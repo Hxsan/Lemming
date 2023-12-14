@@ -206,7 +206,8 @@ class EditTaskForm(forms.ModelForm):
         task.id = old_task.id
         task.created_by = old_task.created_by
         task.task_completed = old_task.task_completed
-
+        if old_task.due_date < date.today():
+            task.due_date = old_task.due_date
         task.save()
         return task
 

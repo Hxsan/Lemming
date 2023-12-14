@@ -221,7 +221,6 @@ def view_task(request, team_id=1, task_id=1):
                     task.task_completed = True #we clicked on mark as done, so it is now done
             elif 'edit_submit' in request.POST:
                 POST = request.POST.copy() #we do this so we can edit the dictionary
-                print(POST)
                 #add task.priority if it is not in (i.e. if we have disabled the field)
                 if 'priority' not in POST:
                     POST['priority'] = task.priority
@@ -303,6 +302,9 @@ def view_task(request, team_id=1, task_id=1):
 @login_required
 def user_activity_log(request, team_id, user_id):
     user = User.objects.get(pk=user_id)
+    if not Team.objects.filter(pk=team_id).exists():
+        messages.add_message(request, messages.ERROR, "This team was deleted")
+        return redirect('dashboard')
     if Activity_Log.objects.filter(user=user).exists():
         log = Activity_Log.objects.get(user=user)
         log.log.reverse() #reverse to have it in order of most recent

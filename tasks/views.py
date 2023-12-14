@@ -84,7 +84,7 @@ def dashboard(request):
                                                'teams': teams,
                                                'task_fields': task_fields,
                                                'team_tasks': team_tasks,
-                                               'notifications_from_dashboard': notifications_from_dashboard,
+                                               'notifications_list': request.notifications_list,
                                                'due_dates': due_dates
                                                })
 

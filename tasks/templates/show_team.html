@@ -30,7 +30,7 @@
                                     <td class="d-flex actionTableSection">
                                         <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
                                         {% csrf_token %}
-                                        <button class="remove-member-button" type="submit" id="remove-member-btn">Remove Member</button>
+                                        <button class="btn btn-danger" type="submit" id="remove-member-btn">Remove Member</button>
                                         </form>
                                         <a href="{%url 'activity_log' team_id=team.id user_id=member.id%}" class="btn btn-secondary btn activityLogButton">View Activity Log</a>
                                     </td>

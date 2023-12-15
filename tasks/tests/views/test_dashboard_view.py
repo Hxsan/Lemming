@@ -57,8 +57,8 @@ class DashboardViewTestCase(TestCase):
         self.assertEqual(len(response.context['teams']), 1)
         self.assertNotEqual(len(response.context['team_tasks']), 0)
 
-    def test_dashboard_view_sorting(self):
-        request = self.factory.get(self.url, {'sort': 'ascending', 'order': 'due_date'})
+    def test_dashboard_view_ordering(self):
+        request = self.factory.get(self.url, {'order': 'due_date'})
         request.user = self.user
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

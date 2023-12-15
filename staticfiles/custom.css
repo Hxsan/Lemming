@@ -188,6 +188,19 @@ select option {
   align-items: center;
 }
 
+#remove-member-btn{
+  background-color: #cb0808; 
+  color: #fff; 
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px; 
+}
+
+#remove-member-btn:hover{
+  background-color: #880303; 
+}
+
 #teamSidebar{
   background-color: #0C1821;
 }

@@ -127,7 +127,7 @@
 
                     <h2 style="margin-top: 10px;">Users: {{q}}</h2>
                     <br/>
-                    <div class="list-group">
+                    <div class="list-group" id="search-user-list">
                         {% for user in users %}
                             {% if not user in team_members %}
                                 <li class="list-group-item" id="search-users-items">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}

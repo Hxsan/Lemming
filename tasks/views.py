@@ -378,11 +378,13 @@ def reset_time(request, team_id, task_id):
 
         # Reset only the user's time spent
         elif action == 'user':
-            user_time_spent = get_object_or_404(
-                TimeSpent,
-                user=user,
-                task=task,
-            )
+            try:
+                user_time_spent = TimeSpent.objects.get(
+                    user=user,
+                    task=task,
+                )
+            except TimeSpent.DoesNotExist:
+                return redirect('view_task', team_id=team_id, task_id=task_id) 
             user_time_spent.time_spent = 0
             user_time_spent.save()
             # Delete all time logs associated with the user on the task

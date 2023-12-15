@@ -17,6 +17,11 @@ from datetime import datetime, timedelta
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 
+def key_for_sorting_by_priority(task):
+        priority_map = {'high': 1, 'medium': 2, 'low': 3}
+        task_id = task.id
+        return priority_map[Task.objects.get(pk=task_id).priority]
+
 @login_required
 def dashboard(request):
     """Display the current user's dashboard."""
@@ -53,6 +58,8 @@ def dashboard(request):
             tasks_for_each_team = tasks_for_each_team.filter(
                 Q(title__icontains=search_query) | Q(description__icontains=search_query)
             )
+        elif order_type=='priority':
+            tasks_for_each_team = sorted(tasks_for_each_team, key=key_for_sorting_by_priority)
 
         elif order_type != 'default':
             tasks_for_each_team = list(tasks_for_each_team.order_by(order_type))
@@ -62,6 +69,7 @@ def dashboard(request):
                 if task not in new_tasks:
                     new_tasks.append(task)
             tasks_for_each_team = new_tasks
+        
 
         # Filter conditions
         filter_conditions={}

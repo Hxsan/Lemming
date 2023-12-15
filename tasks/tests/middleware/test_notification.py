@@ -1,4 +1,4 @@
-"""Unit tests for notifications"""
+"""Unit tests for the notification middleware"""
 
 from django.test import TestCase
 from django.urls import reverse

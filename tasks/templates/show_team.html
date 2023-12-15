@@ -1,44 +1,6 @@
 {% extends 'base_content.html' %}
 {% block content %}
 
-<style>
-    /*
-    table{
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    td {
-    padding: 12px; 
-    margin: 4px;
-    text-align: center;
-    border-bottom: 1px solid rgb(214, 214, 214); 
-    }
-    th {
-        text-align: center;
-        padding: 12px; 
-        margin: 4px;
-        color: white;
-        border-bottom: 2px solid rgb(209, 209, 209);
-        background-color: rgb(46, 46, 44);
-    }
-    */
-    .remove-member-button {
-        background-color: #cb0808; /* Red background color */
-        color: #fff; /* White text color */
-        border: none;
-        padding: 8px 12px; /* Adjust padding as needed */
-        cursor: pointer;
-        border-radius: 4px; /* Optional: Add rounded corners */
-    }
-
-    .remove-member-button:hover {
-        background-color: #880303; /* Darker red on hover */
-    }
-
-</style>
-
 <div class="container">
     <div class="row">
         <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7" id="show-team-table">
@@ -68,7 +30,7 @@
                                     <td class="d-flex actionTableSection">
                                         <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
                                         {% csrf_token %}
-                                        <button class="remove-member-button" type="submit">Remove Member</button>
+                                        <button class="remove-member-button" type="submit" id="remove-member-btn">Remove Member</button>
                                         </form>
                                         <a href="{%url 'activity_log' team_id=team.id user_id=member.id%}" class="btn btn-secondary btn activityLogButton">View Activity Log</a>
                                     </td>
@@ -127,7 +89,7 @@
 
                     <h2 style="margin-top: 10px;">Users: {{q}}</h2>
                     <br/>
-                    <div class="list-group">
+                    <div class="list-group" id="search-user-list">
                         {% for user in users %}
                             {% if not user in team_members %}
                                 <li class="list-group-item" id="search-users-items">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}

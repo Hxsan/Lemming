@@ -191,6 +191,11 @@ select option {
   background-color: #CCC9DC;
 }
 
+#search-user-list{
+  overflow: auto;
+  max-height: 40rem;
+}
+
 #show-team-header{
   display: flex;
   justify-content: space-between;
@@ -210,8 +215,16 @@ select option {
 }
 
 #dueDateCards{
-  background-color: darkblue;
+  background-color: rgb(38, 102, 221);
 }
+
+#dueDateContainer{
+  max-height: 400px; 
+  border-radius: 10px; 
+  border: 10px solid rgb(32, 84, 172); 
+  overflow-y: auto
+}
+
 .modal-header{
   background-color: #142134;
 }

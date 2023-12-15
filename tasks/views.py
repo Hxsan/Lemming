@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
@@ -45,7 +45,6 @@ def dashboard(request):
 
     for team in teams:
         tasks_for_each_team = Task.objects.filter(created_by=team)
-
         # Due dates and notifications
         due_dates.extend(task for task in tasks_for_each_team if task.due_date)
 
@@ -56,16 +55,33 @@ def dashboard(request):
             )
 
         elif order_type != 'default':
-            tasks_for_each_team = tasks_for_each_team.order_by(order_type)
+            tasks_for_each_team = list(tasks_for_each_team.order_by(order_type))
+            #Remove duplicates from tasks
+            new_tasks = []
+            for task in tasks_for_each_team:
+                if task not in new_tasks:
+                    new_tasks.append(task)
+            tasks_for_each_team = new_tasks
 
         # Filter conditions
-        filter_conditions = {}
-
+        filter_conditions={}
+        filter = ""
         if filter_type in ['priorityLow', 'priorityMedium', 'priorityHigh']:
             filter_conditions['priority'] = filter_type.replace('priority', '').lower()
         elif filter_type in ['CompletedTrue', 'CompletedFalse']:
             filter_conditions['task_completed'] = (filter_type == 'CompletedTrue')
 
+        #filter the tasks using filter_conditions
+        if 'priority' in filter_conditions:
+            filter = filter_conditions['priority'] + " priority"
+            tasks_for_each_team = tasks_for_each_team.filter(
+                Q(priority=filter_conditions['priority'] )
+            )
+        elif 'task_completed' in filter_conditions:
+            filter = "tasks that are complete" if filter_conditions['task_completed'] else "tasks that are incomplete"
+            tasks_for_each_team = tasks_for_each_team.filter(
+                Q(task_completed=filter_conditions['task_completed'])
+            )
         # Append tasks for the current team to the team_tasks list
         team_tasks.append((team, tasks_for_each_team))
 
@@ -74,7 +90,9 @@ def dashboard(request):
                                                'task_fields': task_fields,
                                                'team_tasks': team_tasks,
                                                'notifications_list': request.notifications_list,
-                                               'due_dates': due_dates
+                                               'due_dates': due_dates,
+                                               'filter': filter,
+                                               'sort_order': order_type,
                                                })
 
 @login_required

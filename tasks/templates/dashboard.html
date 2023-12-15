@@ -22,6 +22,17 @@
 			You have no Teams. Create a team to get started!
 		  </div>
 		  {%endif%}
+		  <!--Tell them what sort or filter they have on-->
+		  {%if sort_order != "default"%}
+		  <div class="alert alert-info" role="alert">
+			You are sorting by {{sort_order}}
+		  </div>
+		  {%endif%}
+		  {%if filter != ""%}
+		  <div class="alert alert-info" role="alert">
+			You are filtering by {{filter}}
+		  </div>
+		  {%endif%}
 		  <div class="row">
 				<div class="tab-content w-100 align-items-center">
           			{% if team_tasks %}

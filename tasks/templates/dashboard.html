@@ -1,36 +1,153 @@
-{% extends 'base_content.html' %}
+{% extends 'base_content_for_dashboard.html' %}
+
 {% block content %}
-<style>
-  .view-team-button{
-    background-color: rgb(75, 74, 74);
-    border: 1px solid #121313;
-    border-radius: 5px;
-    font-size: 12px;
-    padding: 8px 16;
-    color: white;
-  }
-
-  .view-team-button:hover{
-    background-color: rgb(30, 29, 29);
-  }
-</style>
-<div class="container">
-  <div class="row">
-    <div class="col-12 d-flex justify-content-center">
-      <h1>Welcome to your dashboard {{ user.username }}</h1>
-
-    </div>
-    <div class="col-12 d-flex mt-2">
-      {% include 'partials/sidebar.html' %}
-    </div>
-    <div class="col-3 mt-3">
-      <a href="{% url 'create_team' %}" class="btn btn-sm btn-secondary">
-          Create Team
-      <a href="{% url 'show_team' team_id=team_id %}" class="btn btn-md btn-secondary view-team-button">
-        View Team Members
-
-      </a>
-    </div>
-  </div>
+<div class="container-fluid">
+  <!-- Height is calculated by the height of the page minus the nav-menu height --> 
+  <div class="row row-cols-3 " style="height: calc(100vh - 55.99px)"> 
+	<!-- Sidebar Left -->
+	<div id="teamSidebar" class="col-2">
+		{% include 'partials/sidebar.html' %}
+	</div>
+	<!-- Main Content Section -->
+	<div class="col-8 align-items-center">
+		<div class="container-fluid">
+		<!-- Main content Header -->
+		  <div class="row m-1 text-center">
+			 <h1>Welcome to your dashboard {{ user.username }}</h1>
+		  </div>
+		  {% include 'partials/messages.html' %}
+		  <!--Tell them to create a team if they have none-->
+		  {%if user.teams.count == 0%}
+		  <div class="alert alert-info" role="alert">
+			You have no Teams. Create a team to get started!
+		  </div>
+		  {%endif%}
+		  <div class="row">
+				<div class="tab-content w-100 align-items-center">
+          			{% if team_tasks %}
+						<div class="dropdown btn-group">
+							<button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+								Order By
+							</button>
+							<ul class="dropdown-menu bg-dark">
+								{% if team_tasks %}
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=id">Task ID</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=title">Title</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=created_by">Created By</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=priority">Priority</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=task_completed">Task Completed</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=assigned_to">Assigned To</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}?order=due_date">Due Date</a></li>
+									<li><a class="dropdown-item" href="{% url 'dashboard' %}">Clear Filter</a></li>
+								{% else %}
+									<li><a class="dropdown-item" href="#">No Task available</a></li>
+								{% endif %}
+							</ul>
+						</div>
+						
+						<div class="dropdown btn-group">
+							<button class="btn btn-secondary dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+								Filter By
+							</button>
+							<ul class="dropdown-menu bg-dark">
+								<li>
+									<a class="dropdown-item bg-dark text-white">
+										Priority
+									</a>
+									<ul class="submenu bg-dark">
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=priorityLow">Low</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=priorityMedium">Medium</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=priorityHigh">High</a></li>
+									</ul>
+								</li>
+								<li>
+									<a class="dropdown-item bg-dark text-white">
+										Completion
+									</a>
+									<ul class="submenu bg-dark">
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=CompletedFalse">Not Completed</a></li>
+										<li><a class="dropdown-item" href="{% url 'dashboard' %}?filter=CompletedTrue">Completed</a></li>
+									</ul>
+								</li>
+								<li><a class="dropdown-item" href="{% url 'dashboard' %}">Clear Filter</a></li>
+							</ul>
+						</div>
+						{% endif %}
+						{% for team, tasks in team_tasks %}
+						<div class="tab-pane" id="{{ team.id }}" role="tabpanel" aria-labelledby="{{ team.id }}-tab">
+							{% ifchanged team.id %}
+							<div class="row m-1 p-1 text-center border border-white rounded-pill">
+								<h3>Current Team : {{ team.team_name }}</h3>
+							</div>
+							<div class="row m-1">
+								<form method="GET" action="{% url 'dashboard' %}">
+									<div class="input-group mb-3">
+										<input type="text" class="form-control" placeholder="Search tasks..." name="search_query" value="{{ request.GET.search_query }}">
+										<button class="btn btn-outline-secondary" type="submit">Search</button>
+									</div>
+								</form>
+							</div>
+							<div class="row m-1">
+								{% for task in tasks %}
+									{% include 'partials/task_card.html' with task_id=task.id %}
+								{% endfor %}
+								<div class="card text-center text-black border-white m-1 taskCreationCard">
+									<div class="card-body">
+										<h5 class="card-title">Create A Task</h5>
+										<p class="card-text"> + </p>
+										<a href="#" class="stretched-link create-task-button"></a>
+									</div>
+								</div>
+							</div>
+							{% endifchanged %}
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+		  	</div>
+	</div>
+	<!-- Sidebar right -->
+	<div class="col-2 flex-column" id="viewTeamSidebar">
+		<!--Disable View team button if the user has no team -->
+		{%if user.teams.count == 0%}
+			<div class="card text-white text-center bg-secondary m-1" style="max-width: 18rem;">
+				<div class="card-body">
+					<h5 class="card-title">View Team</h5>
+				</div>
+			</div>
+		{%else%}
+			<div class="card text-white text-center bg-primary m-1" style="max-width: 18rem;">
+				<div class="card-body">
+					<h5 class="card-title">View Team</h5>
+					<a href="#" class="stretched-link view-team-button"></a>
+				</div>
+			</div>
+		{%endif%}
+			<div class="p-2 border align-self-start bg-dark">
+				<h5 class="text-center">Due Dates</h5>
+				{% if due_dates %}
+					{% for task in due_dates %}
+						<div class="card text-white text-center m-1" style="max-width: 12rem; max-height: 5rem;" id="dueDateCards">
+							<div class="card-body">
+								<h6 class="card-title">
+									{% if task.title|length > 10 %}
+										{{ task.title|slice:":10" }}...
+									{% else %}
+										{{ task.title }}
+									{% endif %}
+								</h6>
+								<p class="card-text">{{ task.due_date }}</p>
+							</div>
+						</div>
+					{% endfor %}
+				{% else %}
+					<p class="text-center">No due dates available.</p>
+				{% endif %}
+			</div>
+		<hr>
+		<div class="text-center">
+			<a href="{% url 'summary_report' %}" class="btn btn-outline-light rounded-pill">Summary Report</a>
+		</div>
+	</div>
 </div>
 {% endblock %}

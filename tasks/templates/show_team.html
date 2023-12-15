@@ -2,7 +2,7 @@
 {% block content %}
 
 <style>
-
+    /*
     table{
         width: 100%;
         border-collapse: collapse;
@@ -23,8 +23,8 @@
         border-bottom: 2px solid rgb(209, 209, 209);
         background-color: rgb(46, 46, 44);
     }
-
-    .remove-button {
+    */
+    .remove-member-button {
         background-color: #cb0808; /* Red background color */
         color: #fff; /* White text color */
         border: none;
@@ -33,45 +33,124 @@
         border-radius: 4px; /* Optional: Add rounded corners */
     }
 
-    .remove-button:hover {
+    .remove-member-button:hover {
         background-color: #880303; /* Darker red on hover */
     }
 
 </style>
-<h1>Team {{team.team_name}}</h1>
-<!--Show the team members in the team as a list-->
-<table>
-    <thead>
-        <tr>
-            <th>Username</th>
-            {% if is_admin %}
-                <th>Action</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for member in team_members %}
-            <tr>
-                <td>
-                    {% if is_admin %}
-                        {{ member.username }} (Admin)</td>
-                    {% else %}
-                        {{ member.username }}</td>
-                {% endif %}
-                </td>
-                {% if is_admin %} 
-                    {% if member != team.admin_user %}
-                        <td>
-                            <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
-                            {% csrf_token %}
-                            <button class="remove-button" type="submit">Remove</button>
-                            </form>
-                        </td>
-                        {% endif %}
-                {% endif %}
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
 
-{% endblock %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7" id="show-team-table">
+            <h1 id="show-team-header">Team {{team.team_name}}</h1>
+            <!--Show the team members in the team as a list-->
+            <table class="table table-dark table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Username</th>
+                        {% if is_admin %}
+                            <th scope="col">Action</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for member in page_obj%}
+                        <tr>
+                            
+                            {% if member == team.admin_user %}
+                                <td colspan="2">{{ member.username }} (Admin)</td>
+                            {% else %}
+                                <td>{{ member.username }}</td>
+                            {% endif %}
+                           
+                            {% if is_admin %}
+                                {% if member != team.admin_user %}
+                                    <td class="d-flex actionTableSection">
+                                        <form method="post" action="{% url 'remove_member' team_id=team.id member_username=member.username %}">
+                                        {% csrf_token %}
+                                        <button class="remove-member-button" type="submit">Remove Member</button>
+                                        </form>
+                                        <a href="{%url 'activity_log' team_id=team.id user_id=member.id%}" class="btn btn-secondary btn activityLogButton">View Activity Log</a>
+                                    </td>
+                                {% endif %}
+                            {% endif %}
+                        </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+            {% if is_admin %}
+            <form method="post" action="{% url 'delete_team' team_id=team.id%}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger float-end">Delete Team</button>
+            </form>
+            {% endif %}
+            <!-- Display paginator for list of team members -->
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+                {%else%}
+                <li class="page-item disabled"><a class="page-link" href="#">&laquo; First</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#">Prev</a></li>
+                {% endif %}
+                        
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                {%else%}
+                    <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#">Last &raquo;</a></li>
+                {% endif %}
+            </ul>
+            <span class="current">
+                <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</p>
+            </span>
+        </div>
+        {%if is_admin %}
+        <div class="col-auto">
+            <div class="mt-5" style="border-left: 2px dashed white; height: 81%"></div>
+        </div>
+        {%endif%}
+        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+            <!-- Show the search bar to search team members -->
+            {% if is_admin %}
+            <form class="d-flex userSearch" method="POST" action="{% url 'show_team' team_id=team.id%}">
+                {% csrf_token %}
+                <input type = "hidden" name="page" value="{{page_obj.number}}"/>
+                <input class="form-control me-2" type="search" id="query" name="q" placeholder="User Search">
+                <button class="btn btn-outline-secondary">Search</button>
+            </form>
+            {%endif%}
+            {%if is_admin %}
+
+                {% if q %}
+
+                    <h2 style="margin-top: 10px;">Users: {{q}}</h2>
+                    <br/>
+                    <div class="list-group">
+                        {% for user in users %}
+                            {% if not user in team_members %}
+                                <li class="list-group-item" id="search-users-items">{{ user.first_name }} {{ user.last_name }} : {{ user.username }}
+                                    <form method="POST" action="">
+                                        {% csrf_token %}
+                                        {% if is_admin %}
+                                            <input type = "hidden" name="userToAdd" value="{{user}}"/>
+                                            <input type = "hidden" name="page" value="{{page_obj.number}}"/>
+                                            <input type="submit" class="btn btn-outline-success" value="Add to Team"/>
+                                        {% endif %}
+                                    </form>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" style="margin-top: 10px"role="alert">
+                        Please search by username or full first/last name
+                    </div>
+                {% endif%}
+            {%endif%}
+        </div>        
+    </div>
+</div>
+    
+{% endblock %}  

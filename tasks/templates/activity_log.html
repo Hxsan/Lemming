@@ -1,0 +1,45 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-bordered activityTable">
+                <thead>
+                    <tr>
+                      <th scope="col">Time</th>
+                      <th scope="col">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for log in page_obj%}
+                        <tr>
+                            <td>{{log.1}}</td>
+                            <td>{{log.0}}</td>
+                        </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+                {%else%}
+                <li class="page-item disabled"><a class="page-link" href="#">&laquo; First</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#">Prev</a></li>
+                {% endif %}
+                        
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                {%else%}
+                    <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#">Last &raquo;</a></li>
+                {% endif %}
+            </ul>
+            <span class="current">
+                <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</p>
+            </span>
+        </div>
+    </div>
+</div>
+{% endblock %}

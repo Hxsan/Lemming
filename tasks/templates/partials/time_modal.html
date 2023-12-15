@@ -1,0 +1,49 @@
+{% load format_time %}
+<div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Tracking time spent on task</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div> Total time spent on this task so far: </div>
+                <h3 class="my-0 p-3 text-center">
+                    {{ total_time_spent|format }}
+                </h3>
+                <form method="post" action="{% url 'submit_time' team_id=team.id task_id=task.id %}">
+                    {% csrf_token %} 
+                    <p> Enter how much time you've spent on this task. </p>
+                    <div class="row">
+                        <div class="col-4">
+                            <input class="form-control" type="number" min="0" name="hours" placeholder="Hours">
+                        </div>
+                        <div class="col-4">
+                            <input class="form-control" type="number" min="0" name="minutes" placeholder="Minutes">
+                        </div>
+                        <div class="col-4">
+                            <input class="form-control" type="number" min="0" name="seconds" placeholder="Seconds">
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'reset_time' team_id=team.id task_id=task.id %}?action=total" class="btn btn-sm btn-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Total Reset
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'reset_time' team_id=team.id task_id=task.id %}?action=user" class="btn btn-sm btn-secondary">Your Reset</a>
+                    <input type="submit" class="btn btn-sm btn-primary" value="Add Time">
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>

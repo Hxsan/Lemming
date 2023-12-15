@@ -1,8 +1,15 @@
-<html>
-    <h1>Create Team</h1>
-    <form action = "{% url 'create_team'%}" method = "post"> 
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value = "Create">
-    </form>
-</html>
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="container">
+    <div class="row creationForm">
+      <div class="col-12">
+        <h1>Create Team</h1>
+        <form action = "{% url 'create_team'%}" method = "post"> 
+            {% csrf_token %}
+            {% include 'partials/bootstrap_form.html' with form=form %}
+            <input type="submit" value = "Create" class="btn btn-primary">
+        </form>
+       </div>
+    </div>
+</div>
+{% endblock %}

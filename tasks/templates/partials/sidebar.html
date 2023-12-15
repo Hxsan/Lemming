@@ -1,53 +1,106 @@
-<ul class="nav nav-pills flex-column col-auto bg-light" id="sidebar" role="tablist" style="border-radius: 10px; overflow: hidden; max-width: 140px;">
-    <div class="row">
-        <div class="col d-flex justify-content-between">
-            <p class="my-auto mx-1"> <b>Teams:</b> </p>
-            <a href="" class="mx-2" id="minimize">
-                <span class="bi-dash-circle"> </span>
-            </a>
+<div class="container-fluid">
+    <div class="row flex-nowrap">
+        <div class="col-md-2 px-sm-2 px-1">
+            <div class="row row-md-12">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                    <!-- Smaller screens have a dropdown menu -->
+                    <div class="dropdown d-md-none">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Teams:
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li>
+                                <a class="nav-link" href="{% url 'create_team' %}"> Create +</a>
+                            </li> 
+                            {% for team in teams %}
+                                <li class="nav-object">
+                                    <a class="dropdown-item nav-link" href="#{{ team.id }}">
+                                        {{ team.team_name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <!-- Medium / large screens have content shown normally -->
+                    <ul class="nav nav-pills flex-column p-2 d-none d-md-block" id="menu" role="tablist">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="mx-1 mb-1 text-white" style="padding-right: 77px">Teams:</h5>
+                            </div>
+                        </div>
+                        <div class="move-row">
+                            <li>
+                                {% if request.resolver_match.view_name == 'dashboard' %}
+                                    <a class="nav-link" href="{% url 'create_team' %}"> Create +</a>
+                                {% endif %}
+                            </li> 
+                        {% for team in teams %}
+                            <li class="nav-object my-1">
+                                <div class="text-start border border-primary rounded">
+                                    <a class="nav-link text-white" id="{{ team.id }}-tab" data-toggle="pill" href="#{{ team.id }}" role="tab" aria-controls="{{ team.id }}" aria-selected="false">
+                                        {{ team.team_name }}
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        </div>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="minimize-row overflow-auto" style="max-height: calc(100vh - 170px)">
-    {% for team in teams %}
-        <li class="nav-item">
-            <div class="text-start border border-primary rounded">
-                <a class="nav-link {% if forloop.first %} active {% endif %}" id="{{ team.team_name|slugify }}-tab" data-toggle="pill" href="#{{ team.team_name|slugify }}" role="tab" aria-controls="{{ team.team_name|slugify }}" aria-selected="{% if forloop.first %} true {% else %} false {% endif %}">
-                    {{ team.team_name }}
-                </a>
-            </div>
-        </li>
-        <li class="mt-1 mb-3">
-            <div class="d-flex justify-content-center">
-                <a href= "{% url 'show_team' %}?team_name={{ team.team_name }}" class="btn btn-outline-info" style="padding: 0.12rem 0.32rem; font-size: 0.55rem;">
-                    Members
-                </a>
-            </div>
-        </li>
-    {% endfor %}
-    </div>
-</ul>
-
-<div class="tab-content mx-2" id="sidebarContent">
-    {% for team in teams %}
-    <div class="tab-pane {% if forloop.first %} show active {% endif %}" id="{{ team.team_name|slugify }}" role="tabpanel" aria-labelledby="{{ team.team_name|slugify }}-tab">
-        <!-- displaying dashboard with tasks could go here -->
-        {{ team.team_name }}
-    </div>
-    {% endfor %}
 </div>
 
 
 
 
-
-<!-- Bootstrap apparently can do these automatically but it didn't work -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Specific jQuery to this partial -->
 <script>
+
+    // Activates content of nav-times based on previous active team
+    function setActiveTeamOnRedirect() {
+        var activeTeam = localStorage.getItem('active');
+        if (activeTeam) {
+            var tab = $('#' + activeTeam + '-tab');
+            tab.addClass('active');
+            $(tab.attr('href')).addClass('active');
+        } else { // No team is found, make first team active
+            var firstTab = $('.nav-link[data-toggle="pill"]').first();
+            firstTab.addClass('active');
+            $(firstTab.attr('href')).addClass('active');
+        }
+    }
+
+    // Activates content of nav-items based on URL input
+    function setActivefromURL() {
+        var url = window.location.href;
+        var splitURL = url.split('#');
+            var id = splitURL[1];
+            var activeTab = $('#' + id);
+            if (activeTab.length > 0) {
+                $('.nav-link').removeClass('active');
+                $('.tab-pane').removeClass('active');
+
+                // Activate the tab corresponding to the URL ID
+                activeTab.addClass('active');
+                $('a[href="#' + id + '"]').addClass('active');
+            }
+        }
+
     $(document).ready(function() {
+
+        setActiveTeamOnRedirect();
+
+        setActivefromURL();
+
+        // Changes active tab directly from the dashboard
+        window.onhashchange = function() {
+            setActivefromURL();
+        }
 
         // Activates content of nav-items on click
 
-        $('.nav-item').on('click', function(e) {
+        $('.nav-object').on('click', function(e) {
             e.preventDefault();
 
             $('.nav-link').removeClass('active');
@@ -58,13 +111,32 @@
             $(tag.attr('href')).addClass('active');
 
             window.location.href = tag.attr('href');
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            localStorage.setItem('active', teamId);
         });
-        
-        // Minimizes nav-items on click of "minimize" button
-        
-        $('#minimize').on('click', function(e) {
+
+        // Redirects to correct pages based on which team was clicked on sidebar
+
+        $('.view-team-button').on('click', function(e) {
             e.preventDefault();
-            $('.minimize-row').slideToggle();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/show_team/' + teamId + '/';
+                window.location.href = url;
+            }
+
+        });
+
+        $('.create-task-button').on('click', function(e) {
+            e.preventDefault();
+
+            var teamId = $('.nav-link.active').attr('href').replace('#','');
+            if (teamId) {
+                var url = '/dashboard/create_task/' + teamId + '/';
+                window.location.href = url;
+            }
+
         });
 
     });

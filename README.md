@@ -1,4 +1,4 @@
-  # Team Lemming Small Group project
+  # Lemming Collaborative Project
 
 ## Team members
 The members of the team are:

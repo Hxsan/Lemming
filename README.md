@@ -1,12 +1,4 @@
-  # Lemming Collaborative Project
-
-## Team members
-The members of the team are:
-- Vincent Ha
-- Benjamin Morka
-- Issa Abdi
-- Nithursan Muraleetharan
-- Mohammed Ahmed
+# Lemming Collaborative Project
 
 ## Project structure
 The project is called `task_manager`.  It currently consists of a single app `tasks`.

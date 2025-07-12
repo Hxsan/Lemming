@@ -1,4 +1,4 @@
-# Lemming Collaborative Project
+ # Team Lemming Small Group project
 
 ## Project structure
 The project is called `task_manager`.  It currently consists of a single app `tasks`.
